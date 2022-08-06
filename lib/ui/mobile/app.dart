@@ -18,12 +18,15 @@ class App extends StatelessWidget {
         brightness: Brightness.dark,
         fontFamily: "Montserrat",
       ),
-      home: MultiProvider(
-        providers: [
-          ChangeNotifierProvider(create: (_) => UserProvider()),
-        ],
-        child: const NavigationScreen(),
-      ),
+      builder: (context, child) {
+        return MultiProvider(
+          providers: [
+            ChangeNotifierProvider(create: (_) => UserProvider()),
+          ],
+          child: child,
+        );
+      },
+      home: const NavigationScreen(),
     );
   }
 }

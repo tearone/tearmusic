@@ -1,0 +1,54 @@
+<animated-vector
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt">
+    <aapt:attr name="android:drawable">
+        <vector
+            android:name="vector"
+            android:width="100dp"
+            android:height="100dp"
+            android:viewportWidth="100"
+            android:viewportHeight="100">
+            <clip-path
+                android:name="mask"
+                android:pathData="M 50 0 C 36.744 0 24.018 5.271 14.645 14.645 C 5.271 24.018 0 36.744 0 50 C 0 63.256 5.271 75.982 14.645 85.355 C 24.018 94.729 36.744 100 50 100 C 63.256 100 75.982 94.729 85.355 85.355 C 94.729 75.982 100 63.256 100 50 C 100 36.744 94.729 24.018 85.355 14.645 C 75.982 5.271 63.256 0 50 0 Z"/>
+            <group
+                android:name="group"
+                android:translateX="20"
+                android:translateY="20"
+                android:scaleX="0.6"
+                android:scaleY="0.6">
+                <path
+                    android:name="path"
+                    android:pathData="M 0 143 L 32.25 110.75 M -48.667 134.333 L -16.417 102.083 M 116.417 -2.083 L 148.667 -34.333 M 67.75 -10.75 L 100 -43"
+                    android:fillColor="#000"
+                    android:strokeColor="#ffffff"
+                    android:strokeAlpha="0"
+                    android:strokeWidth="10"
+                    android:strokeLineCap="round"
+                    android:strokeLineJoin="round"/>
+            </group>
+        </vector>
+    </aapt:attr>
+    <target android:name="path">
+        <aapt:attr name="android:animation">
+            <set>
+                <objectAnimator
+                    android:propertyName="pathData"
+                    android:startOffset="400"
+                    android:duration="600"
+                    android:valueFrom="M 0 143 L 32.25 110.75 M -48.667 134.333 L -16.417 102.083 M 116.417 -2.083 L 148.667 -34.333 M 67.75 -10.75 L 100 -43"
+                    android:valueTo="M 50 93 L 82.25 60.75 M 21.333 64.333 L 53.583 32.083 M 46.417 67.917 L 78.667 35.667 M 17.75 39.25 L 50 7"
+                    android:valueType="pathType"
+                    android:interpolator="@android:anim/overshoot_interpolator"/>
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:startOffset="400"
+                    android:duration="160"
+                    android:valueFrom="0"
+                    android:valueTo="1"
+                    android:valueType="floatType"
+                    android:interpolator="@android:interpolator/fast_out_slow_in"/>
+            </set>
+        </aapt:attr>
+    </target>
+</animated-vector>

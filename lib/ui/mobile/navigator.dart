@@ -1,3 +1,4 @@
+import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -35,9 +36,15 @@ class _NavigationScreenState extends State<NavigationScreen> {
 
   Route _navigationRoute(Widget Function(BuildContext) builder) {
     return PageRouteBuilder(
-      pageBuilder: (context, _, __) => builder(context),
-      transitionDuration: const Duration(seconds: 0),
-      reverseTransitionDuration: const Duration(seconds: 0),
+      pageBuilder: (context, primaryAnimation, secondaryAnimation) {
+        return FadeThroughTransition(
+          animation: primaryAnimation,
+          secondaryAnimation: secondaryAnimation,
+          child: builder(context),
+        );
+      },
+      transitionDuration: const Duration(milliseconds: 500),
+      reverseTransitionDuration: const Duration(milliseconds: 500),
     );
   }
 
@@ -79,7 +86,10 @@ class _NavigationScreenState extends State<NavigationScreen> {
         ),
         bottomNavigationBar: NavigationBar(
           selectedIndex: _selected.index,
-          onDestinationSelected: (value) => setState(() => _selected = MobileRoutes.values[value]),
+          onDestinationSelected: (value) {
+            setState(() => _selected = MobileRoutes.values[value]);
+            _navigatorState.currentState?.pushReplacementNamed(MobileRoutes.values[value].name);
+          },
           destinations: const [
             NavigationDestination(
               label: "Home",

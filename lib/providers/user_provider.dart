@@ -8,7 +8,9 @@ class UserProvider extends ChangeNotifier {
   bool loggedIn = false;
 
   String? _username;
+  String? _avatar;
   String get username => _username ?? "";
+  String get avatar => _avatar ?? "";
 
   String get accessToken => _accessToken ?? "";
 
@@ -22,7 +24,10 @@ class UserProvider extends ChangeNotifier {
       headers: {"authorization": accessToken},
     );
 
-    _username = jsonDecode(res.body)['username'];
+    final json = jsonDecode(res.body);
+
+    _username = json['username'];
+    _avatar = json['avatar'];
 
     notifyListeners();
   }

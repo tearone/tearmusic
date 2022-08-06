@@ -18,6 +18,8 @@ dependencies:
   url_launcher: ^6.1.5
   uni_links: ^0.5.1
   clipboard: ^0.1.3
+  provider: ^6.0.3
+  ionicons: ^0.2.1
 
 dev_dependencies:
   flutter_test:

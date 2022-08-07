@@ -13,7 +13,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
-    final user = context.read<UserProvider>();
+    final username = context.select<UserProvider, String>((user) => user.username);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
@@ -26,7 +26,7 @@ class _HomePageState extends State<HomePage> {
               children: [
                 Expanded(
                   child: Text(
-                    "Welcome back, ${user.username}!",
+                    "Welcome back, $username!",
                     maxLines: 2,
                     softWrap: true,
                     overflow: TextOverflow.ellipsis,

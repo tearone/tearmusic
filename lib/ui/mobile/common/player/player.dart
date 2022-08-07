@@ -303,7 +303,7 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
 
               final double rp = inverseAboveOne(p);
               final double rcp = rp.clamp(0, 1);
-              final double rip = 1 - rp;
+              // final double rip = 1 - rp;
               // final double ricp = 1 - rcp;
 
               final double qp = p.clamp(1.0, 3.0) - 1.0;

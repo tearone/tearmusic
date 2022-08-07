@@ -7,13 +7,13 @@ class ProfileButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final user = context.watch<UserProvider>();
+    final avatar = context.select<UserProvider, String>((user) => user.avatar);
 
     return ClipOval(
       child: SizedBox(
         width: 36.0,
         height: 36.0,
-        child: user.avatar != "" ? Image.network(user.avatar) : null,
+        child: avatar != "" ? Image.network(avatar) : null,
       ),
     );
   }

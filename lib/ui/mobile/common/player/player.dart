@@ -57,7 +57,7 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
     MusicTrack(
         id: "id",
         name: "name",
-        duration: Duration(seconds: 2),
+        duration: const Duration(seconds: 2),
         explicit: true,
         trackNumber: 1,
         album: MusicAlbum(
@@ -72,7 +72,7 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
     MusicTrack(
         id: "id",
         name: "name",
-        duration: Duration(seconds: 2),
+        duration: const Duration(seconds: 2),
         explicit: true,
         trackNumber: 1,
         album: MusicAlbum(
@@ -87,7 +87,7 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
     MusicTrack(
         id: "id",
         name: "name",
-        duration: Duration(seconds: 2),
+        duration: const Duration(seconds: 2),
         explicit: true,
         trackNumber: 1,
         album: MusicAlbum(

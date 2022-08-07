@@ -28,9 +28,9 @@ class MusicAlbum {
       name: json["name"],
       albumType: AlbumType.values[["single", "album", "compilation"].indexOf(json["album_type"])],
       trackCount: json["track_count"],
-      releaseDate: DateTime.parse(json["release_date"]),
-      artists: json["artists"].map((e) => MusicArtist.fromJson(e)).toList(),
-      images: Images.fromJson(json["images"]),
+      releaseDate: DateTime.tryParse(json["release_date"] ?? "") ?? DateTime.fromMillisecondsSinceEpoch(0),
+      artists: json["artists"].map((e) => MusicArtist.fromJson(e)).toList().cast<MusicArtist>(),
+      images: Images.fromJson(json["images"].cast<Map>()),
     );
   }
 }

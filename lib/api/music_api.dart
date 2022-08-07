@@ -10,14 +10,14 @@ class MusicApi {
 
   BaseApi base;
 
-  Future<SearchResults> search() async {
+  Future<SearchResults> search(String query) async {
     final res = await http.get(
-      Uri.parse("${BaseApi.url}/user/info"),
+      Uri.parse("${BaseApi.url}/music/search?query=${Uri.encodeComponent(query)}"),
       headers: {"authorization": await base.getToken()},
     );
 
     if (res.statusCode != 200) {
-      throw AuthException("UserApi.getInfo");
+      throw AuthException("MusicApi.search");
     }
 
     return SearchResults.fromJson(jsonDecode(res.body));

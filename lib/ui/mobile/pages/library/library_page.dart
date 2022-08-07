@@ -10,6 +10,6 @@ class LibraryPage extends StatefulWidget {
 class _LibraryPageState extends State<LibraryPage> {
   @override
   Widget build(BuildContext context) {
-    return Text("Library Page");
+    return const Text("Library Page");
   }
 }

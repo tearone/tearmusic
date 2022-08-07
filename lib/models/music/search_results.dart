@@ -7,7 +7,7 @@ class SearchResults {
 
   factory SearchResults.fromJson(Map json) {
     return SearchResults(
-      tracks: json["tracks"].map((e) => MusicTrack.fromJson(e)).toList(),
+      tracks: json["tracks"].map((e) => MusicTrack.fromJson(e)).toList().cast<MusicTrack>(),
     );
   }
 }

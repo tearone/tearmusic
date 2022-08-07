@@ -24,11 +24,11 @@ class MusicTrack {
     return MusicTrack(
       id: json["id"],
       name: json["name"],
-      duration: Duration(milliseconds: json["duration"]),
+      duration: Duration(milliseconds: json["duration_ms"]),
       explicit: json["explicit"],
       trackNumber: json["track_number"],
       album: MusicAlbum.fromJson(json["album"]),
-      artists: json["artists"].map((e) => MusicArtist.fromJson(e)).toList(),
+      artists: json["artists"].map((e) => MusicArtist.fromJson(e)).toList().cast<MusicArtist>(),
     );
   }
 }

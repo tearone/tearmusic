@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:tearmusic/models/track.dart';
+import 'package:tearmusic/models/music/track.dart';
 import 'package:tearmusic/ui/mobile/common/player/queue_view.dart';
 import 'package:tearmusic/ui/mobile/common/player/slider.dart';
 import 'package:tearmusic/ui/mobile/common/player/track_image.dart';

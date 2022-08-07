@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:tearmusic/providers/user_provider.dart';
+import 'package:provider/single_child_widget.dart';
 import 'package:tearmusic/ui/mobile/navigator.dart';
 
 class App extends StatelessWidget {
-  const App({super.key});
+  const App({super.key, required this.providers});
+
+  final List<SingleChildWidget> providers;
 
   @override
   Widget build(BuildContext context) {
@@ -20,9 +22,7 @@ class App extends StatelessWidget {
       ),
       builder: (context, child) {
         return MultiProvider(
-          providers: [
-            ChangeNotifierProvider(create: (_) => UserProvider()),
-          ],
+          providers: providers,
           child: child,
         );
       },

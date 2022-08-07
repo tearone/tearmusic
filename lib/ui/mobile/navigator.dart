@@ -99,8 +99,8 @@ class _NavigationScreenState extends State<NavigationScreen> with SingleTickerPr
       child: FutureBuilder<Uint8List>(
         future: getImage(),
         builder: (context, snapshot) {
-          return Scaffold(
-            body: Container(
+          return Material(
+            child: Container(
               decoration: BoxDecoration(
                 gradient: RadialGradient(
                   center: const Alignment(0.95, -0.95),

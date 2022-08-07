@@ -10,6 +10,14 @@ class SearchPage extends StatefulWidget {
 class _SearchPageState extends State<SearchPage> {
   @override
   Widget build(BuildContext context) {
-    return Text("Search Page");
+    return const TextField(
+      textInputAction: TextInputAction.search,
+      decoration: InputDecoration(
+        hintText: "Search...",
+        border: UnderlineInputBorder(
+          borderSide: BorderSide.none,
+        ),
+      ),
+    );
   }
 }

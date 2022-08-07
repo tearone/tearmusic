@@ -137,52 +137,54 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
             ),
           ),
           Expanded(
-            child: NotificationListener<ScrollNotification>(
-              onNotification: (notification) {
-                // from flutter source
-                if (notification is ScrollUpdateNotification && !_tabController.indexIsChanging) {
-                  if ((_pageController.page! - _tabController.index).abs() > 1.0) {
-                    _tabController.index = _pageController.page!.floor();
-                  }
-                  _tabController.offset = (_pageController.page! - _tabController.index).clamp(-1.0, 1.0);
-                } else if (notification is ScrollEndNotification) {
-                  _tabController.index = _pageController.page!.round();
-                  if (!_tabController.indexIsChanging) _tabController.offset = (_pageController.page! - _tabController.index).clamp(-1.0, 1.0);
-                }
-                return false;
+            child: PageTransitionSwitcher(
+              duration: const Duration(milliseconds: 500),
+              transitionBuilder: (child, primaryAnimation, secondaryAnimation) {
+                return SharedAxisTransition(
+                  fillColor: Colors.transparent,
+                  animation: primaryAnimation,
+                  secondaryAnimation: secondaryAnimation,
+                  transitionType: SharedAxisTransitionType.vertical,
+                  child: child,
+                );
               },
-              child: PageView.custom(
-                controller: _pageController,
-                childrenDelegate: SliverChildBuilderDelegate(
-                  (BuildContext context, int pageIndex) {
-                    return PageTransitionSwitcher(
-                      duration: const Duration(milliseconds: 500),
-                      transitionBuilder: (child, primaryAnimation, secondaryAnimation) {
-                        return SharedAxisTransition(
-                          fillColor: Colors.transparent,
-                          animation: primaryAnimation,
-                          secondaryAnimation: secondaryAnimation,
-                          transitionType: SharedAxisTransitionType.vertical,
-                          child: child,
-                        );
+              child: () {
+                switch (result) {
+                  case SearchResult.prepare:
+                    return Container();
+                  case SearchResult.empty:
+                    return const Text("No results");
+                  case SearchResult.loading:
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 200.0),
+                      child: Center(
+                        child: LoadingAnimationWidget.staggeredDotsWave(
+                          color: Theme.of(context).colorScheme.secondary.withOpacity(.2),
+                          size: 64.0,
+                        ),
+                      ),
+                    );
+                  case SearchResult.done:
+                    return NotificationListener<ScrollNotification>(
+                      onNotification: (notification) {
+                        // from flutter source
+                        if (notification is ScrollUpdateNotification && !_tabController.indexIsChanging) {
+                          if ((_pageController.page! - _tabController.index).abs() > 1.0) {
+                            _tabController.index = _pageController.page!.floor();
+                          }
+                          _tabController.offset = (_pageController.page! - _tabController.index).clamp(-1.0, 1.0);
+                        } else if (notification is ScrollEndNotification) {
+                          _tabController.index = _pageController.page!.round();
+                          if (!_tabController.indexIsChanging) {
+                            _tabController.offset = (_pageController.page! - _tabController.index).clamp(-1.0, 1.0);
+                          }
+                        }
+                        return false;
                       },
-                      child: () {
-                        switch (result) {
-                          case SearchResult.prepare:
-                            return Container();
-                          case SearchResult.empty:
-                            return const Text("No results");
-                          case SearchResult.loading:
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 200.0),
-                              child: Center(
-                                child: LoadingAnimationWidget.staggeredDotsWave(
-                                  color: Theme.of(context).colorScheme.secondary.withOpacity(.2),
-                                  size: 64.0,
-                                ),
-                              ),
-                            );
-                          case SearchResult.done:
+                      child: PageView.custom(
+                        controller: _pageController,
+                        childrenDelegate: SliverChildBuilderDelegate(
+                          (BuildContext context, int pageIndex) {
                             if (pageIndex == 0) {
                             } else {
                               switch (pageIndex) {
@@ -232,19 +234,21 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                                   );
                               }
                             }
-                        }
-                      }(),
+
+                            return null;
+                          },
+                          childCount: 5,
+                          findChildIndexCallback: (Key key) {
+                            final ValueKey<String> valueKey = key as ValueKey<String>;
+                            final String data = valueKey.value;
+                            return listOrder.indexOf(data);
+                          },
+                        ),
+                        physics: const PageScrollPhysics().applyTo(const BouncingScrollPhysics()),
+                      ),
                     );
-                  },
-                  childCount: 5,
-                  findChildIndexCallback: (Key key) {
-                    final ValueKey<String> valueKey = key as ValueKey<String>;
-                    final String data = valueKey.value;
-                    return listOrder.indexOf(data);
-                  },
-                ),
-                physics: const PageScrollPhysics().applyTo(const BouncingScrollPhysics()),
-              ),
+                }
+              }(),
             ),
           ),
         ],

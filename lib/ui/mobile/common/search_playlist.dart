@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tearmusic/models/music/playlist.dart';
+import 'package:tearmusic/ui/mobile/common/cached_image.dart';
 
 class SearchPlaylist extends StatelessWidget {
   const SearchPlaylist(this.playlist, {Key? key}) : super(key: key);
@@ -10,18 +11,10 @@ class SearchPlaylist extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       visualDensity: VisualDensity.compact,
-      leading: ClipRRect(
-        borderRadius: BorderRadius.circular(2.0),
-        child: SizedBox(
-          width: 42,
-          height: 42,
-          child: Image.network(
-            playlist.images.forSize(const Size(42, 42)),
-            width: 42,
-            height: 42,
-            fit: BoxFit.contain,
-          ),
-        ),
+      leading: SizedBox(
+        width: 42,
+        height: 42,
+        child: CachedImage(playlist.images),
       ),
       title: Text(playlist.name),
       subtitle: Text("${playlist.owner} • ${playlist.trackCount} tracks"),

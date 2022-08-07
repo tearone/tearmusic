@@ -15,6 +15,7 @@ class UserProvider extends ChangeNotifier {
     String? accessToken = _store.get("access_token");
     String? refreshToken = _store.get("refresh_token");
 
+    _api.base.refreshCallback = loginCallback;
     _api.base.setAuth(accessToken, refreshToken);
 
     if (accessToken != null) loggedIn = true;

@@ -8,6 +8,8 @@ class BaseApi {
   String? _accessToken;
   String? _refreshToken;
 
+  late Function(String, String)? refreshCallback;
+
   void setAuth(String? accessToken, String? refreshToken) {
     _accessToken = accessToken;
     _refreshToken = refreshToken;
@@ -31,6 +33,8 @@ class BaseApi {
       final token = jsonDecode(res.body);
       _accessToken = token["access_token"];
       _refreshToken = token["refresh_token"];
+
+      refreshCallback != null ? refreshCallback!(_accessToken ?? "", _refreshToken ?? "") : null;
     }
 
     return _accessToken!;

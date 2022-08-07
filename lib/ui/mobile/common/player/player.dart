@@ -3,6 +3,9 @@ import 'dart:ui';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:tearmusic/models/music/album.dart';
+import 'package:tearmusic/models/music/artist.dart';
+import 'package:tearmusic/models/music/images.dart';
 import 'package:tearmusic/models/music/track.dart';
 import 'package:tearmusic/ui/mobile/common/player/queue_view.dart';
 import 'package:tearmusic/ui/mobile/common/player/slider.dart';
@@ -51,9 +54,51 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
   bool bounceDown = false;
 
   final List<MusicTrack> tracks = [
-    const MusicTrack(image: "1", title: "akactea", artist: "pataki"),
-    const MusicTrack(image: "2", title: "Charmy", artist: "Ekhoe"),
-    const MusicTrack(image: "3", title: "Gyere Velem", artist: "AKC Kretta"),
+    MusicTrack(
+        id: "id",
+        name: "name",
+        duration: Duration(seconds: 2),
+        explicit: true,
+        trackNumber: 1,
+        album: MusicAlbum(
+            id: "id",
+            name: "name",
+            albumType: AlbumType.single,
+            trackCount: 1,
+            releaseDate: DateTime.now(),
+            artists: [MusicArtist(id: "id", name: "name")],
+            images: Images(images: [InternalImage(url: "1", width: 100, height: 100)])),
+        artists: [MusicArtist(id: "id", name: "name")]),
+    MusicTrack(
+        id: "id",
+        name: "name",
+        duration: Duration(seconds: 2),
+        explicit: true,
+        trackNumber: 1,
+        album: MusicAlbum(
+            id: "id",
+            name: "name",
+            albumType: AlbumType.single,
+            trackCount: 1,
+            releaseDate: DateTime.now(),
+            artists: [MusicArtist(id: "id", name: "name")],
+            images: Images(images: [InternalImage(url: "2", width: 100, height: 100)])),
+        artists: [MusicArtist(id: "id", name: "name")]),
+    MusicTrack(
+        id: "id",
+        name: "name",
+        duration: Duration(seconds: 2),
+        explicit: true,
+        trackNumber: 1,
+        album: MusicAlbum(
+            id: "id",
+            name: "name",
+            albumType: AlbumType.single,
+            trackCount: 1,
+            releaseDate: DateTime.now(),
+            artists: [MusicArtist(id: "id", name: "name")],
+            images: Images(images: [InternalImage(url: "3", width: 100, height: 100)])),
+        artists: [MusicArtist(id: "id", name: "name")]),
   ];
 
   @override
@@ -458,7 +503,7 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text("1:12", style: TextStyle(color: onSecondary)),
-                                    Text("2:31", style: TextStyle(color: onSecondary)),
+                                    Text(tracks[0].duration.toString(), style: TextStyle(color: onSecondary)),
                                   ],
                                 ),
                               ),
@@ -654,8 +699,8 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
                               child: Transform.translate(
                                 offset: Offset(-sAnim.value * sMaxOffset / stParallax - sMaxOffset / stParallax, 0),
                                 child: TrackInfo(
-                                    artist: tracks[0].artist,
-                                    title: tracks[0].title,
+                                    artist: tracks[0].artists.map((e) => e.name).join(", "),
+                                    title: tracks[0].name,
                                     cp: cp,
                                     p: p,
                                     bottomOffset: bottomOffset,
@@ -675,8 +720,8 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
                                                 : (1 - bp)
                                             : 0.0)),
                                 child: TrackInfo(
-                                    artist: tracks[1].artist,
-                                    title: tracks[1].title,
+                                    artist: tracks[1].artists.map((e) => e.name).join(", "),
+                                    title: tracks[1].name,
                                     p: bp,
                                     cp: bcp,
                                     bottomOffset: bottomOffset,
@@ -689,8 +734,8 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
                               child: Transform.translate(
                                 offset: Offset(-sAnim.value * sMaxOffset / stParallax + sMaxOffset / stParallax, 0),
                                 child: TrackInfo(
-                                    artist: tracks[2].artist,
-                                    title: tracks[2].title,
+                                    artist: tracks[2].artists.map((e) => e.name).join(", "),
+                                    title: tracks[2].name,
                                     cp: cp,
                                     p: p,
                                     bottomOffset: bottomOffset,
@@ -715,7 +760,7 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
                             child: Transform.translate(
                               offset: Offset(-sAnim.value * sMaxOffset / siParallax - sMaxOffset / siParallax, 0),
                               child: TrackImage(
-                                image: tracks[0].image,
+                                image: tracks[0].album.images.maxSize,
                                 large: true,
                                 p: p,
                                 cp: cp,
@@ -746,7 +791,7 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
                             child: Transform.translate(
                               offset: Offset(-sAnim.value * sMaxOffset / siParallax + sMaxOffset / siParallax, 0),
                               child: TrackImage(
-                                image: tracks[2].image,
+                                image: tracks[2].album.images.maxSize,
                                 large: true,
                                 p: p,
                                 cp: cp,

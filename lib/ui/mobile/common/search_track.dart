@@ -9,13 +9,31 @@ class SearchTrack extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: SizedBox(
-        width: 42,
-        height: 42,
-        child: Image.network(track.album.images.forSize(const Size(42, 42))),
+      leading: ClipRRect(
+        borderRadius: BorderRadius.circular(2.0),
+        child: SizedBox(
+          width: 42,
+          height: 42,
+          child: Image.network(
+            track.album.images.forSize(const Size(42, 42)),
+            width: 42,
+            height: 42,
+            fit: BoxFit.cover,
+          ),
+        ),
       ),
-      title: Text(track.name),
-      subtitle: Text(track.artists.map((e) => e.name).join(", ")),
+      title: Text(
+        track.name,
+        maxLines: 2,
+        softWrap: true,
+        overflow: TextOverflow.ellipsis,
+      ),
+      subtitle: Text(
+        track.artists.map((e) => e.name).join(", "),
+        maxLines: 1,
+        softWrap: false,
+        overflow: TextOverflow.ellipsis,
+      ),
       visualDensity: VisualDensity.compact,
       onTap: () {},
     );

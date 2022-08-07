@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:like_button/like_button.dart';
 import 'package:tearmusic/utils.dart';
 
 class TrackInfo extends StatelessWidget {
@@ -69,10 +70,26 @@ class TrackInfo extends StatelessWidget {
                         opacity: opacity,
                         child: Transform.translate(
                           offset: Offset(-100 * (1.0 - cp), 0.0),
-                          child: IconButton(
-                            onPressed: () {},
-                            iconSize: 30.0,
-                            icon: Icon(Icons.favorite_border, color: Theme.of(context).colorScheme.onSecondaryContainer),
+                          child: LikeButton(
+                            bubblesColor: BubblesColor(
+                              dotPrimaryColor: Theme.of(context).colorScheme.primary,
+                              dotSecondaryColor: Theme.of(context).colorScheme.primaryContainer,
+                            ),
+                            circleColor: CircleColor(
+                              start: Theme.of(context).colorScheme.tertiary,
+                              end: Theme.of(context).colorScheme.tertiary,
+                            ),
+                            likeBuilder: (value) => value
+                                ? Icon(
+                                    Icons.favorite,
+                                    color: Theme.of(context).colorScheme.primary,
+                                    size: 30.0,
+                                  )
+                                : Icon(
+                                    Icons.favorite_border_outlined,
+                                    color: Theme.of(context).colorScheme.onSecondaryContainer,
+                                    size: 30.0,
+                                  ),
                           ),
                         ),
                       ),

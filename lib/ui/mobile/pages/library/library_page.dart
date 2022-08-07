@@ -10,6 +10,15 @@ class LibraryPage extends StatefulWidget {
 class _LibraryPageState extends State<LibraryPage> {
   @override
   Widget build(BuildContext context) {
-    return const Text("Library Page");
+    return const Padding(
+      padding: EdgeInsets.all(24.0),
+      child: Text(
+        "Library",
+        style: TextStyle(
+          fontSize: 18.0,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    );
   }
 }

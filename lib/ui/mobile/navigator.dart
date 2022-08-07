@@ -136,6 +136,7 @@ class _NavigationScreenState extends State<NavigationScreen> with SingleTickerPr
                       child: NavigationBar(
                         selectedIndex: _selected.index,
                         onDestinationSelected: (value) {
+                          if (value == _selected.index) return;
                           setState(() => _selected = MobileRoutes.values[value]);
                           _navigatorState.currentState?.pushReplacementNamed(MobileRoutes.values[value].name);
                         },

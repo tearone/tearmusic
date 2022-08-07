@@ -39,8 +39,8 @@ class InternalImage {
   factory InternalImage.fromJson(Map json) {
     return InternalImage(
       url: json["url"],
-      width: json["width"],
-      height: json["height"],
+      width: json["width"] ?? 0,
+      height: json["height"] ?? 0,
     );
   }
 }

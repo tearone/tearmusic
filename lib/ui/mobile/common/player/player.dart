@@ -56,7 +56,7 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
   final List<MusicTrack> tracks = [
     MusicTrack(
         id: "id",
-        name: "name",
+        name: "Track 1",
         duration: const Duration(seconds: 2),
         explicit: true,
         trackNumber: 1,
@@ -68,10 +68,10 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
             releaseDate: DateTime.now(),
             artists: [MusicArtist(id: "id", name: "name")],
             images: Images(images: [InternalImage(url: "1", width: 100, height: 100)])),
-        artists: [MusicArtist(id: "id", name: "name")]),
+        artists: [MusicArtist(id: "id", name: "Artist 1")]),
     MusicTrack(
         id: "id",
-        name: "name",
+        name: "Track 2",
         duration: const Duration(seconds: 2),
         explicit: true,
         trackNumber: 1,
@@ -83,10 +83,10 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
             releaseDate: DateTime.now(),
             artists: [MusicArtist(id: "id", name: "name")],
             images: Images(images: [InternalImage(url: "2", width: 100, height: 100)])),
-        artists: [MusicArtist(id: "id", name: "name")]),
+        artists: [MusicArtist(id: "id", name: "Artist 2")]),
     MusicTrack(
         id: "id",
-        name: "name",
+        name: "Track 3",
         duration: const Duration(seconds: 2),
         explicit: true,
         trackNumber: 1,
@@ -98,7 +98,7 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
             releaseDate: DateTime.now(),
             artists: [MusicArtist(id: "id", name: "name")],
             images: Images(images: [InternalImage(url: "3", width: 100, height: 100)])),
-        artists: [MusicArtist(id: "id", name: "name")]),
+        artists: [MusicArtist(id: "id", name: "Artist 3")]),
   ];
 
   @override
@@ -461,7 +461,7 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
                                         ),
                                       ),
                                       Text(
-                                        "Fuzet",
+                                        "Album",
                                         style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20.0, color: onSecondary.withOpacity(.9)),
                                       ),
                                     ],
@@ -609,11 +609,14 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
                                       color: Colors.black,
                                       borderRadius: BorderRadius.circular(16.0),
                                     ),
-                                    child: FloatingActionButton(
-                                      onPressed: () {},
-                                      elevation: 0,
-                                      backgroundColor: Theme.of(context).colorScheme.surfaceTint.withOpacity(.3),
-                                      child: const Icon(Icons.pause),
+                                    child: CustomPaint(
+                                      painter: MiniplayerProgressPainter(.68 * (1 - rcp)),
+                                      child: FloatingActionButton(
+                                        onPressed: () {},
+                                        elevation: 0,
+                                        backgroundColor: Theme.of(context).colorScheme.surfaceTint.withOpacity(.3),
+                                        child: const Icon(Icons.pause),
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -651,7 +654,7 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
                                     ),
                                     Padding(
                                       padding: const EdgeInsets.only(left: 14.0),
-                                      child: Text('Nothing Ear 1', style: TextStyle(color: onSecondary)),
+                                      child: Text('Headphones', style: TextStyle(color: onSecondary)),
                                     ),
                                   ],
                                 ),
@@ -830,5 +833,52 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
         ),
       ),
     );
+  }
+}
+
+class MiniplayerProgressPainter extends CustomPainter {
+  MiniplayerProgressPainter(this.progress);
+
+  final double progress;
+  final strokeWidth = 4.0;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.drawDRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(0, 0, size.width, size.height),
+        const Radius.circular(16.0),
+      ),
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(strokeWidth, strokeWidth, size.width - strokeWidth * 2, size.height - strokeWidth * 2),
+        const Radius.circular(12.0),
+      ),
+      Paint()..color = Colors.white.withOpacity(.25),
+    );
+    canvas.saveLayer(Rect.fromLTWH(-10, -10, size.width + 20, size.height + 20), Paint());
+    canvas.drawArc(
+      Rect.fromLTWH(-10, -10, size.width + 20, size.height + 20),
+      -1.570796,
+      6.283185 * (1 - progress) * -1,
+      true,
+      Paint()..color = Colors.black,
+    );
+    canvas.drawDRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(-10, -10, size.width + 20, size.height + 20),
+        const Radius.circular(0.0),
+      ),
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(0, 0, size.width, size.height),
+        const Radius.circular(16.0),
+      ),
+      Paint()..blendMode = BlendMode.clear,
+    );
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return true;
   }
 }

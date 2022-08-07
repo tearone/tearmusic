@@ -30,6 +30,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
 
   @override
   void initState() {
+    super.initState();
     linkSub = uriLinkStream.listen((event) {
       if (event != null && event.queryParameters["access_token"] != null) {
         linkSub.cancel();
@@ -45,8 +46,6 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     });
 
     animation = AnimationController(vsync: this, duration: const Duration(seconds: 2));
-
-    super.initState();
   }
 
   @override

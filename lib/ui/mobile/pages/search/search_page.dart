@@ -165,6 +165,9 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                       ),
                     );
                   case SearchResult.done:
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      _pageController.jumpToPage(_tabController.index);
+                    });
                     return NotificationListener<ScrollNotification>(
                       onNotification: (notification) {
                         // from flutter source
@@ -186,6 +189,7 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                         childrenDelegate: SliverChildBuilderDelegate(
                           (BuildContext context, int pageIndex) {
                             if (pageIndex == 0) {
+                              return Container();
                             } else {
                               switch (pageIndex) {
                                 case 1:

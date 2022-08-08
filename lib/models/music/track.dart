@@ -7,7 +7,7 @@ class MusicTrack {
   final Duration duration;
   final bool explicit;
   final int trackNumber;
-  final MusicAlbum album;
+  final MusicAlbum? album;
   final List<MusicArtist> artists;
 
   MusicTrack({
@@ -22,12 +22,12 @@ class MusicTrack {
 
   factory MusicTrack.fromJson(Map json) {
     return MusicTrack(
-      id: json["id"],
+      id: json["id"] ?? "",
       name: json["name"],
       duration: Duration(milliseconds: json["duration_ms"]),
       explicit: json["explicit"],
       trackNumber: json["track_number"],
-      album: MusicAlbum.fromJson(json["album"]),
+      album: json["album"] != null ? MusicAlbum.fromJson(json["album"]) : null,
       artists: json["artists"].map((e) => MusicArtist.fromJson(e)).toList().cast<MusicArtist>(),
     );
   }

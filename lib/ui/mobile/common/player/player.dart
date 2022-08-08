@@ -11,6 +11,7 @@ import 'package:tearmusic/ui/mobile/common/player/queue_view.dart';
 import 'package:tearmusic/ui/mobile/common/player/slider.dart';
 import 'package:tearmusic/ui/mobile/common/player/track_image.dart';
 import 'package:tearmusic/ui/mobile/common/player/track_info.dart';
+import 'package:tearmusic/ui/common/format.dart';
 import 'package:tearmusic/utils.dart';
 
 enum PlayerState { mini, expanded, queue }
@@ -57,7 +58,7 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
     MusicTrack(
         id: "id",
         name: "Track 1",
-        duration: const Duration(seconds: 2),
+        duration: const Duration(seconds: 200),
         explicit: true,
         trackNumber: 1,
         album: MusicAlbum(
@@ -72,7 +73,7 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
     MusicTrack(
         id: "id",
         name: "Track 2",
-        duration: const Duration(seconds: 2),
+        duration: const Duration(seconds: 200),
         explicit: true,
         trackNumber: 1,
         album: MusicAlbum(
@@ -87,7 +88,7 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
     MusicTrack(
         id: "id",
         name: "Track 3",
-        duration: const Duration(seconds: 2),
+        duration: const Duration(seconds: 200),
         explicit: true,
         trackNumber: 1,
         album: MusicAlbum(
@@ -503,7 +504,7 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text("1:12", style: TextStyle(color: onSecondary)),
-                                    Text(tracks[0].duration.toString(), style: TextStyle(color: onSecondary)),
+                                    Text(tracks[0].duration.shortFormat(), style: TextStyle(color: onSecondary)),
                                   ],
                                 ),
                               ),
@@ -763,7 +764,7 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
                             child: Transform.translate(
                               offset: Offset(-sAnim.value * sMaxOffset / siParallax - sMaxOffset / siParallax, 0),
                               child: TrackImage(
-                                image: tracks[0].album.images.maxSize,
+                                image: tracks[0].album?.images!.maxSize,
                                 large: true,
                                 p: p,
                                 cp: cp,
@@ -794,7 +795,7 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
                             child: Transform.translate(
                               offset: Offset(-sAnim.value * sMaxOffset / siParallax + sMaxOffset / siParallax, 0),
                               child: TrackImage(
-                                image: tracks[2].album.images.maxSize,
+                                image: tracks[2].album?.images!.maxSize,
                                 large: true,
                                 p: p,
                                 cp: cp,

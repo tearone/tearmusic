@@ -10,7 +10,7 @@ class MusicAlbum {
   final int trackCount;
   final DateTime releaseDate;
   final List<MusicArtist> artists;
-  final Images images;
+  final Images? images;
 
   MusicAlbum({
     required this.id,
@@ -24,13 +24,13 @@ class MusicAlbum {
 
   factory MusicAlbum.fromJson(Map json) {
     return MusicAlbum(
-      id: json["id"],
+      id: json["id"] ?? "",
       name: json["name"],
-      albumType: AlbumType.values[["single", "album", "compilation"].indexOf(json["album_type"])],
-      trackCount: json["track_count"],
+      albumType: AlbumType.values[["single", "album", "compilation"].indexOf(json["album_type"] ?? "album")],
+      trackCount: json["track_count"] ?? 0,
       releaseDate: DateTime.tryParse(json["release_date"] ?? "") ?? DateTime.fromMillisecondsSinceEpoch(0),
       artists: json["artists"].map((e) => MusicArtist.fromJson(e)).toList().cast<MusicArtist>(),
-      images: Images.fromJson(json["images"].cast<Map>()),
+      images: json["images"].isNotEmpty ? Images.fromJson(json["images"].cast<Map>()) : null,
     );
   }
 }

@@ -7,10 +7,10 @@ import 'package:provider/provider.dart';
 import 'package:tearmusic/models/music/search_results.dart';
 import 'package:tearmusic/providers/music_info_provider.dart';
 import 'package:tearmusic/ui/mobile/common/filter_bar.dart';
-import 'package:tearmusic/ui/mobile/common/search_album.dart';
-import 'package:tearmusic/ui/mobile/common/search_artist.dart';
-import 'package:tearmusic/ui/mobile/common/search_playlist.dart';
-import 'package:tearmusic/ui/mobile/common/search_track.dart';
+import 'package:tearmusic/ui/mobile/common/search_album_tile.dart';
+import 'package:tearmusic/ui/mobile/common/search_artist_tile.dart';
+import 'package:tearmusic/ui/mobile/common/search_playlist_tile.dart';
+import 'package:tearmusic/ui/mobile/common/search_track_tile.dart';
 import 'package:tearmusic/ui/mobile/pages/search/top_result_container.dart';
 
 enum SearchResult { prepare, empty, loading, done }
@@ -245,7 +245,7 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                                           kind: "Tracks",
                                           results: results!.tracks
                                               .sublist(0, min(results!.tracks.length, topShowCount))
-                                              .map((e) => SearchTrack(e))
+                                              .map((e) => SearchTrackTile(e))
                                               .toList(),
                                           index: 1,
                                           pageController: _pageController,
@@ -257,7 +257,7 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                                           kind: "Playlists",
                                           results: results!.playlists
                                               .sublist(0, min(results!.playlists.length, topShowCount))
-                                              .map((e) => SearchPlaylist(e))
+                                              .map((e) => SearchPlaylistTile(e))
                                               .toList(),
                                           index: 2,
                                           pageController: _pageController,
@@ -269,7 +269,7 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                                           kind: "Albums",
                                           results: results!.albums
                                               .sublist(0, min(results!.albums.length, topShowCount))
-                                              .map((e) => SearchAlbum(e))
+                                              .map((e) => SearchAlbumTile(e))
                                               .toList(),
                                           index: 3,
                                           pageController: _pageController,
@@ -281,7 +281,7 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                                           kind: "Artists",
                                           results: results!.artists
                                               .sublist(0, min(results!.artists.length, topShowCount))
-                                              .map((e) => SearchArtist(e))
+                                              .map((e) => SearchArtistTile(e))
                                               .toList(),
                                           index: 4,
                                           pageController: _pageController,
@@ -302,7 +302,7 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                                           return const SizedBox(height: 200);
                                         }
 
-                                        return SearchTrack(results!.tracks[index]);
+                                        return SearchTrackTile(results!.tracks[index]);
                                       },
                                     );
                                   case 2:
@@ -313,7 +313,7 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                                           return const SizedBox(height: 200);
                                         }
 
-                                        return SearchPlaylist(results!.playlists[index]);
+                                        return SearchPlaylistTile(results!.playlists[index]);
                                       },
                                     );
                                   case 3:
@@ -324,7 +324,7 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                                           return const SizedBox(height: 200);
                                         }
 
-                                        return SearchAlbum(results!.albums[index]);
+                                        return SearchAlbumTile(results!.albums[index]);
                                       },
                                     );
                                   case 4:
@@ -335,7 +335,7 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                                           return const SizedBox(height: 200);
                                         }
 
-                                        return SearchArtist(results!.artists[index]);
+                                        return SearchArtistTile(results!.artists[index]);
                                       },
                                     );
                                 }

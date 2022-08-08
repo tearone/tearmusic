@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:tearmusic/models/music/artist.dart';
 import 'package:tearmusic/ui/mobile/common/cached_image.dart';
 
-class SearchArtist extends StatelessWidget {
-  const SearchArtist(this.artist, {Key? key}) : super(key: key);
+class SearchArtistTile extends StatelessWidget {
+  const SearchArtistTile(this.artist, {Key? key}) : super(key: key);
 
   final MusicArtist artist;
 

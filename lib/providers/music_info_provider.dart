@@ -1,5 +1,6 @@
 import 'package:tearmusic/api/base_api.dart';
 import 'package:tearmusic/api/music_api.dart';
+import 'package:tearmusic/models/music/album.dart';
 import 'package:tearmusic/models/music/playlist.dart';
 import 'package:tearmusic/models/music/search_results.dart';
 import 'package:tearmusic/models/music/track.dart';
@@ -15,5 +16,9 @@ class MusicInfoProvider {
 
   Future<List<MusicTrack>> playlistTracks(MusicPlaylist playlist) async {
     return await _api.playlistTracks(playlist);
+  }
+
+  Future<List<MusicTrack>> albumTracks(MusicAlbum album) async {
+    return await _api.albumTracks(album);
   }
 }

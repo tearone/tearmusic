@@ -2,6 +2,7 @@ import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
+import 'package:tearmusic/models/music/album.dart';
 import 'package:tearmusic/providers/music_info_provider.dart';
 import 'package:tearmusic/providers/user_provider.dart';
 import 'package:tearmusic/ui/mobile/common/profile_button.dart';
@@ -54,7 +55,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             Expanded(
-              child: FutureBuilder(
+              child: FutureBuilder<List<MusicAlbum>>(
                 future: context.read<MusicInfoProvider>().newReleases(),
                 builder: (context, snapshot) {
                   return PageTransitionSwitcher(

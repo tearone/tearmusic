@@ -181,7 +181,7 @@ class _PlaylistViewState extends State<PlaylistView> {
                                           labelPadding: const EdgeInsets.symmetric(horizontal: 4.0),
                                           avatar: Icon(Icons.schedule, color: theme.colorScheme.primary, size: 18.0),
                                           label: Text(
-                                            snapshot.data!.tracks.fold(Duration.zero, (a, b) => b.duration + a).format(),
+                                            snapshot.data!.tracks.fold(Duration.zero, (Duration a, b) => b.duration + a).format(),
                                             style: TextStyle(
                                               fontSize: 14.0,
                                               color: theme.colorScheme.primary,

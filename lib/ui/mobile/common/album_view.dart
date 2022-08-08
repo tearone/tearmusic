@@ -1,10 +1,12 @@
 import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:like_button/like_button.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:tearmusic/models/music/album.dart';
+import 'package:tearmusic/models/music/track.dart';
 import 'package:tearmusic/providers/music_info_provider.dart';
 import 'package:tearmusic/ui/common/image_color.dart';
 import 'package:tearmusic/ui/mobile/common/album_track_tile.dart';
@@ -55,7 +57,7 @@ class _AlbumViewState extends State<AlbumView> {
     final image = CachedImage(widget.album.images!);
     const double imageSize = 250;
 
-    return FutureBuilder(
+    return FutureBuilder<Uint8List>(
       future: image.getImage(const Size.square(imageSize)),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
@@ -70,7 +72,7 @@ class _AlbumViewState extends State<AlbumView> {
           fontFamily: "Montserrat",
         );
 
-        return FutureBuilder(
+        return FutureBuilder<List<MusicTrack>>(
           future: context.read<MusicInfoProvider>().albumTracks(widget.album),
           builder: (context, snapshot) {
             return Theme(

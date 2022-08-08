@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
@@ -7,6 +9,7 @@ import 'package:tearmusic/providers/music_info_provider.dart';
 import 'package:tearmusic/ui/mobile/common/filter_bar.dart';
 import 'package:tearmusic/ui/mobile/common/search_playlist.dart';
 import 'package:tearmusic/ui/mobile/common/search_track.dart';
+import 'package:tearmusic/ui/mobile/pages/search/top_result_container.dart';
 
 enum SearchResult { prepare, empty, loading, done }
 
@@ -189,7 +192,62 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                         childrenDelegate: SliverChildBuilderDelegate(
                           (BuildContext context, int pageIndex) {
                             if (pageIndex == 0) {
-                              return Container();
+                              return ListView.builder(
+                                itemCount: 5,
+                                itemBuilder: (context, index) {
+                                  if (index == 4) {
+                                    return const SizedBox(height: 200);
+                                  }
+
+                                  const topShowCount = 5;
+
+                                  switch (index) {
+                                    case 0:
+                                      return TopResultContainer(
+                                        kind: "Tracks",
+                                        results:
+                                            results!.tracks.sublist(0, min(results!.tracks.length, topShowCount)).map((e) => SearchTrack(e)).toList(),
+                                        index: 1,
+                                        pageController: _pageController,
+                                        tabController: _tabController,
+                                      );
+
+                                    case 1:
+                                      return TopResultContainer(
+                                        kind: "Playlists",
+                                        results: results!.playlists
+                                            .sublist(0, min(results!.playlists.length, topShowCount))
+                                            .map((e) => SearchPlaylist(e))
+                                            .toList(),
+                                        index: 2,
+                                        pageController: _pageController,
+                                        tabController: _tabController,
+                                      );
+
+                                    case 2:
+                                      return TopResultContainer(
+                                        kind: "Albums",
+                                        results:
+                                            results!.tracks.sublist(0, min(results!.tracks.length, topShowCount)).map((e) => SearchTrack(e)).toList(),
+                                        index: 3,
+                                        pageController: _pageController,
+                                        tabController: _tabController,
+                                      );
+
+                                    case 3:
+                                      return TopResultContainer(
+                                        kind: "Artists",
+                                        results:
+                                            results!.tracks.sublist(0, min(results!.tracks.length, topShowCount)).map((e) => SearchTrack(e)).toList(),
+                                        index: 4,
+                                        pageController: _pageController,
+                                        tabController: _tabController,
+                                      );
+                                  }
+
+                                  return const SizedBox();
+                                },
+                              );
                             } else {
                               switch (pageIndex) {
                                 case 1:

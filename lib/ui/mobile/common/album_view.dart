@@ -156,7 +156,7 @@ class _AlbumViewState extends State<AlbumView> {
                                   Padding(
                                     padding: const EdgeInsets.only(bottom: 12.0),
                                     child: Text(
-                                      widget.album.artists.map((e) => e.name).join(", "),
+                                      widget.album.artistsLabel,
                                       maxLines: 1,
                                       softWrap: false,
                                       overflow: TextOverflow.ellipsis,
@@ -167,7 +167,7 @@ class _AlbumViewState extends State<AlbumView> {
                                     ),
                                   ),
                                   Text(
-                                    "${widget.album.albumType == AlbumType.single ? 'Single • ' : ''}${widget.album.releaseDate.year}",
+                                    "${widget.album.title} • ${widget.album.releaseDate.year}",
                                     style: TextStyle(
                                       fontSize: 16.0,
                                       color: theme.colorScheme.primary,

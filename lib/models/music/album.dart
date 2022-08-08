@@ -47,6 +47,20 @@ class MusicAlbum {
     );
   }
 
+  String get artistsLabel {
+    if (artists.length == 2) {
+      return "${artists[0].name} & ${artists[1].name}";
+    }
+    return artists.map((e) => e.name).join(", ");
+  }
+
+  String get title {
+    if (albumType == AlbumType.single && trackCount > 1) {
+      return "EP";
+    }
+    return albumType.title;
+  }
+
   @override
   bool operator ==(other) => other is MusicAlbum && other.id == id;
 

@@ -120,8 +120,10 @@ class _ArtistViewState extends State<ArtistView> {
                                   gradient: LinearGradient(
                                     begin: Alignment.topCenter,
                                     end: Alignment.bottomCenter,
-                                    stops: const [0.5, 1],
+                                    stops: const [0, .3, .5, 1],
                                     colors: [
+                                      theme.scaffoldBackgroundColor.withOpacity(.3),
+                                      theme.scaffoldBackgroundColor.withOpacity(0),
                                       theme.scaffoldBackgroundColor.withOpacity(0),
                                       theme.scaffoldBackgroundColor,
                                     ],

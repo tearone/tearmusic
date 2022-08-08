@@ -160,6 +160,8 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                 onTap: (index) {
                   if (_pageController.positions.isEmpty) return;
 
+                  FocusScope.of(context).requestFocus(FocusNode());
+
                   int selectedPage = _pageController.page!.round();
 
                   if (index == selectedPage) return;

@@ -114,12 +114,10 @@ class _NavigationScreenState extends State<NavigationScreen> with SingleTickerPr
               child: Stack(
                 alignment: Alignment.bottomCenter,
                 children: [
-                  SafeArea(
-                    child: Navigator(
-                      key: _navigatorState,
-                      initialRoute: MobileRoutes.home.name,
-                      onGenerateRoute: (route) => _handleRoute(route),
-                    ),
+                  Navigator(
+                    key: _navigatorState,
+                    initialRoute: MobileRoutes.home.name,
+                    onGenerateRoute: (route) => _handleRoute(route),
                   ),
 
                   AnimatedBuilder(

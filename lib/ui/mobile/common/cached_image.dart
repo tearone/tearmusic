@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:animations/animations.dart';
@@ -62,9 +63,10 @@ class CachedImage extends StatelessWidget {
                           elevation: 0,
                           margin: EdgeInsets.zero,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(borderRadius)),
-                          color: Theme.of(context).colorScheme.surfaceVariant,
+                          color: Theme.of(context).colorScheme.secondaryContainer,
                           child: Icon(
                             Icons.music_note,
+                            size: sqrt(constraints.maxWidth * constraints.maxHeight) / 2,
                             color: Theme.of(context).colorScheme.secondary,
                           ),
                         ),

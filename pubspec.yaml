@@ -26,6 +26,7 @@ dependencies:
   figma_squircle: ^0.5.3
   like_button: ^2.0.4
   loading_animation_widget: ^1.2.0+2
+  image: ^3.2.0
 
 dev_dependencies:
   flutter_test:

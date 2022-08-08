@@ -1,6 +1,8 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:tearmusic/models/music/playlist.dart';
 import 'package:tearmusic/ui/mobile/common/cached_image.dart';
+import 'package:tearmusic/ui/mobile/common/playlist_view.dart';
 
 class SearchPlaylist extends StatelessWidget {
   const SearchPlaylist(this.playlist, {Key? key}) : super(key: key);
@@ -17,8 +19,10 @@ class SearchPlaylist extends StatelessWidget {
         child: CachedImage(playlist.images),
       ),
       title: Text(playlist.name),
-      subtitle: Text("${playlist.owner} • ${playlist.trackCount} tracks"),
-      onTap: () {},
+      subtitle: Text("${playlist.owner} • ${playlist.trackCount} songs"),
+      onTap: () {
+        PlaylistView.view(playlist, context: context);
+      },
     );
   }
 }

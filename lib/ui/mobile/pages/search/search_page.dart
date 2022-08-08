@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:animations/animations.dart';
@@ -34,9 +35,15 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
   SearchResults? results;
   SearchResult result = SearchResult.prepare;
 
+  late Timer searchAfterTyping;
+  String lastTerm = "";
+  final Duration searchAfterDuration = const Duration(milliseconds: 350);
+
   @override
   void initState() {
     super.initState();
+
+    searchAfterTyping = Timer(const Duration(), () => {});
 
     _tabController = TabController(length: 5, vsync: this);
     _pageController = PageController();
@@ -47,6 +54,37 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
     _tabController.dispose();
     _pageController.dispose();
     super.dispose();
+  }
+
+  void onHandlerChanged(value) {
+    if (value == "") {
+      setState(() => result = SearchResult.prepare);
+      lastTerm = value;
+      return;
+    }
+    if (lastTerm == value) return;
+    lastTerm = value;
+
+    setState(() {
+      result = SearchResult.loading;
+    });
+
+    if (searchAfterTyping.isActive) setState(() => searchAfterTyping.cancel());
+    setState(() => searchAfterTyping = Timer(searchAfterDuration, () => searchResults(value)));
+  }
+
+  Future<void> searchResults(String value) async {
+    results = await context.read<MusicInfoProvider>().search(value);
+    if (lastTerm != value) results = null;
+    setState(() {
+      if (results == null) {
+        result = SearchResult.prepare;
+      } else if (results?.isEmpty ?? true) {
+        result = SearchResult.empty;
+      } else {
+        result = SearchResult.done;
+      }
+    });
   }
 
   @override
@@ -76,19 +114,8 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                       child: TextField(
                         autocorrect: false,
                         autofocus: true,
-                        onSubmitted: (value) async {
-                          setState(() {
-                            result = SearchResult.loading;
-                          });
-                          results = await context.read<MusicInfoProvider>().search(value);
-                          setState(() {
-                            if (results?.isEmpty ?? true) {
-                              result = SearchResult.empty;
-                            } else {
-                              result = SearchResult.done;
-                            }
-                          });
-                        },
+                        onChanged: onHandlerChanged,
+                        onSubmitted: (value) => onHandlerChanged(value),
                         controller: _searchInputController,
                         textInputAction: TextInputAction.search,
                         style: const TextStyle(fontWeight: FontWeight.w500),

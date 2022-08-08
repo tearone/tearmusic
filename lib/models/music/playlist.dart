@@ -1,4 +1,5 @@
 import 'package:tearmusic/models/music/images.dart';
+import 'package:tearmusic/models/music/track.dart';
 
 class MusicPlaylist {
   final String id;
@@ -25,6 +26,23 @@ class MusicPlaylist {
       images: Images.fromJson(json["images"].cast<Map>()),
       trackCount: json["track_count"],
       owner: json["owner"]["name"],
+    );
+  }
+}
+
+class PlaylistDetails {
+  final List<MusicTrack> tracks;
+  final int followers;
+
+  PlaylistDetails({
+    required this.tracks,
+    required this.followers,
+  });
+
+  factory PlaylistDetails.fromJson(Map json) {
+    return PlaylistDetails(
+      tracks: json['tracks'].where((e) => e['id'] != null).map((e) => MusicTrack.fromJson(e)).toList().cast<MusicTrack>(),
+      followers: json['followers'],
     );
   }
 }

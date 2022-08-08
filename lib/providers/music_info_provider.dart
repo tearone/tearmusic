@@ -14,11 +14,15 @@ class MusicInfoProvider {
     return await _api.search(query);
   }
 
-  Future<List<MusicTrack>> playlistTracks(MusicPlaylist playlist) async {
+  Future<PlaylistDetails> playlistTracks(MusicPlaylist playlist) async {
     return await _api.playlistTracks(playlist);
   }
 
   Future<List<MusicTrack>> albumTracks(MusicAlbum album) async {
     return await _api.albumTracks(album);
+  }
+
+  Future<List<MusicAlbum>> newReleases() async {
+    return await _api.newReleases();
   }
 }

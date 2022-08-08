@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -56,7 +58,7 @@ class _PlaylistViewState extends State<PlaylistView> {
     final image = CachedImage(widget.playlist.images);
     const double imageSize = 250;
 
-    return FutureBuilder(
+    return FutureBuilder<Uint8List>(
       future: image.getImage(const Size.square(imageSize)),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
@@ -71,7 +73,7 @@ class _PlaylistViewState extends State<PlaylistView> {
           fontFamily: "Montserrat",
         );
 
-        return FutureBuilder(
+        return FutureBuilder<PlaylistDetails>(
           future: context.read<MusicInfoProvider>().playlistTracks(widget.playlist),
           builder: (context, snapshot) {
             return Theme(
@@ -141,7 +143,7 @@ class _PlaylistViewState extends State<PlaylistView> {
                                     ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsets.only(bottom: 12.0),
+                                    padding: const EdgeInsets.only(bottom: 4.0),
                                     child: Text(
                                       widget.playlist.owner,
                                       maxLines: 1,
@@ -154,12 +156,40 @@ class _PlaylistViewState extends State<PlaylistView> {
                                     ),
                                   ),
                                   if (snapshot.hasData)
-                                    Text(
-                                      snapshot.data!.fold(Duration.zero, (a, b) => b.duration + a).format(),
-                                      style: TextStyle(
-                                        fontSize: 16.0,
-                                        color: theme.colorScheme.primary,
-                                      ),
+                                    Row(
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.only(right: 8.0),
+                                          child: Chip(
+                                            elevation: 1,
+                                            backgroundColor: theme.colorScheme.primary.withOpacity(.2),
+                                            labelPadding: const EdgeInsets.symmetric(horizontal: 4.0),
+                                            avatar: Icon(Icons.favorite, color: theme.colorScheme.primary, size: 18.0),
+                                            label: Text(
+                                              "${snapshot.data!.followers} likes",
+                                              style: TextStyle(
+                                                fontSize: 14.0,
+                                                color: theme.colorScheme.primary,
+                                                height: -0.05,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        Chip(
+                                          elevation: 1,
+                                          backgroundColor: theme.colorScheme.primary.withOpacity(.2),
+                                          labelPadding: const EdgeInsets.symmetric(horizontal: 4.0),
+                                          avatar: Icon(Icons.schedule, color: theme.colorScheme.primary, size: 18.0),
+                                          label: Text(
+                                            snapshot.data!.tracks.fold(Duration.zero, (a, b) => b.duration + a).format(),
+                                            style: TextStyle(
+                                              fontSize: 14.0,
+                                              color: theme.colorScheme.primary,
+                                              height: -0.05,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                 ],
                               ),
@@ -234,13 +264,13 @@ class _PlaylistViewState extends State<PlaylistView> {
                             );
                           }
 
-                          if (index == snapshot.data!.length) {
+                          if (index == snapshot.data!.tracks.length) {
                             return const SizedBox(height: 200);
                           }
 
-                          return PlaylistTrackTile(snapshot.data![index]);
+                          return PlaylistTrackTile(snapshot.data!.tracks[index]);
                         },
-                        childCount: snapshot.hasData ? snapshot.data!.length + 1 : 1,
+                        childCount: snapshot.hasData ? snapshot.data!.tracks.length + 1 : 1,
                       ),
                     ),
                   ],

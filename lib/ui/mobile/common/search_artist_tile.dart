@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tearmusic/models/music/artist.dart';
+import 'package:tearmusic/ui/mobile/common/artist_view.dart';
 import 'package:tearmusic/ui/mobile/common/cached_image.dart';
 
 class SearchArtistTile extends StatelessWidget {
@@ -33,7 +34,9 @@ class SearchArtistTile extends StatelessWidget {
             ),
       title: Text(artist.name),
       subtitle: artist.genres.isNotEmpty ? Text(artist.genres.first) : null,
-      onTap: () {},
+      onTap: () {
+        ArtistView.view(artist, context: context);
+      },
     );
   }
 }

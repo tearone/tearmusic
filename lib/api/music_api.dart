@@ -26,7 +26,7 @@ class MusicApi {
     return SearchResults.fromJson(jsonDecode(res.body));
   }
 
-  Future<List<MusicTrack>> playlistTracks(MusicPlaylist playlist) async {
+  Future<PlaylistDetails> playlistTracks(MusicPlaylist playlist) async {
     final res = await http.get(
       Uri.parse("${BaseApi.url}/music/playlist-tracks?id=${Uri.encodeComponent(playlist.id)}"),
       headers: {"authorization": await base.getToken()},
@@ -36,7 +36,7 @@ class MusicApi {
       throw AuthException("MusicApi.playlistTracks");
     }
 
-    return jsonDecode(res.body).map((e) => MusicTrack.fromJson(e)).toList().cast<MusicTrack>();
+    return PlaylistDetails.fromJson(jsonDecode(res.body));
   }
 
   Future<List<MusicTrack>> albumTracks(MusicAlbum album) async {
@@ -49,6 +49,19 @@ class MusicApi {
       throw AuthException("MusicApi.albumTracks");
     }
 
-    return jsonDecode(res.body).where((e) => e['id'] != null).map((e) => MusicTrack.fromJson(e)).toList().cast<MusicTrack>();
+    return jsonDecode(res.body)['tracks'].where((e) => e['id'] != null).map((e) => MusicTrack.fromJson(e)).toList().cast<MusicTrack>();
+  }
+
+  Future<List<MusicAlbum>> newReleases() async {
+    final res = await http.get(
+      Uri.parse("${BaseApi.url}/music/new-releases"),
+      headers: {"authorization": await base.getToken()},
+    );
+
+    if (res.statusCode != 200) {
+      throw AuthException("MusicApi.newReleases");
+    }
+
+    return jsonDecode(res.body).map((e) => MusicAlbum.fromJson(e)).toList().cast<MusicAlbum>();
   }
 }

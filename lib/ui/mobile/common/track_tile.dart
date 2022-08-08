@@ -44,19 +44,19 @@ class TrackTile extends StatelessWidget {
           if (track.explicit)
             Container(
               margin: const EdgeInsets.only(right: 6.0),
-              height: 15,
-              width: 15,
+              height: 14,
+              width: 14,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(4.0),
-                color: Theme.of(context).colorScheme.secondary,
+                color: Theme.of(context).colorScheme.onSecondaryContainer,
               ),
               child: Center(
                 child: Text(
                   "E",
                   style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSecondary,
+                    color: Theme.of(context).colorScheme.secondaryContainer,
                     fontSize: 12.0,
-                    height: -0.1,
+                    height: -0.05,
                     fontWeight: FontWeight.bold,
                   ),
                 ),

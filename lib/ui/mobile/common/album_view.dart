@@ -153,7 +153,7 @@ class _AlbumViewState extends State<AlbumView> {
                                     ),
                                   ),
                                   Text(
-                                    widget.album.releaseDate.year.toString(),
+                                    "${widget.album.albumType == AlbumType.single ? 'Single • ' : ''}${widget.album.releaseDate.year}",
                                     style: TextStyle(
                                       fontSize: 16.0,
                                       color: theme.colorScheme.primary,

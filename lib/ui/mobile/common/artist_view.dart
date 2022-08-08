@@ -1,7 +1,6 @@
-import 'dart:typed_data';
+import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
@@ -9,11 +8,12 @@ import 'package:provider/provider.dart';
 import 'package:tearmusic/models/music/album.dart';
 import 'package:tearmusic/models/music/artist.dart';
 import 'package:tearmusic/providers/music_info_provider.dart';
+import 'package:tearmusic/providers/theme_provider.dart';
 import 'package:tearmusic/ui/common/image_color.dart';
 import 'package:tearmusic/ui/mobile/common/cached_image.dart';
 import 'package:tearmusic/ui/mobile/common/latest_release.dart';
 
-class ArtistView extends StatelessWidget {
+class ArtistView extends StatefulWidget {
   const ArtistView(this.artist, {Key? key}) : super(key: key);
 
   final MusicArtist artist;
@@ -24,11 +24,16 @@ class ArtistView extends StatelessWidget {
         ),
       );
 
+  @override
+  State<ArtistView> createState() => _ArtistViewState();
+}
+
+class _ArtistViewState extends State<ArtistView> {
   Future<ArtistDetails> artistDetails(MusicInfoProvider musicInfo) async {
     final res = await Future.wait([
-      musicInfo.artistAlbums(artist),
-      musicInfo.artistTracks(artist),
-      musicInfo.artistRelated(artist),
+      musicInfo.artistAlbums(widget.artist),
+      musicInfo.artistTracks(widget.artist),
+      musicInfo.artistRelated(widget.artist),
     ]);
 
     List<MusicAlbum> albums = List.castFrom(res[0]);
@@ -36,32 +41,44 @@ class ArtistView extends StatelessWidget {
 
     return ArtistDetails(
       tracks: res[1].cast(),
-      albums: albums.where((e) => e.artists.first == artist).toList(),
-      appearsOn: albums.where((e) => e.artists.first != artist).toList(),
+      albums: albums.where((e) => e.artists.first == widget.artist).toList(),
+      appearsOn: albums.where((e) => e.artists.first != widget.artist).toList(),
       related: res[2].cast(),
     );
   }
 
+  Future<ThemeData> getTheme(CachedImage image) async {
+    final bytes = await image.getImage(const Size.square(350));
+
+    final colors = generateColorPalette(bytes);
+    return ThemeProvider.coloredTheme(colors[1]);
+  }
+
+  late CachedImage image;
+  final theme = Completer<ThemeData>();
+
+  @override
+  void initState() {
+    super.initState();
+
+    image = CachedImage(widget.artist.images!);
+
+    getTheme(image).then((value) {
+      if (mounted) context.read<ThemeProvider>().tempNavTheme(value);
+      theme.complete(value);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    final image = CachedImage(artist.images!);
-    const double imageSize = 300;
-
-    return FutureBuilder<Uint8List>(
-      future: image.getImage(const Size.square(imageSize)),
+    return FutureBuilder<ThemeData>(
+      future: theme.future,
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return Container();
+          return const SizedBox();
         }
 
-        final colors = generateColorPalette(snapshot.data!);
-        final theme = ThemeData(
-          useMaterial3: true,
-          colorSchemeSeed: colors[1],
-          brightness: Brightness.dark,
-          fontFamily: "Montserrat",
-        );
-
+        final theme = snapshot.data!;
         final musicInfo = context.read<MusicInfoProvider>();
 
         return FutureBuilder<ArtistDetails>(
@@ -87,7 +104,7 @@ class ArtistView extends StatelessWidget {
                       expandedHeight: 300,
                       flexibleSpace: FlexibleSpaceBar(
                         title: Text(
-                          artist.name,
+                          widget.artist.name,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(fontWeight: FontWeight.w700),
                         ),
@@ -112,7 +129,7 @@ class ArtistView extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            Text("${NumberFormat.compact().format(artist.followers)} followers"),
+                            Text("${NumberFormat.compact().format(widget.artist.followers)} followers"),
                           ],
                         ),
                       ),
@@ -134,7 +151,12 @@ class ArtistView extends StatelessWidget {
                       SliverToBoxAdapter(
                         child: Padding(
                           padding: const EdgeInsets.all(12.0).add(const EdgeInsets.only(top: 8.0)),
-                          child: LatestRelease(snapshot.data!.albums.first),
+                          child: LatestRelease(
+                            snapshot.data!.albums.first,
+                            then: () {
+                              context.read<ThemeProvider>().tempNavTheme(theme);
+                            },
+                          ),
                         ),
                       ),
                   ],

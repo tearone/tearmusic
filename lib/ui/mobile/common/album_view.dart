@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:figma_squircle/figma_squircle.dart';
@@ -9,6 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:tearmusic/models/music/album.dart';
 import 'package:tearmusic/models/music/track.dart';
 import 'package:tearmusic/providers/music_info_provider.dart';
+import 'package:tearmusic/providers/theme_provider.dart';
 import 'package:tearmusic/ui/common/image_color.dart';
 import 'package:tearmusic/ui/mobile/common/album_track_tile.dart';
 import 'package:tearmusic/ui/mobile/common/cached_image.dart';
@@ -33,6 +35,17 @@ class _AlbumViewState extends State<AlbumView> {
 
   bool showTitle = false;
 
+  Future<ThemeData> getTheme(CachedImage image) async {
+    final bytes = await image.getImage(const Size.square(imageSize));
+
+    final colors = generateColorPalette(bytes);
+    return ThemeProvider.coloredTheme(colors[1]);
+  }
+
+  late CachedImage image;
+  static const double imageSize = 250;
+  final theme = Completer<ThemeData>();
+
   @override
   void initState() {
     super.initState();
@@ -45,6 +58,13 @@ class _AlbumViewState extends State<AlbumView> {
         if (showTitle) setState(() => showTitle = false);
       }
     });
+
+    image = CachedImage(widget.album.images!);
+
+    getTheme(image).then((value) {
+      if (mounted) context.read<ThemeProvider>().tempNavTheme(value);
+      theme.complete(value);
+    });
   }
 
   @override
@@ -55,23 +75,14 @@ class _AlbumViewState extends State<AlbumView> {
 
   @override
   Widget build(BuildContext context) {
-    final image = CachedImage(widget.album.images!);
-    const double imageSize = 250;
-
-    return FutureBuilder<Uint8List>(
-      future: image.getImage(const Size.square(imageSize)),
+    return FutureBuilder<ThemeData>(
+      future: theme.future,
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return Container();
         }
 
-        final colors = generateColorPalette(snapshot.data!);
-        final theme = ThemeData(
-          useMaterial3: true,
-          colorSchemeSeed: colors[1],
-          brightness: Brightness.dark,
-          fontFamily: "Montserrat",
-        );
+        final theme = snapshot.data!;
 
         return FutureBuilder<List<MusicTrack>>(
           future: context.read<MusicInfoProvider>().albumTracks(widget.album),

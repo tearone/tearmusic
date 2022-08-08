@@ -48,6 +48,10 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
 
     _tabController = TabController(length: 5, vsync: this);
     _pageController = PageController();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _searchInputFocus.requestFocus();
+    });
   }
 
   @override
@@ -115,7 +119,7 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                       child: TextField(
                         focusNode: _searchInputFocus,
                         autocorrect: false,
-                        autofocus: true,
+                        autofocus: false,
                         onChanged: onHandlerChanged,
                         onSubmitted: (value) => onHandlerChanged(value),
                         controller: _searchInputController,

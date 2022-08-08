@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:tearmusic/models/music/album.dart';
+import 'package:tearmusic/providers/theme_provider.dart';
 import 'package:tearmusic/ui/mobile/common/album_view.dart';
 import 'package:tearmusic/ui/mobile/common/cached_image.dart';
 
@@ -20,7 +22,7 @@ class SearchAlbumTile extends StatelessWidget {
       title: Text(album.name),
       subtitle: Text("${album.releaseDate.year} • ${album.artists.first.name}"),
       onTap: () {
-        AlbumView.view(album, context: context);
+        AlbumView.view(album, context: context).then((_) => context.read<ThemeProvider>().resetTheme());
       },
     );
   }

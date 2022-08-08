@@ -2,6 +2,7 @@ import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:tearmusic/providers/theme_provider.dart';
 import 'package:tearmusic/providers/user_provider.dart';
 import 'package:tearmusic/ui/mobile/common/player/player.dart';
 import 'package:tearmusic/ui/mobile/pages/home/home_page.dart';
@@ -120,40 +121,44 @@ class _NavigationScreenState extends State<NavigationScreen> with SingleTickerPr
                     onGenerateRoute: (route) => _handleRoute(route),
                   ),
 
-                  AnimatedBuilder(
-                    animation: animation,
-                    builder: (context, child) {
-                      return Transform.translate(
-                        offset: Offset(0, (animation.value * 120).clamp(0, 120)),
-                        child: child,
-                      );
-                    },
-                    child: MediaQuery.removePadding(
-                      context: context,
-                      removeTop: true,
-                      child: NavigationBar(
-                        selectedIndex: _selected.index,
-                        onDestinationSelected: (value) {
-                          if (value == _selected.index) return;
-                          setState(() => _selected = MobileRoutes.values[value]);
-                          _navigatorState.currentState?.pushReplacementNamed(MobileRoutes.values[value].name);
-                        },
-                        destinations: const [
-                          NavigationDestination(
-                            label: "Home",
-                            icon: Icon(Icons.home_outlined),
-                            selectedIcon: Icon(Icons.home_filled),
-                          ),
-                          NavigationDestination(
-                            label: "Search",
-                            icon: Icon(Icons.search_outlined),
-                          ),
-                          NavigationDestination(
-                            label: "Library",
-                            icon: Icon(Icons.library_music_outlined),
-                            selectedIcon: Icon(Icons.library_music),
-                          ),
-                        ],
+                  AnimatedTheme(
+                    data: context.select<ThemeProvider, ThemeData>((e) => e.navigationTheme),
+                    child: AnimatedBuilder(
+                      animation: animation,
+                      builder: (context, child) {
+                        return Transform.translate(
+                          offset: Offset(0, (animation.value * 120).clamp(0, 120)),
+                          child: child,
+                        );
+                      },
+                      child: MediaQuery.removePadding(
+                        context: context,
+                        removeTop: true,
+                        child: NavigationBar(
+                          selectedIndex: _selected.index,
+                          onDestinationSelected: (value) {
+                            if (value == _selected.index) return;
+                            setState(() => _selected = MobileRoutes.values[value]);
+                            _navigatorState.currentState?.pushNamedAndRemoveUntil(MobileRoutes.values[value].name, (route) => false);
+                            context.read<ThemeProvider>().resetTheme();
+                          },
+                          destinations: const [
+                            NavigationDestination(
+                              label: "Home",
+                              icon: Icon(Icons.home_outlined),
+                              selectedIcon: Icon(Icons.home_filled),
+                            ),
+                            NavigationDestination(
+                              label: "Search",
+                              icon: Icon(Icons.search_outlined),
+                            ),
+                            NavigationDestination(
+                              label: "Library",
+                              icon: Icon(Icons.library_music_outlined),
+                              selectedIcon: Icon(Icons.library_music),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),

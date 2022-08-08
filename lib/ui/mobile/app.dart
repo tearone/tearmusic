@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
+import 'package:tearmusic/providers/theme_provider.dart';
 import 'package:tearmusic/ui/mobile/navigator.dart';
 
 class App extends StatelessWidget {
@@ -10,23 +11,17 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Tear Music',
-      debugShowCheckedModeBanner: false,
-      themeMode: ThemeMode.dark,
-      darkTheme: ThemeData(
-        useMaterial3: true,
-        colorSchemeSeed: Colors.blue,
-        brightness: Brightness.dark,
-        fontFamily: "Montserrat",
-      ),
-      builder: (context, child) {
-        return MultiProvider(
-          providers: providers,
-          child: child,
+    return MultiProvider(
+      providers: providers,
+      child: Builder(builder: (context) {
+        return MaterialApp(
+          title: 'Tear Music',
+          debugShowCheckedModeBanner: false,
+          themeMode: ThemeMode.dark,
+          darkTheme: context.select<ThemeProvider, ThemeData>((e) => e.appTheme),
+          home: const NavigationScreen(),
         );
-      },
-      home: const NavigationScreen(),
+      }),
     );
   }
 }

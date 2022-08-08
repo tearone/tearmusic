@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:tearmusic/models/music/playlist.dart';
+import 'package:tearmusic/providers/theme_provider.dart';
 import 'package:tearmusic/ui/mobile/common/cached_image.dart';
 import 'package:tearmusic/ui/mobile/common/playlist_view.dart';
 
@@ -20,7 +22,7 @@ class SearchPlaylistTile extends StatelessWidget {
       title: Text(playlist.name),
       subtitle: Text("${playlist.owner} • ${playlist.trackCount} songs"),
       onTap: () {
-        PlaylistView.view(playlist, context: context);
+        PlaylistView.view(playlist, context: context).then((_) => context.read<ThemeProvider>().resetTheme());
       },
     );
   }

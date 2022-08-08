@@ -267,7 +267,7 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                                       return const SizedBox(height: 200);
                                     }
 
-                                    const topShowCount = 5;
+                                    const topShowCount = 3;
 
                                     switch (index) {
                                       case 0:

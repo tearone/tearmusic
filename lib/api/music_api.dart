@@ -4,6 +4,7 @@ import 'package:tearmusic/api/base_api.dart';
 import 'package:http/http.dart' as http;
 import 'package:tearmusic/exceptionts.dart';
 import 'package:tearmusic/models/music/album.dart';
+import 'package:tearmusic/models/music/artist.dart';
 import 'package:tearmusic/models/music/playlist.dart';
 import 'package:tearmusic/models/music/search_results.dart';
 import 'package:tearmusic/models/music/track.dart';
@@ -70,9 +71,9 @@ class MusicApi {
     return jsonDecode(res.body)['albums'].map((e) => MusicAlbum.fromJson(e)).toList().cast<MusicAlbum>();
   }
 
-  Future<List<MusicAlbum>> artistAlbums() async {
+  Future<List<MusicAlbum>> artistAlbums(MusicArtist artist) async {
     final res = await http.get(
-      Uri.parse("${BaseApi.url}/music/artist-albums"),
+      Uri.parse("${BaseApi.url}/music/artist-albums?id=${Uri.encodeComponent(artist.id)}"),
       headers: {"authorization": await base.getToken()},
     );
 
@@ -81,14 +82,25 @@ class MusicApi {
     return jsonDecode(res.body)['albums'].map((e) => MusicAlbum.fromJson(e)).toList().cast<MusicAlbum>();
   }
 
-  Future<List<MusicTrack>> artistTracks() async {
+  Future<List<MusicTrack>> artistTracks(MusicArtist artist) async {
     final res = await http.get(
-      Uri.parse("${BaseApi.url}/music/artist-tracks"),
+      Uri.parse("${BaseApi.url}/music/artist-tracks?id=${Uri.encodeComponent(artist.id)}"),
       headers: {"authorization": await base.getToken()},
     );
 
     _reschk(res, "artistTracks");
 
     return jsonDecode(res.body)['tracks'].map((e) => MusicTrack.fromJson(e)).toList().cast<MusicTrack>();
+  }
+
+  Future<List<MusicArtist>> artistRelated(MusicArtist artist) async {
+    final res = await http.get(
+      Uri.parse("${BaseApi.url}/music/artist-related?id=${Uri.encodeComponent(artist.id)}"),
+      headers: {"authorization": await base.getToken()},
+    );
+
+    _reschk(res, "artistRelated");
+
+    return jsonDecode(res.body)['artists'].map((e) => MusicArtist.fromJson(e)).toList().cast<MusicArtist>();
   }
 }

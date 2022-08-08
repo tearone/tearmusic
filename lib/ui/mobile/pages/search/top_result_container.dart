@@ -26,13 +26,13 @@ class TopResultContainer extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+              padding: const EdgeInsets.only(left: 16.0, right: 8.0),
               child: Row(
                 children: [
                   Expanded(
                     child: Text(
                       "Top $kind",
-                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14.0),
+                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16.0),
                     ),
                   ),
                   TextButton(

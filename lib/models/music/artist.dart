@@ -1,4 +1,6 @@
+import 'package:tearmusic/models/music/album.dart';
 import 'package:tearmusic/models/music/images.dart';
+import 'package:tearmusic/models/music/track.dart';
 
 class MusicArtist {
   final String id;
@@ -24,4 +26,24 @@ class MusicArtist {
       followers: json["followers"] ?? 0,
     );
   }
+
+  @override
+  bool operator ==(other) => other is MusicArtist && other.id == id;
+
+  @override
+  int get hashCode => id.hashCode;
+}
+
+class ArtistDetails {
+  final List<MusicTrack> tracks;
+  final List<MusicAlbum> albums;
+  final List<MusicArtist> related;
+  final List<MusicAlbum> appearsOn;
+
+  ArtistDetails({
+    required this.tracks,
+    required this.albums,
+    required this.related,
+    required this.appearsOn,
+  });
 }

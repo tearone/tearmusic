@@ -47,7 +47,7 @@ class TrackTile extends StatelessWidget {
               height: 14,
               width: 14,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(4.0),
+                borderRadius: BorderRadius.circular(2.0),
                 color: Theme.of(context).colorScheme.onSecondaryContainer,
               ),
               child: Center(
@@ -64,7 +64,7 @@ class TrackTile extends StatelessWidget {
             ),
           Expanded(
             child: Text(
-              track.artists.map((e) => e.name).join(", "),
+              track.artistsLabel,
               maxLines: 1,
               softWrap: false,
               overflow: TextOverflow.ellipsis,

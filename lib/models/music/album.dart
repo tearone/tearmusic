@@ -3,6 +3,19 @@ import 'package:tearmusic/models/music/images.dart';
 
 enum AlbumType { single, album, compilation }
 
+extension AlbumTypeTitle on AlbumType {
+  String get title {
+    switch (this) {
+      case AlbumType.album:
+        return "Album";
+      case AlbumType.single:
+        return "Single";
+      case AlbumType.compilation:
+        return "Compilation";
+    }
+  }
+}
+
 class MusicAlbum {
   final String id;
   final String name;
@@ -30,7 +43,13 @@ class MusicAlbum {
       trackCount: json["track_count"] ?? 0,
       releaseDate: DateTime.tryParse(json["release_date"] ?? "") ?? DateTime.fromMillisecondsSinceEpoch(0),
       artists: json["artists"].map((e) => MusicArtist.fromJson(e)).toList().cast<MusicArtist>(),
-      images: json["images"].isNotEmpty ? Images.fromJson(json["images"].cast<Map>()) : null,
+      images: json["images"] != null && json["images"].isNotEmpty ? Images.fromJson(json["images"].cast<Map>()) : null,
     );
   }
+
+  @override
+  bool operator ==(other) => other is MusicAlbum && other.id == id;
+
+  @override
+  int get hashCode => id.hashCode;
 }

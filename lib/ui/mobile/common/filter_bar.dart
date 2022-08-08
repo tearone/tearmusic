@@ -22,7 +22,7 @@ class FilterBar extends StatefulWidget implements PreferredSizeWidget {
   final bool scrollable;
 
   @override
-  _FilterBarState createState() => _FilterBarState();
+  State<FilterBar> createState() => _FilterBarState();
 }
 
 class _FilterBarState extends State<FilterBar> {

@@ -28,6 +28,12 @@ class MusicPlaylist {
       owner: json["owner"]["name"],
     );
   }
+
+  @override
+  bool operator ==(other) => other is MusicPlaylist && other.id == id;
+
+  @override
+  int get hashCode => id.hashCode;
 }
 
 class PlaylistDetails {

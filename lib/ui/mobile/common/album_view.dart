@@ -219,31 +219,32 @@ class _AlbumViewState extends State<AlbumView> {
                         ),
                       ),
                     ),
-                    SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (BuildContext context, int index) {
-                          if (!snapshot.hasData) {
-                            return Padding(
-                              padding: const EdgeInsets.only(top: 32.0),
-                              child: Align(
-                                alignment: Alignment.topCenter,
-                                child: LoadingAnimationWidget.staggeredDotsWave(
-                                  color: theme.colorScheme.secondary.withOpacity(.2),
-                                  size: 64.0,
-                                ),
-                              ),
-                            );
-                          }
-
-                          if (index == snapshot.data!.length) {
-                            return const SizedBox(height: 200);
-                          }
-
-                          return AlbumTrackTile(snapshot.data![index]);
-                        },
-                        childCount: snapshot.hasData ? snapshot.data!.length + 1 : 1,
+                    if (!snapshot.hasData)
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 32.0),
+                          child: Align(
+                            alignment: Alignment.topCenter,
+                            child: LoadingAnimationWidget.staggeredDotsWave(
+                              color: theme.colorScheme.secondary.withOpacity(.2),
+                              size: 64.0,
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
+                    if (snapshot.hasData)
+                      SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (BuildContext context, int index) {
+                            if (index == snapshot.data!.length) {
+                              return const SizedBox(height: 200);
+                            }
+
+                            return AlbumTrackTile(snapshot.data![index]);
+                          },
+                          childCount: snapshot.data!.length + 1,
+                        ),
+                      ),
                   ],
                 ),
               ),

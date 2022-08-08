@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:tearmusic/models/music/track.dart';
-import 'package:tearmusic/ui/mobile/common/cached_image.dart';
 import 'package:tearmusic/ui/mobile/common/track_tile.dart';
 
 class SearchTrackTile extends StatelessWidget {

@@ -18,8 +18,7 @@ class SearchAlbumTile extends StatelessWidget {
         child: CachedImage(album.images!),
       ),
       title: Text(album.name),
-      subtitle:
-          Text("${album.artists.map((e) => e.name).join(", ")} • ${album.albumType == AlbumType.single ? "Single" : "${album.trackCount} songs"}"),
+      subtitle: Text("${album.releaseDate.year} • ${album.artists.first.name}"),
       onTap: () {
         AlbumView.view(album, context: context);
       },

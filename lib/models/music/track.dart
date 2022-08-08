@@ -31,4 +31,17 @@ class MusicTrack {
       artists: json["artists"].map((e) => MusicArtist.fromJson(e)).toList().cast<MusicArtist>(),
     );
   }
+
+  String get artistsLabel {
+    if (artists.length == 2) {
+      return "${artists[0].name} & ${artists[1].name}";
+    }
+    return artists.map((e) => e.name).join(", ");
+  }
+
+  @override
+  bool operator ==(other) => other is MusicTrack && other.id == id;
+
+  @override
+  int get hashCode => id.hashCode;
 }

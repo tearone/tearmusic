@@ -1,6 +1,7 @@
 import 'package:tearmusic/api/base_api.dart';
 import 'package:tearmusic/api/music_api.dart';
 import 'package:tearmusic/models/music/album.dart';
+import 'package:tearmusic/models/music/artist.dart';
 import 'package:tearmusic/models/music/playlist.dart';
 import 'package:tearmusic/models/music/search_results.dart';
 import 'package:tearmusic/models/music/track.dart';
@@ -24,5 +25,17 @@ class MusicInfoProvider {
 
   Future<List<MusicAlbum>> newReleases() async {
     return await _api.newReleases();
+  }
+
+  Future<List<MusicAlbum>> artistAlbums(MusicArtist artist) async {
+    return await _api.artistAlbums(artist);
+  }
+
+  Future<List<MusicTrack>> artistTracks(MusicArtist artist) async {
+    return await _api.artistTracks(artist);
+  }
+
+  Future<List<MusicArtist>> artistRelated(MusicArtist artist) async {
+    return await _api.artistRelated(artist);
   }
 }

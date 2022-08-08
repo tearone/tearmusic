@@ -1,4 +1,3 @@
-import 'package:animations/animations.dart';
 import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -85,7 +84,7 @@ class _PlaylistViewState extends State<PlaylistView> {
                         duration: const Duration(milliseconds: 200),
                         child: Text(
                           widget.playlist.name,
-                          style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w500),
+                          style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.w500),
                         ),
                       ),
                       backgroundColor: theme.scaffoldBackgroundColor,
@@ -212,19 +211,31 @@ class _PlaylistViewState extends State<PlaylistView> {
                         ),
                       ),
                     ),
-                    if (snapshot.hasData)
-                      SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                          (BuildContext context, int index) {
-                            if (index == snapshot.data!.length) {
-                              return const SizedBox(height: 200);
-                            }
+                    SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (BuildContext context, int index) {
+                          if (!snapshot.hasData) {
+                            return Padding(
+                              padding: const EdgeInsets.only(top: 32.0),
+                              child: Align(
+                                alignment: Alignment.topCenter,
+                                child: LoadingAnimationWidget.staggeredDotsWave(
+                                  color: theme.colorScheme.secondary.withOpacity(.2),
+                                  size: 64.0,
+                                ),
+                              ),
+                            );
+                          }
 
-                            return SearchTrack(snapshot.data![index]);
-                          },
-                          childCount: snapshot.data!.length + 1,
-                        ),
+                          if (index == snapshot.data!.length) {
+                            return const SizedBox(height: 200);
+                          }
+
+                          return SearchTrack(snapshot.data![index]);
+                        },
+                        childCount: snapshot.hasData ? snapshot.data!.length + 1 : 1,
                       ),
+                    ),
                   ],
                 ),
               ),

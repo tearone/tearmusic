@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:tearmusic/models/music/artist.dart';
 import 'package:tearmusic/ui/common/image_color.dart';
@@ -20,7 +21,7 @@ class ArtistView extends StatelessWidget {
     final image = CachedImage(artist.images!);
     const double imageSize = 300;
 
-    return FutureBuilder(
+    return FutureBuilder<Uint8List>(
       future: image.getImage(const Size.square(imageSize)),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {

@@ -67,9 +67,9 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
             albumType: AlbumType.single,
             trackCount: 1,
             releaseDate: DateTime.now(),
-            artists: [MusicArtist(id: "id", name: "name", genres: [], images: null)],
+            artists: [MusicArtist(id: "id", name: "name", genres: [], images: null, followers: 0)],
             images: Images(images: [InternalImage(url: "1", width: 100, height: 100)])),
-        artists: [MusicArtist(id: "id", name: "Artist 1", genres: [], images: null)]),
+        artists: [MusicArtist(id: "id", name: "Artist 1", genres: [], images: null, followers: 0)]),
     MusicTrack(
         id: "id",
         name: "Track 2",
@@ -82,9 +82,9 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
             albumType: AlbumType.single,
             trackCount: 1,
             releaseDate: DateTime.now(),
-            artists: [MusicArtist(id: "id", name: "name", genres: [], images: null)],
+            artists: [MusicArtist(id: "id", name: "name", genres: [], images: null, followers: 0)],
             images: Images(images: [InternalImage(url: "2", width: 100, height: 100)])),
-        artists: [MusicArtist(id: "id", name: "Artist 2", genres: [], images: null)]),
+        artists: [MusicArtist(id: "id", name: "Artist 2", genres: [], images: null, followers: 0)]),
     MusicTrack(
         id: "id",
         name: "Track 3",
@@ -97,9 +97,9 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
             albumType: AlbumType.single,
             trackCount: 1,
             releaseDate: DateTime.now(),
-            artists: [MusicArtist(id: "id", name: "name", genres: [], images: null)],
+            artists: [MusicArtist(id: "id", name: "name", genres: [], images: null, followers: 0)],
             images: Images(images: [InternalImage(url: "3", width: 100, height: 100)])),
-        artists: [MusicArtist(id: "id", name: "Artist 3", genres: [], images: null)]),
+        artists: [MusicArtist(id: "id", name: "Artist 3", genres: [], images: null, followers: 0)]),
   ];
 
   @override

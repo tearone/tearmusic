@@ -1,6 +1,7 @@
+import 'dart:typed_data';
+
 import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:like_button/like_button.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';

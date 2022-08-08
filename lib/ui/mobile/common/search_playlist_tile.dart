@@ -16,7 +16,7 @@ class SearchPlaylistTile extends StatelessWidget {
       leading: SizedBox(
         width: 42,
         height: 42,
-        child: CachedImage(playlist.images),
+        child: playlist.images != null ? CachedImage(playlist.images!) : null,
       ),
       title: Text(playlist.name),
       subtitle: Text("${playlist.owner} • ${playlist.trackCount} songs"),

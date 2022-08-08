@@ -27,6 +27,7 @@ class SearchPage extends StatefulWidget {
 
 class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateMixin {
   final _searchInputController = TextEditingController();
+  final _searchInputFocus = FocusNode();
   late TabController _tabController;
   late PageController _pageController;
 
@@ -112,6 +113,7 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                     ),
                     Expanded(
                       child: TextField(
+                        focusNode: _searchInputFocus,
                         autocorrect: false,
                         autofocus: true,
                         onChanged: onHandlerChanged,
@@ -132,6 +134,7 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                       icon: const Icon(Icons.close),
                       onPressed: () {
                         _searchInputController.text = "";
+                        _searchInputFocus.requestFocus();
                         setState(() {});
                       },
                     ),
@@ -144,7 +147,7 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
               child: FilterBar(
                 items: const [
                   Tab(text: "Top"),
-                  Tab(text: "Tracks"),
+                  Tab(text: "Songs"),
                   Tab(text: "Playlists"),
                   Tab(text: "Albums"),
                   Tab(text: "Artists"),
@@ -269,7 +272,7 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                                     switch (index) {
                                       case 0:
                                         return TopResultContainer(
-                                          kind: "Tracks",
+                                          kind: "Songs",
                                           results: results!.tracks
                                               .sublist(0, min(results!.tracks.length, topShowCount))
                                               .map((e) => SearchTrackTile(e))

@@ -13,15 +13,26 @@ class MusicApi {
 
   BaseApi base;
 
+  void _reschk(http.Response res, String cause) {
+    cause = "MusicApi.$cause";
+    if (res.statusCode == 401) {
+      throw AuthException(cause);
+    }
+    if (res.statusCode == 404) {
+      throw NotFoundException(cause);
+    }
+    if (res.statusCode != 200) {
+      throw UnknownRequestException(cause);
+    }
+  }
+
   Future<SearchResults> search(String query) async {
     final res = await http.get(
       Uri.parse("${BaseApi.url}/music/search?query=${Uri.encodeComponent(query)}"),
       headers: {"authorization": await base.getToken()},
     );
 
-    if (res.statusCode != 200) {
-      throw AuthException("MusicApi.search");
-    }
+    _reschk(res, "search");
 
     return SearchResults.fromJson(jsonDecode(res.body));
   }
@@ -32,9 +43,7 @@ class MusicApi {
       headers: {"authorization": await base.getToken()},
     );
 
-    if (res.statusCode != 200) {
-      throw AuthException("MusicApi.playlistTracks");
-    }
+    _reschk(res, "playlistTracks");
 
     return PlaylistDetails.fromJson(jsonDecode(res.body));
   }
@@ -45,9 +54,7 @@ class MusicApi {
       headers: {"authorization": await base.getToken()},
     );
 
-    if (res.statusCode != 200) {
-      throw AuthException("MusicApi.albumTracks");
-    }
+    _reschk(res, "albumTracks");
 
     return jsonDecode(res.body)['tracks'].where((e) => e['id'] != null).map((e) => MusicTrack.fromJson(e)).toList().cast<MusicTrack>();
   }
@@ -58,10 +65,30 @@ class MusicApi {
       headers: {"authorization": await base.getToken()},
     );
 
-    if (res.statusCode != 200) {
-      throw AuthException("MusicApi.newReleases");
-    }
+    _reschk(res, "newReleases");
 
-    return jsonDecode(res.body).map((e) => MusicAlbum.fromJson(e)).toList().cast<MusicAlbum>();
+    return jsonDecode(res.body)['albums'].map((e) => MusicAlbum.fromJson(e)).toList().cast<MusicAlbum>();
+  }
+
+  Future<List<MusicAlbum>> artistAlbums() async {
+    final res = await http.get(
+      Uri.parse("${BaseApi.url}/music/artist-albums"),
+      headers: {"authorization": await base.getToken()},
+    );
+
+    _reschk(res, "artistAlbums");
+
+    return jsonDecode(res.body)['albums'].map((e) => MusicAlbum.fromJson(e)).toList().cast<MusicAlbum>();
+  }
+
+  Future<List<MusicTrack>> artistTracks() async {
+    final res = await http.get(
+      Uri.parse("${BaseApi.url}/music/artist-tracks"),
+      headers: {"authorization": await base.getToken()},
+    );
+
+    _reschk(res, "artistTracks");
+
+    return jsonDecode(res.body)['tracks'].map((e) => MusicTrack.fromJson(e)).toList().cast<MusicTrack>();
   }
 }

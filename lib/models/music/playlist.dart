@@ -5,7 +5,7 @@ class MusicPlaylist {
   final String id;
   final String name;
   final String description;
-  final Images images;
+  final Images? images;
   final int trackCount;
   final String owner;
 
@@ -23,7 +23,7 @@ class MusicPlaylist {
       id: json["id"],
       name: json["name"],
       description: json["description"],
-      images: Images.fromJson(json["images"].cast<Map>()),
+      images: json["images"] != null && json["images"].isNotEmpty ? Images.fromJson(json["images"].cast<Map>()) : null,
       trackCount: json["track_count"],
       owner: json["owner"]["name"],
     );

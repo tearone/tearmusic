@@ -55,7 +55,7 @@ class _PlaylistViewState extends State<PlaylistView> {
 
   @override
   Widget build(BuildContext context) {
-    final image = CachedImage(widget.playlist.images);
+    final image = CachedImage(widget.playlist.images!);
     const double imageSize = 250;
 
     return FutureBuilder<Uint8List>(
@@ -170,6 +170,8 @@ class _PlaylistViewState extends State<PlaylistView> {
                                               style: TextStyle(
                                                 fontSize: 14.0,
                                                 color: theme.colorScheme.primary,
+                                                fontWeight: FontWeight.w600,
+                                                wordSpacing: -1,
                                                 height: -0.05,
                                               ),
                                             ),
@@ -185,6 +187,8 @@ class _PlaylistViewState extends State<PlaylistView> {
                                             style: TextStyle(
                                               fontSize: 14.0,
                                               color: theme.colorScheme.primary,
+                                              fontWeight: FontWeight.w600,
+                                              wordSpacing: -1,
                                               height: -0.05,
                                             ),
                                           ),

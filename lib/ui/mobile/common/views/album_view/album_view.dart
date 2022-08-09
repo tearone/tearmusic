@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/cupertino.dart';
@@ -167,7 +166,7 @@ class _AlbumViewState extends State<AlbumView> {
                                     ),
                                   ),
                                   Text(
-                                    "${widget.album.realTitle} • ${widget.album.releaseDate.year}",
+                                    "${widget.album.title} • ${widget.album.releaseDate.year}",
                                     style: TextStyle(
                                       fontSize: 16.0,
                                       color: theme.colorScheme.primary,

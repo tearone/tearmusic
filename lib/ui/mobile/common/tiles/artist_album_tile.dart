@@ -52,7 +52,7 @@ class ArtistAlbumTile extends StatelessWidget {
               ),
             ),
             Text(
-              "${album.title} • ${album.releaseDate.year}",
+              "${album.shortTitle} • ${album.releaseDate.year}",
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(

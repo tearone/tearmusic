@@ -31,7 +31,14 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
   late TabController _tabController;
   late PageController _pageController;
 
-  List<String> listOrder = ['A', 'B', 'C', 'D', 'E'];
+  final List<Widget> tabs = const [
+    Tab(text: "Top"),
+    Tab(text: "Songs"),
+    Tab(text: "Albums"),
+    Tab(text: "Playlists"),
+    Tab(text: "Artists"),
+  ];
+  late List<String> listOrder;
 
   SearchResults? results;
   SearchResult result = SearchResult.prepare;
@@ -46,7 +53,8 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
 
     searchAfterTyping = Timer(const Duration(), () => {});
 
-    _tabController = TabController(length: 5, vsync: this);
+    listOrder = List.generate(tabs.length, (i) => "$i");
+    _tabController = TabController(length: tabs.length, vsync: this);
     _pageController = PageController();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -56,6 +64,7 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
 
   @override
   void dispose() {
+    _searchInputController.dispose();
     _tabController.dispose();
     _pageController.dispose();
     super.dispose();
@@ -83,7 +92,6 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
     if (lastTerm != value) results = null;
     setState(() {
       if (results == null) {
-        result = SearchResult.prepare;
       } else if (results?.isEmpty ?? true) {
         result = SearchResult.empty;
       } else {
@@ -138,8 +146,8 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                       icon: const Icon(Icons.close),
                       onPressed: () {
                         _searchInputController.text = "";
-                        _searchInputFocus.requestFocus();
                         setState(() {});
+                        _searchInputFocus.requestFocus();
                       },
                     ),
                   ],
@@ -149,13 +157,7 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: FilterBar(
-                items: const [
-                  Tab(text: "Top"),
-                  Tab(text: "Songs"),
-                  Tab(text: "Playlists"),
-                  Tab(text: "Albums"),
-                  Tab(text: "Artists"),
-                ],
+                items: tabs,
                 controller: _tabController,
                 onTap: (index) {
                   if (_pageController.positions.isEmpty) return;
@@ -245,6 +247,7 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                       WidgetsBinding.instance.addPostFrameCallback((_) {
                         _pageController.jumpToPage(_tabController.index);
                       });
+                      if (results == null) return const SizedBox();
                       return NotificationListener<ScrollNotification>(
                         onNotification: (notification) {
                           // from flutter source
@@ -290,10 +293,10 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
 
                                       case 1:
                                         return TopResultContainer(
-                                          kind: "Playlists",
-                                          results: results!.playlists
-                                              .sublist(0, min(results!.playlists.length, topShowCount))
-                                              .map((e) => SearchPlaylistTile(e))
+                                          kind: "Albums",
+                                          results: results!.albums
+                                              .sublist(0, min(results!.albums.length, topShowCount))
+                                              .map((e) => SearchAlbumTile(e))
                                               .toList(),
                                           index: 2,
                                           pageController: _pageController,
@@ -302,10 +305,10 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
 
                                       case 2:
                                         return TopResultContainer(
-                                          kind: "Albums",
-                                          results: results!.albums
-                                              .sublist(0, min(results!.albums.length, topShowCount))
-                                              .map((e) => SearchAlbumTile(e))
+                                          kind: "Playlists",
+                                          results: results!.playlists
+                                              .sublist(0, min(results!.playlists.length, topShowCount))
+                                              .map((e) => SearchPlaylistTile(e))
                                               .toList(),
                                           index: 3,
                                           pageController: _pageController,
@@ -343,17 +346,6 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                                     );
                                   case 2:
                                     return ListView.builder(
-                                      itemCount: (results?.playlists.length ?? 0) + 1,
-                                      itemBuilder: (context, index) {
-                                        if (index == results!.playlists.length) {
-                                          return const SizedBox(height: 200);
-                                        }
-
-                                        return SearchPlaylistTile(results!.playlists[index]);
-                                      },
-                                    );
-                                  case 3:
-                                    return ListView.builder(
                                       itemCount: (results?.albums.length ?? 0) + 1,
                                       itemBuilder: (context, index) {
                                         if (index == results!.albums.length) {
@@ -361,6 +353,17 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                                         }
 
                                         return SearchAlbumTile(results!.albums[index]);
+                                      },
+                                    );
+                                  case 3:
+                                    return ListView.builder(
+                                      itemCount: (results?.playlists.length ?? 0) + 1,
+                                      itemBuilder: (context, index) {
+                                        if (index == results!.playlists.length) {
+                                          return const SizedBox(height: 200);
+                                        }
+
+                                        return SearchPlaylistTile(results!.playlists[index]);
                                       },
                                     );
                                   case 4:

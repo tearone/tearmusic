@@ -15,6 +15,7 @@ void main() async {
   final musicInfoProvider = MusicInfoProvider(base: baseApi);
 
   await userProvider.init();
+  await musicInfoProvider.init();
 
   final providers = [
     ChangeNotifierProvider(create: (_) => userProvider),

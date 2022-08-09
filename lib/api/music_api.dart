@@ -35,7 +35,7 @@ class MusicApi {
 
     _reschk(res, "search");
 
-    return SearchResults.fromJson(jsonDecode(res.body));
+    return SearchResults.decode(jsonDecode(res.body));
   }
 
   Future<PlaylistDetails> playlistTracks(MusicPlaylist playlist) async {
@@ -46,7 +46,7 @@ class MusicApi {
 
     _reschk(res, "playlistTracks");
 
-    return PlaylistDetails.fromJson(jsonDecode(res.body));
+    return PlaylistDetails.decode(jsonDecode(res.body));
   }
 
   Future<List<MusicTrack>> albumTracks(MusicAlbum album) async {
@@ -57,7 +57,9 @@ class MusicApi {
 
     _reschk(res, "albumTracks");
 
-    return jsonDecode(res.body)['tracks'].where((e) => e['id'] != null).map((e) => MusicTrack.fromJson(e)).toList().cast<MusicTrack>();
+    final json = (jsonDecode(res.body)['tracks'] as List).cast<Map>();
+
+    return MusicTrack.decodeList(json);
   }
 
   Future<List<MusicAlbum>> newReleases() async {
@@ -68,7 +70,9 @@ class MusicApi {
 
     _reschk(res, "newReleases");
 
-    return jsonDecode(res.body)['albums'].map((e) => MusicAlbum.fromJson(e)).toList().cast<MusicAlbum>();
+    final json = (jsonDecode(res.body)['albums'] as List).cast<Map>();
+
+    return MusicAlbum.decodeList(json);
   }
 
   Future<List<MusicAlbum>> artistAlbums(MusicArtist artist) async {
@@ -79,7 +83,9 @@ class MusicApi {
 
     _reschk(res, "artistAlbums");
 
-    return jsonDecode(res.body)['albums'].map((e) => MusicAlbum.fromJson(e)).toList().cast<MusicAlbum>();
+    final json = (jsonDecode(res.body)['albums'] as List).cast<Map>();
+
+    return MusicAlbum.decodeList(json);
   }
 
   Future<List<MusicTrack>> artistTracks(MusicArtist artist) async {
@@ -90,7 +96,9 @@ class MusicApi {
 
     _reschk(res, "artistTracks");
 
-    return jsonDecode(res.body)['tracks'].map((e) => MusicTrack.fromJson(e)).toList().cast<MusicTrack>();
+    final json = (jsonDecode(res.body)['tracks'] as List).cast<Map>();
+
+    return MusicTrack.decodeList(json);
   }
 
   Future<List<MusicArtist>> artistRelated(MusicArtist artist) async {
@@ -101,6 +109,8 @@ class MusicApi {
 
     _reschk(res, "artistRelated");
 
-    return jsonDecode(res.body)['artists'].map((e) => MusicArtist.fromJson(e)).toList().cast<MusicArtist>();
+    final json = (jsonDecode(res.body)['artists'] as List).cast<Map>();
+
+    return MusicArtist.decodeList(json);
   }
 }

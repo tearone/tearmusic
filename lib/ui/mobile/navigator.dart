@@ -183,7 +183,7 @@ class _NavigationScreenState extends State<NavigationScreen> with SingleTickerPr
                   ),
 
                   /// Miniplayer
-                  // if (snapshot.hasData) Player(animation: animation, mainImageBytes: snapshot.data!),
+                  if (snapshot.hasData) Player(animation: animation, mainImageBytes: snapshot.data!),
                 ],
               ),
             ),

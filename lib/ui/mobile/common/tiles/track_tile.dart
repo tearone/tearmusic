@@ -31,7 +31,7 @@ class TrackTile extends StatelessWidget {
           : SizedBox(
               width: 42,
               height: 42,
-              child: track.album!.images != null ? CachedImage(track.album!.images!) : null,
+              child: track.album != null && track.album!.images != null ? CachedImage(track.album!.images!) : null,
             ),
       title: Text(
         track.name,
@@ -74,7 +74,9 @@ class TrackTile extends StatelessWidget {
       ),
       trailing: trailingDuration ? Text(track.duration.shortFormat()) : null,
       visualDensity: VisualDensity.compact,
-      onTap: () {},
+      onTap: () {
+        FocusScope.of(context).requestFocus(FocusNode());
+      },
     );
   }
 }

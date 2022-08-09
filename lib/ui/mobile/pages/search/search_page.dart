@@ -92,7 +92,6 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
     if (lastTerm != value) results = null;
     setState(() {
       if (results == null) {
-        result = SearchResult.prepare;
       } else if (results?.isEmpty ?? true) {
         result = SearchResult.empty;
       } else {
@@ -147,8 +146,8 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                       icon: const Icon(Icons.close),
                       onPressed: () {
                         _searchInputController.text = "";
-                        _searchInputFocus.requestFocus();
                         setState(() {});
+                        _searchInputFocus.requestFocus();
                       },
                     ),
                   ],

@@ -37,6 +37,7 @@ class SearchArtistTile extends StatelessWidget {
       title: Text(artist.name),
       subtitle: artist.genres.isNotEmpty ? Text(artist.genres.first) : null,
       onTap: () {
+        FocusScope.of(context).requestFocus(FocusNode());
         ArtistView.view(artist, context: context).then((_) => context.read<ThemeProvider>().resetTheme());
       },
     );

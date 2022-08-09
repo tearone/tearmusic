@@ -22,6 +22,7 @@ class SearchAlbumTile extends StatelessWidget {
       title: Text(album.name),
       subtitle: Text("${album.shortTitle} • ${album.releaseDate.year} • ${album.artists.first.name}"),
       onTap: () {
+        FocusScope.of(context).requestFocus(FocusNode());
         AlbumView.view(album, context: context).then((_) => context.read<ThemeProvider>().resetTheme());
       },
     );

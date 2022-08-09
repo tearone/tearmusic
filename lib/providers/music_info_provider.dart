@@ -24,6 +24,7 @@ class MusicInfoProvider {
 
   Future<void> init() async {
     _store = await Hive.openBox("music_cache");
+    await _store.clear();
   }
 
   Future<SearchResults> search(String query) async {
@@ -54,31 +55,31 @@ class MusicInfoProvider {
         "playlists": playlists,
         "artists": artists,
       });
-    // Offline search
-    // } else if (no internet connection) {
-    //   final ids = _store.keys.where((k) => RegExp(r'^((:?tracks|albums|playlists|artists)_[a-zA-Z0-9:-]+)$').hasMatch(k)).cast<String>();
-    //   List<Map> tracks = [];
-    //   List<Map> albums = [];
-    //   List<Map> playlists = [];
-    //   List<Map> artists = [];
-    //   for (final id in ids.where((k) => k.startsWith("tracks"))) {
-    //     tracks.add(jsonDecode(_store.get(id)));
-    //   }
-    //   for (final id in ids.where((k) => k.startsWith("albums"))) {
-    //     albums.add(jsonDecode(_store.get(id)));
-    //   }
-    //   for (final id in ids.where((k) => k.startsWith("playlists"))) {
-    //     playlists.add(jsonDecode(_store.get(id)));
-    //   }
-    //   for (final id in ids.where((k) => k.startsWith("artists"))) {
-    //     artists.add(jsonDecode(_store.get(id)));
-    //   }
-    //   data = SearchResults.decodeFilter({
-    //     "tracks": tracks,
-    //     "albums": albums,
-    //     "playlists": playlists,
-    //     "artists": artists,
-    //   }, filter: query);
+      // Offline search
+      // } else if (no internet connection) {
+      //   final ids = _store.keys.where((k) => RegExp(r'^((:?tracks|albums|playlists|artists)_[a-zA-Z0-9:-]+)$').hasMatch(k)).cast<String>();
+      //   List<Map> tracks = [];
+      //   List<Map> albums = [];
+      //   List<Map> playlists = [];
+      //   List<Map> artists = [];
+      //   for (final id in ids.where((k) => k.startsWith("tracks"))) {
+      //     tracks.add(jsonDecode(_store.get(id)));
+      //   }
+      //   for (final id in ids.where((k) => k.startsWith("albums"))) {
+      //     albums.add(jsonDecode(_store.get(id)));
+      //   }
+      //   for (final id in ids.where((k) => k.startsWith("playlists"))) {
+      //     playlists.add(jsonDecode(_store.get(id)));
+      //   }
+      //   for (final id in ids.where((k) => k.startsWith("artists"))) {
+      //     artists.add(jsonDecode(_store.get(id)));
+      //   }
+      //   data = SearchResults.decodeFilter({
+      //     "tracks": tracks,
+      //     "albums": albums,
+      //     "playlists": playlists,
+      //     "artists": artists,
+      //   }, filter: query);
     } else {
       data = await _api.search(query);
       _store.put(
@@ -165,14 +166,12 @@ class MusicInfoProvider {
   }
 
   Future<List<MusicAlbum>> artistAlbums(MusicArtist artist) async {
-    List<MusicAlbum> data = [];
+    List<MusicAlbum> data;
     final cacheKey = "artist_albums_$artist";
     final String? cache = _store.get(cacheKey);
     if (cache != null) {
       final json = jsonDecode(cache) as List;
-      for (final id in json) {
-        data.add(MusicAlbum.decode(jsonDecode(_store.get("albums_$id"))));
-      }
+      data = json.map((id) => MusicAlbum.decode(jsonDecode(_store.get("albums_$id")))).toList().cast<MusicAlbum>();
     } else {
       data = await _api.artistAlbums(artist);
       _store.put(cacheKey, jsonEncode(Model.encodeIdList(data)));
@@ -180,7 +179,7 @@ class MusicInfoProvider {
         _store.put("albums_$e", jsonEncode(e.encode()));
       }
     }
-    return data;
+    return data.toSet().toList();
   }
 
   Future<List<MusicTrack>> artistTracks(MusicArtist artist) async {

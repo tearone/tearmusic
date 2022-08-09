@@ -29,22 +29,23 @@ class MusicInfoProvider {
   Future<SearchResults> search(String query) async {
     SearchResults data;
     final cacheKey = "search_results_$query";
-    final cache = jsonDecode(_store.get(cacheKey)) as Map?;
+    final String? cache = _store.get(cacheKey);
     if (cache != null) {
+      final json = jsonDecode(cache) as Map;
       List<MusicTrack> tracks = [];
       List<MusicAlbum> albums = [];
       List<MusicPlaylist> playlists = [];
       List<MusicArtist> artists = [];
-      for (final id in cache['tracks']) {
+      for (final id in json['tracks']) {
         tracks.add(MusicTrack.decode(jsonDecode(_store.get("tracks_$id"))));
       }
-      for (final id in cache['albums']) {
+      for (final id in json['albums']) {
         albums.add(MusicAlbum.decode(jsonDecode(_store.get("albums_$id"))));
       }
-      for (final id in cache['playlists']) {
+      for (final id in json['playlists']) {
         playlists.add(MusicPlaylist.decode(jsonDecode(_store.get("playlists_$id"))));
       }
-      for (final id in cache['artists']) {
+      for (final id in json['artists']) {
         artists.add(MusicArtist.decode(jsonDecode(_store.get("artists_$id"))));
       }
       data = SearchResults.decode({
@@ -82,13 +83,14 @@ class MusicInfoProvider {
   Future<PlaylistDetails> playlistTracks(MusicPlaylist playlist) async {
     PlaylistDetails data;
     final cacheKey = "playlist_tracks_$playlist";
-    final cache = jsonDecode(_store.get(cacheKey)) as Map?;
+    final String? cache = _store.get(cacheKey);
     if (cache != null) {
+      final json = jsonDecode(cache) as Map;
       List<Map> tracks = [];
-      for (final id in cache['tracks']) {
+      for (final id in json['tracks']) {
         tracks.add(jsonDecode(_store.get("tracks_$id")));
       }
-      data = PlaylistDetails.decode({'tracks': tracks, 'followers': cache['followers']});
+      data = PlaylistDetails.decode({'tracks': tracks, 'followers': json['followers']});
     } else {
       data = await _api.playlistTracks(playlist);
       _store.put(cacheKey, jsonEncode({'tracks': Model.encodeIdList(data.tracks), 'followers': data.followers}));
@@ -102,9 +104,10 @@ class MusicInfoProvider {
   Future<List<MusicTrack>> albumTracks(MusicAlbum album) async {
     List<MusicTrack> data = [];
     final cacheKey = "album_tracks_$album";
-    final cache = jsonDecode(_store.get(cacheKey)) as List?;
+    final String? cache = _store.get(cacheKey);
     if (cache != null) {
-      for (final id in cache) {
+      final json = jsonDecode(cache) as List;
+      for (final id in json) {
         data.add(MusicTrack.decode(jsonDecode(_store.get("tracks_$id"))));
       }
     } else {
@@ -120,9 +123,10 @@ class MusicInfoProvider {
   Future<List<MusicAlbum>> newReleases() async {
     List<MusicAlbum> data = [];
     const cacheKey = "new_releases";
-    final cache = jsonDecode(_store.get(cacheKey)) as List?;
+    final String? cache = _store.get(cacheKey);
     if (cache != null) {
-      for (final id in cache) {
+      final json = jsonDecode(cache) as List;
+      for (final id in json) {
         data.add(MusicAlbum.decode(jsonDecode(_store.get("albums_$id"))));
       }
     } else {
@@ -138,9 +142,10 @@ class MusicInfoProvider {
   Future<List<MusicAlbum>> artistAlbums(MusicArtist artist) async {
     List<MusicAlbum> data = [];
     final cacheKey = "artist_albums_$artist";
-    final cache = jsonDecode(_store.get(cacheKey)) as List?;
+    final String? cache = _store.get(cacheKey);
     if (cache != null) {
-      for (final id in cache) {
+      final json = jsonDecode(cache) as List;
+      for (final id in json) {
         data.add(MusicAlbum.decode(jsonDecode(_store.get("albums_$id"))));
       }
     } else {
@@ -156,9 +161,10 @@ class MusicInfoProvider {
   Future<List<MusicTrack>> artistTracks(MusicArtist artist) async {
     List<MusicTrack> data = [];
     final cacheKey = "artist_tracks_$artist";
-    final cache = jsonDecode(_store.get(cacheKey)) as List?;
+    final String? cache = _store.get(cacheKey);
     if (cache != null) {
-      for (final id in cache) {
+      final json = jsonDecode(cache) as List;
+      for (final id in json) {
         data.add(MusicTrack.decode(jsonDecode(_store.get("tracks_$id"))));
       }
     } else {
@@ -174,9 +180,10 @@ class MusicInfoProvider {
   Future<List<MusicArtist>> artistRelated(MusicArtist artist) async {
     List<MusicArtist> data = [];
     final cacheKey = "artist_related_$artist";
-    final cache = jsonDecode(_store.get(cacheKey)) as List?;
+    final String? cache = _store.get(cacheKey);
     if (cache != null) {
-      for (final id in cache) {
+      final json = jsonDecode(cache) as List;
+      for (final id in json) {
         data.add(MusicArtist.decode(jsonDecode(_store.get("artists_$id"))));
       }
     } else {

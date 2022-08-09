@@ -57,7 +57,9 @@ class MusicApi {
 
     _reschk(res, "albumTracks");
 
-    return MusicTrack.decodeList(jsonDecode(res.body)['tracks']);
+    final json = (jsonDecode(res.body)['tracks'] as List).cast<Map>();
+
+    return MusicTrack.decodeList(json);
   }
 
   Future<List<MusicAlbum>> newReleases() async {
@@ -68,7 +70,9 @@ class MusicApi {
 
     _reschk(res, "newReleases");
 
-    return MusicAlbum.decodeList(jsonDecode(res.body)['albums']);
+    final json = (jsonDecode(res.body)['albums'] as List).cast<Map>();
+
+    return MusicAlbum.decodeList(json);
   }
 
   Future<List<MusicAlbum>> artistAlbums(MusicArtist artist) async {
@@ -79,7 +83,9 @@ class MusicApi {
 
     _reschk(res, "artistAlbums");
 
-    return MusicAlbum.decodeList(jsonDecode(res.body)['albums']);
+    final json = (jsonDecode(res.body)['albums'] as List).cast<Map>();
+
+    return MusicAlbum.decodeList(json);
   }
 
   Future<List<MusicTrack>> artistTracks(MusicArtist artist) async {
@@ -90,7 +96,9 @@ class MusicApi {
 
     _reschk(res, "artistTracks");
 
-    return MusicTrack.decodeList(jsonDecode(res.body)['tracks']);
+    final json = (jsonDecode(res.body)['tracks'] as List).cast<Map>();
+
+    return MusicTrack.decodeList(json);
   }
 
   Future<List<MusicArtist>> artistRelated(MusicArtist artist) async {
@@ -101,6 +109,8 @@ class MusicApi {
 
     _reschk(res, "artistRelated");
 
-    return MusicArtist.decodeList(jsonDecode(res.body)['artists']);
+    final json = (jsonDecode(res.body)['artists'] as List).cast<Map>();
+
+    return MusicArtist.decodeList(json);
   }
 }

@@ -54,6 +54,31 @@ class MusicInfoProvider {
         "playlists": playlists,
         "artists": artists,
       });
+    // Offline search
+    // } else if (no internet connection) {
+    //   final ids = _store.keys.where((k) => RegExp(r'^((:?tracks|albums|playlists|artists)_[a-zA-Z0-9:-]+)$').hasMatch(k)).cast<String>();
+    //   List<Map> tracks = [];
+    //   List<Map> albums = [];
+    //   List<Map> playlists = [];
+    //   List<Map> artists = [];
+    //   for (final id in ids.where((k) => k.startsWith("tracks"))) {
+    //     tracks.add(jsonDecode(_store.get(id)));
+    //   }
+    //   for (final id in ids.where((k) => k.startsWith("albums"))) {
+    //     albums.add(jsonDecode(_store.get(id)));
+    //   }
+    //   for (final id in ids.where((k) => k.startsWith("playlists"))) {
+    //     playlists.add(jsonDecode(_store.get(id)));
+    //   }
+    //   for (final id in ids.where((k) => k.startsWith("artists"))) {
+    //     artists.add(jsonDecode(_store.get(id)));
+    //   }
+    //   data = SearchResults.decodeFilter({
+    //     "tracks": tracks,
+    //     "albums": albums,
+    //     "playlists": playlists,
+    //     "artists": artists,
+    //   }, filter: query);
     } else {
       data = await _api.search(query);
       _store.put(

@@ -17,7 +17,7 @@ class MusicPlaylist extends Model {
     required this.images,
     required this.trackCount,
     required this.owner,
-  }) : super(id: id, json: json);
+  }) : super(id: id, json: json, key: name);
 
   factory MusicPlaylist.decode(Map json) {
     final images = json["images"] as List?;

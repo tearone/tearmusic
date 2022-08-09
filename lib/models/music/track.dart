@@ -19,7 +19,7 @@ class MusicTrack extends Model {
     required this.trackNumber,
     required this.album,
     required this.artists,
-  }) : super(id: id, json: json);
+  }) : super(id: id, json: json, key: "$name ${artists.first.name}");
 
   factory MusicTrack.decode(Map json) {
     return MusicTrack(

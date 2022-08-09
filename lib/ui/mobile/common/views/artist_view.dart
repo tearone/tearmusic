@@ -118,19 +118,22 @@ class _ArtistViewState extends State<ArtistView> {
                           alignment: Alignment.bottomCenter,
                           children: [
                             image,
-                            Positioned.fill(
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topCenter,
-                                    end: Alignment.bottomCenter,
-                                    stops: const [0, .3, .5, 1],
-                                    colors: [
-                                      theme.scaffoldBackgroundColor.withOpacity(.3),
-                                      theme.scaffoldBackgroundColor.withOpacity(0),
-                                      theme.scaffoldBackgroundColor.withOpacity(0),
-                                      theme.scaffoldBackgroundColor,
-                                    ],
+                            Transform.scale(
+                              scaleY: 1.001,
+                              child: Positioned.fill(
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                      stops: const [0, .3, .5, 1],
+                                      colors: [
+                                        theme.scaffoldBackgroundColor.withOpacity(.3),
+                                        theme.scaffoldBackgroundColor.withOpacity(0),
+                                        theme.scaffoldBackgroundColor.withOpacity(0),
+                                        theme.scaffoldBackgroundColor,
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),

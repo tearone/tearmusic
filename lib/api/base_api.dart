@@ -18,8 +18,8 @@ class BaseApi {
     _refreshToken = refreshToken;
   }
 
-  Future<String> getToken() async {
-    if (_accessToken == null) return "";
+  Future<String> getToken({int tries = 0}) async {
+    if (_accessToken == null || tries > 3) return "";
 
     final claims = Jwt.parseJwt(_accessToken!);
 
@@ -30,9 +30,8 @@ class BaseApi {
 
       if (res.statusCode != 200) {
         log("Failed to refresh token (${res.statusCode})");
-        _accessToken = null;
-        _refreshToken = null;
-        return "";
+        await Future.delayed(const Duration(milliseconds: 200));
+        return await getToken(tries: tries + 1);
       }
 
       log("Token refreshed");

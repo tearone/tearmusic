@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/cupertino.dart';

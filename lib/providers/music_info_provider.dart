@@ -55,7 +55,6 @@ class MusicInfoProvider {
         "playlists": playlists,
         "artists": artists,
       });
-      print(data.artists.where((element) => element.images == null));
       // Offline search
       // } else if (no internet connection) {
       //   final ids = _store.keys.where((k) => RegExp(r'^((:?tracks|albums|playlists|artists)_[a-zA-Z0-9:-]+)$').hasMatch(k)).cast<String>();

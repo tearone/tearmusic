@@ -24,7 +24,7 @@ class BaseApi {
     final claims = Jwt.parseJwt(_accessToken!);
 
     // Jwt expired, generate new one
-    if (claims["iat"] + 600 <= (DateTime.now().millisecondsSinceEpoch / 1000).floor()) {
+    if (claims["iat"] + 1800 <= (DateTime.now().millisecondsSinceEpoch / 1000).floor()) {
       log("Refreshing token...");
       final res = await http.get(Uri.parse("$url/auth/refresh?refresh_token=${Uri.encodeComponent(_refreshToken!)}"));
 

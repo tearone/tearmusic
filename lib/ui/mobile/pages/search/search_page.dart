@@ -31,7 +31,14 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
   late TabController _tabController;
   late PageController _pageController;
 
-  List<String> listOrder = ['A', 'B', 'C', 'D', 'E'];
+  final List<Widget> tabs = const [
+    Tab(text: "Top"),
+    Tab(text: "Songs"),
+    Tab(text: "Albums"),
+    Tab(text: "Playlists"),
+    Tab(text: "Artists"),
+  ];
+  late List<String> listOrder;
 
   SearchResults? results;
   SearchResult result = SearchResult.prepare;
@@ -46,7 +53,8 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
 
     searchAfterTyping = Timer(const Duration(), () => {});
 
-    _tabController = TabController(length: 5, vsync: this);
+    listOrder = List.generate(tabs.length, (i) => "$i");
+    _tabController = TabController(length: tabs.length, vsync: this);
     _pageController = PageController();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -56,6 +64,7 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
 
   @override
   void dispose() {
+    _searchInputController.dispose();
     _tabController.dispose();
     _pageController.dispose();
     super.dispose();
@@ -149,13 +158,7 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: FilterBar(
-                items: const [
-                  Tab(text: "Top"),
-                  Tab(text: "Songs"),
-                  Tab(text: "Albums"),
-                  Tab(text: "Playlists"),
-                  Tab(text: "Artists"),
-                ],
+                items: tabs,
                 controller: _tabController,
                 onTap: (index) {
                   if (_pageController.positions.isEmpty) return;

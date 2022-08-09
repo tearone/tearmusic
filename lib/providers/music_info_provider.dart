@@ -32,10 +32,10 @@ class MusicInfoProvider {
     final String? cache = _store.get(cacheKey);
     if (cache != null) {
       final json = jsonDecode(cache) as Map;
-      List<MusicTrack> tracks = [];
-      List<MusicAlbum> albums = [];
-      List<MusicPlaylist> playlists = [];
-      List<MusicArtist> artists = [];
+      List<Map> tracks = [];
+      List<Map> albums = [];
+      List<Map> playlists = [];
+      List<Map> artists = [];
       for (final id in json['tracks']) {
         tracks.add(jsonDecode(_store.get("tracks_$id")));
       }

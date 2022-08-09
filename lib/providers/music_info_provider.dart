@@ -55,6 +55,7 @@ class MusicInfoProvider {
         "playlists": playlists,
         "artists": artists,
       });
+      print(data.artists.where((element) => element.images == null));
       // Offline search
       // } else if (no internet connection) {
       //   final ids = _store.keys.where((k) => RegExp(r'^((:?tracks|albums|playlists|artists)_[a-zA-Z0-9:-]+)$').hasMatch(k)).cast<String>();
@@ -112,10 +113,7 @@ class MusicInfoProvider {
     final String? cache = _store.get(cacheKey);
     if (cache != null) {
       final json = jsonDecode(cache) as Map;
-      List<Map> tracks = [];
-      for (final id in json['tracks']) {
-        tracks.add(jsonDecode(_store.get("tracks_$id")));
-      }
+      List<Map> tracks = (json['tracks'] as List).map((id) => jsonDecode(_store.get("tracks_$id"))).toList().cast();
       data = PlaylistDetails.decode({'tracks': tracks, 'followers': json['followers']});
     } else {
       data = await _api.playlistTracks(playlist);
@@ -133,9 +131,7 @@ class MusicInfoProvider {
     final String? cache = _store.get(cacheKey);
     if (cache != null) {
       final json = jsonDecode(cache) as List;
-      for (final id in json) {
-        data.add(MusicTrack.decode(jsonDecode(_store.get("tracks_$id"))));
-      }
+      data = MusicTrack.decodeList(json.map((id) => jsonDecode(_store.get("tracks_$id"))).toList().cast());
     } else {
       data = await _api.albumTracks(album);
       _store.put(cacheKey, jsonEncode(Model.encodeIdList(data)));
@@ -152,9 +148,7 @@ class MusicInfoProvider {
     final String? cache = _store.get(cacheKey);
     if (cache != null) {
       final json = jsonDecode(cache) as List;
-      for (final id in json) {
-        data.add(MusicAlbum.decode(jsonDecode(_store.get("albums_$id"))));
-      }
+      data = MusicAlbum.decodeList(json.map((id) => jsonDecode(_store.get("albums_$id"))).toList().cast());
     } else {
       data = await _api.newReleases();
       _store.put(cacheKey, jsonEncode(Model.encodeIdList(data)));
@@ -171,7 +165,7 @@ class MusicInfoProvider {
     final String? cache = _store.get(cacheKey);
     if (cache != null) {
       final json = jsonDecode(cache) as List;
-      data = json.map((id) => MusicAlbum.decode(jsonDecode(_store.get("albums_$id")))).toList().cast<MusicAlbum>();
+      data = MusicAlbum.decodeList(json.map((id) => jsonDecode(_store.get("albums_$id"))).toList().cast());
     } else {
       data = await _api.artistAlbums(artist);
       _store.put(cacheKey, jsonEncode(Model.encodeIdList(data)));
@@ -188,9 +182,7 @@ class MusicInfoProvider {
     final String? cache = _store.get(cacheKey);
     if (cache != null) {
       final json = jsonDecode(cache) as List;
-      for (final id in json) {
-        data.add(MusicTrack.decode(jsonDecode(_store.get("tracks_$id"))));
-      }
+      data = MusicTrack.decodeList(json.map((id) => jsonDecode(_store.get("tracks_$id"))).toList().cast());
     } else {
       data = await _api.artistTracks(artist);
       _store.put(cacheKey, jsonEncode(Model.encodeIdList(data)));
@@ -207,9 +199,7 @@ class MusicInfoProvider {
     final String? cache = _store.get(cacheKey);
     if (cache != null) {
       final json = jsonDecode(cache) as List;
-      for (final id in json) {
-        data.add(MusicArtist.decode(jsonDecode(_store.get("artists_$id"))));
-      }
+      data = MusicArtist.decodeList(json.map((id) => jsonDecode(_store.get("artists_$id"))).toList().cast());
     } else {
       data = await _api.artistRelated(artist);
       _store.put(cacheKey, jsonEncode(Model.encodeIdList(data)));

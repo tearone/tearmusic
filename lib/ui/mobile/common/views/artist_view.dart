@@ -180,7 +180,7 @@ class _ArtistViewState extends State<ArtistView> {
                                     style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16.0),
                                   ),
                                 ),
-                                ...snapshot.data!.tracks.sublist(0, min(snapshot.data!.tracks.length - 1, 5)).map((e) => ArtistTrackTile(e)),
+                                ...snapshot.data!.tracks.sublist(0, min(snapshot.data!.tracks.length, 5)).map((e) => ArtistTrackTile(e)),
                               ],
                             ),
                           ),

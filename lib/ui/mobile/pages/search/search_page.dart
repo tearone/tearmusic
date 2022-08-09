@@ -247,6 +247,7 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                       WidgetsBinding.instance.addPostFrameCallback((_) {
                         _pageController.jumpToPage(_tabController.index);
                       });
+                      if (results == null) return const SizedBox();
                       return NotificationListener<ScrollNotification>(
                         onNotification: (notification) {
                           // from flutter source

@@ -32,8 +32,11 @@ class MusicArtist extends Model {
 
   Map encode() => json;
 
-  static List<MusicArtist> decodeList(List<Map> encoded) =>
-      encoded.where((e) => e["id"] != null && e["images"] != null).map((e) => MusicArtist.decode(e)).toList().cast<MusicArtist>();
+  static List<MusicArtist> decodeList(List<Map> encoded) => encoded
+      .where((e) => e["id"] != null && e["images"] != null && e["images"].isNotEmpty)
+      .map((e) => MusicArtist.decode(e))
+      .toList()
+      .cast<MusicArtist>();
   static List<Map> encodeList(List<MusicArtist> models) => models.map((e) => e.encode()).toList().cast<Map>();
 }
 

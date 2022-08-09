@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tearmusic/models/music/album.dart';
-import 'package:tearmusic/ui/mobile/common/album_view.dart';
+import 'package:tearmusic/ui/mobile/common/views/album_view/album_view.dart';
 import 'package:tearmusic/ui/mobile/common/cached_image.dart';
 
 class LatestRelease extends StatelessWidget {
@@ -12,10 +12,10 @@ class LatestRelease extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 2,
+      elevation: 3,
       child: InkWell(
         onTap: () {
-          AlbumView.view(album, context: context).then((_) => then != null ? then!(): null);
+          AlbumView.view(album, context: context).then((_) => then != null ? then!() : null);
         },
         child: Padding(
           padding: const EdgeInsets.all(16.0),

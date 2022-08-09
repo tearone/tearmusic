@@ -7,30 +7,30 @@ import 'package:flutter/material.dart';
 import 'package:like_button/like_button.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
-import 'package:tearmusic/models/music/album.dart';
-import 'package:tearmusic/models/music/track.dart';
+import 'package:tearmusic/models/music/playlist.dart';
 import 'package:tearmusic/providers/music_info_provider.dart';
 import 'package:tearmusic/providers/theme_provider.dart';
 import 'package:tearmusic/ui/common/image_color.dart';
-import 'package:tearmusic/ui/mobile/common/album_track_tile.dart';
 import 'package:tearmusic/ui/mobile/common/cached_image.dart';
+import 'package:tearmusic/ui/mobile/common/views/playlist_track_tile.dart';
+import 'package:tearmusic/ui/common/format.dart';
 
-class AlbumView extends StatefulWidget {
-  const AlbumView(this.album, {Key? key}) : super(key: key);
+class PlaylistView extends StatefulWidget {
+  const PlaylistView(this.playlist, {Key? key}) : super(key: key);
 
-  final MusicAlbum album;
+  final MusicPlaylist playlist;
 
-  static Future<void> view(MusicAlbum value, {required BuildContext context}) => Navigator.of(context).push(
+  static Future<void> view(MusicPlaylist value, {required BuildContext context}) => Navigator.of(context).push(
         CupertinoPageRoute(
-          builder: (context) => AlbumView(value),
+          builder: (context) => PlaylistView(value),
         ),
       );
 
   @override
-  State<AlbumView> createState() => _AlbumViewState();
+  State<PlaylistView> createState() => _PlaylistViewState();
 }
 
-class _AlbumViewState extends State<AlbumView> {
+class _PlaylistViewState extends State<PlaylistView> {
   late ScrollController _scrollController;
 
   bool showTitle = false;
@@ -44,6 +44,7 @@ class _AlbumViewState extends State<AlbumView> {
 
   late CachedImage image;
   static const double imageSize = 250;
+
   final theme = Completer<ThemeData>();
 
   @override
@@ -59,7 +60,7 @@ class _AlbumViewState extends State<AlbumView> {
       }
     });
 
-    image = CachedImage(widget.album.images!);
+    image = CachedImage(widget.playlist.images!);
 
     getTheme(image).then((value) {
       if (mounted) context.read<ThemeProvider>().tempNavTheme(value);
@@ -84,8 +85,8 @@ class _AlbumViewState extends State<AlbumView> {
 
         final theme = snapshot.data!;
 
-        return FutureBuilder<List<MusicTrack>>(
-          future: context.read<MusicInfoProvider>().albumTracks(widget.album),
+        return FutureBuilder<PlaylistDetails>(
+          future: context.read<MusicInfoProvider>().playlistTracks(widget.playlist),
           builder: (context, snapshot) {
             return Theme(
               data: theme,
@@ -102,7 +103,7 @@ class _AlbumViewState extends State<AlbumView> {
                         opacity: showTitle ? 1.0 : 0.0,
                         duration: const Duration(milliseconds: 200),
                         child: Text(
-                          widget.album.name,
+                          widget.playlist.name,
                           style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.w500),
                         ),
                       ),
@@ -144,7 +145,7 @@ class _AlbumViewState extends State<AlbumView> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    widget.album.name,
+                                    widget.playlist.name,
                                     maxLines: 2,
                                     softWrap: true,
                                     overflow: TextOverflow.ellipsis,
@@ -154,9 +155,9 @@ class _AlbumViewState extends State<AlbumView> {
                                     ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsets.only(bottom: 12.0),
+                                    padding: const EdgeInsets.only(bottom: 4.0),
                                     child: Text(
-                                      widget.album.artistsLabel,
+                                      widget.playlist.owner,
                                       maxLines: 1,
                                       softWrap: false,
                                       overflow: TextOverflow.ellipsis,
@@ -166,13 +167,46 @@ class _AlbumViewState extends State<AlbumView> {
                                       ),
                                     ),
                                   ),
-                                  Text(
-                                    "${widget.album.title} • ${widget.album.releaseDate.year}",
-                                    style: TextStyle(
-                                      fontSize: 16.0,
-                                      color: theme.colorScheme.primary,
+                                  if (snapshot.hasData)
+                                    Row(
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.only(right: 8.0),
+                                          child: Chip(
+                                            elevation: 1,
+                                            backgroundColor: theme.colorScheme.primary.withOpacity(.2),
+                                            labelPadding: const EdgeInsets.only(left: 2.0, right: 4.0),
+                                            avatar: Icon(Icons.favorite, color: theme.colorScheme.primary, size: 18.0),
+                                            label: Text(
+                                              "${snapshot.data!.followers} likes",
+                                              style: TextStyle(
+                                                fontSize: 14.0,
+                                                color: theme.colorScheme.primary,
+                                                fontWeight: FontWeight.w600,
+                                                wordSpacing: -1,
+                                                height: -0.05,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        Chip(
+                                          elevation: 1,
+                                          backgroundColor: theme.colorScheme.primary.withOpacity(.2),
+                                          labelPadding: const EdgeInsets.only(left: 2.0, right: 4.0),
+                                          avatar: Icon(Icons.schedule, color: theme.colorScheme.primary, size: 18.0),
+                                          label: Text(
+                                            snapshot.data!.tracks.fold(Duration.zero, (Duration a, b) => b.duration + a).format(),
+                                            style: TextStyle(
+                                              fontSize: 14.0,
+                                              color: theme.colorScheme.primary,
+                                              fontWeight: FontWeight.w600,
+                                              wordSpacing: -1,
+                                              height: -0.05,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                  ),
                                 ],
                               ),
                             ),
@@ -246,16 +280,13 @@ class _AlbumViewState extends State<AlbumView> {
                     if (snapshot.hasData)
                       SliverList(
                         delegate: SliverChildBuilderDelegate(
-                          (BuildContext context, int index) {
-                            if (index == snapshot.data!.length) {
-                              return const SizedBox(height: 200);
-                            }
-
-                            return AlbumTrackTile(snapshot.data![index]);
-                          },
-                          childCount: snapshot.data!.length + 1,
+                          (BuildContext context, int index) => PlaylistTrackTile(snapshot.data!.tracks[index]),
+                          childCount: snapshot.data!.tracks.length,
                         ),
                       ),
+                    const SliverToBoxAdapter(
+                      child: SizedBox(height: 200),
+                    ),
                   ],
                 ),
               ),

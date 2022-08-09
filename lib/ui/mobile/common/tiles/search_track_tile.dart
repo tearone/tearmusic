@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:tearmusic/models/music/track.dart';
-import 'package:tearmusic/ui/mobile/common/track_tile.dart';
+import 'package:tearmusic/ui/mobile/common/tiles/track_tile.dart';
 
-class ArtistTrackTile extends StatelessWidget {
-  const ArtistTrackTile(this.track, {Key? key}) : super(key: key);
+class SearchTrackTile extends StatelessWidget {
+  const SearchTrackTile(this.track, {Key? key}) : super(key: key);
 
   final MusicTrack track;
 

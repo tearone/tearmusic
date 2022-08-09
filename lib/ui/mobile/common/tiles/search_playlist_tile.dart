@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:tearmusic/models/music/playlist.dart';
 import 'package:tearmusic/providers/theme_provider.dart';
 import 'package:tearmusic/ui/mobile/common/cached_image.dart';
-import 'package:tearmusic/ui/mobile/common/playlist_view.dart';
+import 'package:tearmusic/ui/mobile/common/views/playlist_view.dart';
 
 class SearchPlaylistTile extends StatelessWidget {
   const SearchPlaylistTile(this.playlist, {Key? key}) : super(key: key);

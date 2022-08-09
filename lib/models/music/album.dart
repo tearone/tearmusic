@@ -11,6 +11,17 @@ extension AlbumTypeTitle on AlbumType {
       case AlbumType.single:
         return "Single";
       case AlbumType.compilation:
+        return "Album";
+    }
+  }
+
+  String get realTitle {
+    switch (this) {
+      case AlbumType.album:
+        return "Album";
+      case AlbumType.single:
+        return "Single";
+      case AlbumType.compilation:
         return "Compilation";
     }
   }
@@ -59,6 +70,13 @@ class MusicAlbum {
       return "EP";
     }
     return albumType.title;
+  }
+
+  String get realTitle {
+    if (albumType == AlbumType.single && trackCount > 1) {
+      return "Extended Play";
+    }
+    return albumType.realTitle;
   }
 
   @override

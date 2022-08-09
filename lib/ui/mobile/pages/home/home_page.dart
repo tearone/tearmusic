@@ -6,7 +6,7 @@ import 'package:tearmusic/models/music/album.dart';
 import 'package:tearmusic/providers/music_info_provider.dart';
 import 'package:tearmusic/providers/user_provider.dart';
 import 'package:tearmusic/ui/mobile/common/profile_button.dart';
-import 'package:tearmusic/ui/mobile/common/search_album_tile.dart';
+import 'package:tearmusic/ui/mobile/common/tiles/search_album_tile.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tearmusic/models/music/track.dart';
-import 'package:tearmusic/ui/mobile/common/track_tile.dart';
+import 'package:tearmusic/ui/mobile/common/tiles/track_tile.dart';
 
 class AlbumTrackTile extends StatelessWidget {
   const AlbumTrackTile(this.track, {Key? key}) : super(key: key);

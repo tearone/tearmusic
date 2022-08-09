@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tearmusic/models/music/artist.dart';
 import 'package:tearmusic/providers/theme_provider.dart';
-import 'package:tearmusic/ui/mobile/common/artist_view.dart';
+import 'package:tearmusic/ui/mobile/common/views/artist_view.dart';
 import 'package:tearmusic/ui/mobile/common/cached_image.dart';
 
 class SearchArtistTile extends StatelessWidget {

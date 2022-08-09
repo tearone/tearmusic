@@ -18,6 +18,10 @@ class BaseApi {
     _refreshToken = refreshToken;
   }
 
+  void destroyToken() async {
+    http.get(Uri.parse("$url/auth/destroy?refresh_token=${Uri.encodeComponent(_refreshToken!)}"));
+  }
+
   Future<String> getToken({int tries = 0}) async {
     if (_accessToken == null || tries > 3) return "";
 

@@ -34,6 +34,22 @@ class UserProvider extends ChangeNotifier {
   String get username => _username ?? "";
   String get avatar => _avatar ?? "";
 
+  Future<void> logoutCallback() async {
+    _api.base.destroyToken();
+
+    _store.delete("username");
+    _store.delete("avatar");
+    _store.delete("access_token");
+    _store.delete("refresh_token");
+
+    final cacheBox = await Hive.openBox("cached_images");
+    cacheBox.clear();
+
+    loggedIn = false;
+
+    notifyListeners();
+  }
+
   Future<void> loginCallback(String? accessToken, String? refreshToken) async {
     if (accessToken == null || refreshToken == null) return;
 

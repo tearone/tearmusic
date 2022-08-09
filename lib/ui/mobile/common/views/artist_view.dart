@@ -118,9 +118,9 @@ class _ArtistViewState extends State<ArtistView> {
                           alignment: Alignment.bottomCenter,
                           children: [
                             image,
-                            Transform.scale(
-                              scaleY: 1.001,
-                              child: Positioned.fill(
+                            Positioned.fill(
+                              child: Transform.scale(
+                                scaleY: 1.001,
                                 child: Container(
                                   decoration: BoxDecoration(
                                     gradient: LinearGradient(

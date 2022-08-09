@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +11,7 @@ import 'package:tearmusic/models/music/artist.dart';
 import 'package:tearmusic/providers/music_info_provider.dart';
 import 'package:tearmusic/providers/theme_provider.dart';
 import 'package:tearmusic/ui/common/image_color.dart';
+import 'package:tearmusic/ui/mobile/common/artist_track_tile.dart';
 import 'package:tearmusic/ui/mobile/common/cached_image.dart';
 import 'package:tearmusic/ui/mobile/common/latest_release.dart';
 
@@ -161,6 +163,24 @@ class _ArtistViewState extends State<ArtistView> {
                           ),
                         ),
                       ),
+                    if (snapshot.hasData)
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                          child: Card(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text("Top Songs"),
+                                ...snapshot.data!.tracks.sublist(0, min(snapshot.data!.tracks.length - 1, 5)).map((e) => ArtistTrackTile(e)),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    const SliverToBoxAdapter(
+                      child: SizedBox(height: 200),
+                    ),
                   ],
                 ),
               ),

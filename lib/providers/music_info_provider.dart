@@ -37,16 +37,16 @@ class MusicInfoProvider {
       List<MusicPlaylist> playlists = [];
       List<MusicArtist> artists = [];
       for (final id in json['tracks']) {
-        tracks.add(MusicTrack.decode(jsonDecode(_store.get("tracks_$id"))));
+        tracks.add(jsonDecode(_store.get("tracks_$id")));
       }
       for (final id in json['albums']) {
-        albums.add(MusicAlbum.decode(jsonDecode(_store.get("albums_$id"))));
+        albums.add(jsonDecode(_store.get("albums_$id")));
       }
       for (final id in json['playlists']) {
-        playlists.add(MusicPlaylist.decode(jsonDecode(_store.get("playlists_$id"))));
+        playlists.add(jsonDecode(_store.get("playlists_$id")));
       }
       for (final id in json['artists']) {
-        artists.add(MusicArtist.decode(jsonDecode(_store.get("artists_$id"))));
+        artists.add(jsonDecode(_store.get("artists_$id")));
       }
       data = SearchResults.decode({
         "tracks": tracks,

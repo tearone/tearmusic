@@ -78,7 +78,7 @@ class LyricsLine {
     return LyricsLine(
       start: Duration(milliseconds: ((json['ts'] ?? 0).toDouble() * 1000).round()),
       end: Duration(milliseconds: ((json['te'] ?? 0).toDouble() * 1000).round()),
-      segments: TimedSegment.decodeList((json['l'])),
+      segments: TimedSegment.decodeList((json['l'] as List).cast()),
     );
   }
 

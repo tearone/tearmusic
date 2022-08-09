@@ -1,37 +1,40 @@
 import 'package:tearmusic/models/music/album.dart';
 import 'package:tearmusic/models/music/images.dart';
+import 'package:tearmusic/models/model.dart';
 import 'package:tearmusic/models/music/track.dart';
 
-class MusicArtist {
-  final String id;
+class MusicArtist extends Model {
   final String name;
   final List<String> genres;
   final Images? images;
   final int followers;
 
   MusicArtist({
-    required this.id,
+    required Map json,
+    required String id,
     required this.name,
     required this.genres,
     required this.images,
     required this.followers,
-  });
+  }) : super(id: id, json: json);
 
-  factory MusicArtist.fromJson(Map json) {
+  factory MusicArtist.decode(Map json) {
+    final images = json["images"] as List?;
     return MusicArtist(
-      id: json["id"] ?? "",
+      json: json,
+      id: json["id"],
       name: json["name"],
-      genres: (json["genres"] ?? []).cast<String>(),
-      images: json["images"] != null && json["images"].isNotEmpty ? Images.fromJson(json["images"].cast<Map>()) : null,
+      genres: ((json["genres"] as List?) ?? []).cast<String>(),
+      images: images != null && images.isNotEmpty ? Images.decode(images.cast<Map>()) : null,
       followers: json["followers"] ?? 0,
     );
   }
 
-  @override
-  bool operator ==(other) => other is MusicArtist && other.id == id;
+  Map encode() => json;
 
-  @override
-  int get hashCode => id.hashCode;
+  static List<MusicArtist> decodeList(List<Map> encoded) =>
+      encoded.where((e) => e["id"] != null && e["images"] != null).map((e) => MusicArtist.decode(e)).toList().cast<MusicArtist>();
+  static List<Map> encodeList(List<MusicArtist> models) => models.map((e) => e.encode()).toList().cast<Map>();
 }
 
 class ArtistDetails {

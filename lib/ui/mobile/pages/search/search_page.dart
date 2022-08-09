@@ -152,8 +152,8 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                 items: const [
                   Tab(text: "Top"),
                   Tab(text: "Songs"),
-                  Tab(text: "Playlists"),
                   Tab(text: "Albums"),
+                  Tab(text: "Playlists"),
                   Tab(text: "Artists"),
                 ],
                 controller: _tabController,
@@ -290,10 +290,10 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
 
                                       case 1:
                                         return TopResultContainer(
-                                          kind: "Playlists",
-                                          results: results!.playlists
-                                              .sublist(0, min(results!.playlists.length, topShowCount))
-                                              .map((e) => SearchPlaylistTile(e))
+                                          kind: "Albums",
+                                          results: results!.albums
+                                              .sublist(0, min(results!.albums.length, topShowCount))
+                                              .map((e) => SearchAlbumTile(e))
                                               .toList(),
                                           index: 2,
                                           pageController: _pageController,
@@ -302,10 +302,10 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
 
                                       case 2:
                                         return TopResultContainer(
-                                          kind: "Albums",
-                                          results: results!.albums
-                                              .sublist(0, min(results!.albums.length, topShowCount))
-                                              .map((e) => SearchAlbumTile(e))
+                                          kind: "Playlists",
+                                          results: results!.playlists
+                                              .sublist(0, min(results!.playlists.length, topShowCount))
+                                              .map((e) => SearchPlaylistTile(e))
                                               .toList(),
                                           index: 3,
                                           pageController: _pageController,
@@ -343,17 +343,6 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                                     );
                                   case 2:
                                     return ListView.builder(
-                                      itemCount: (results?.playlists.length ?? 0) + 1,
-                                      itemBuilder: (context, index) {
-                                        if (index == results!.playlists.length) {
-                                          return const SizedBox(height: 200);
-                                        }
-
-                                        return SearchPlaylistTile(results!.playlists[index]);
-                                      },
-                                    );
-                                  case 3:
-                                    return ListView.builder(
                                       itemCount: (results?.albums.length ?? 0) + 1,
                                       itemBuilder: (context, index) {
                                         if (index == results!.albums.length) {
@@ -361,6 +350,17 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                                         }
 
                                         return SearchAlbumTile(results!.albums[index]);
+                                      },
+                                    );
+                                  case 3:
+                                    return ListView.builder(
+                                      itemCount: (results?.playlists.length ?? 0) + 1,
+                                      itemBuilder: (context, index) {
+                                        if (index == results!.playlists.length) {
+                                          return const SizedBox(height: 200);
+                                        }
+
+                                        return SearchPlaylistTile(results!.playlists[index]);
                                       },
                                     );
                                   case 4:

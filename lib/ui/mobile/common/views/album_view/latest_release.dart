@@ -46,7 +46,7 @@ class LatestRelease extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        "${album.releaseDate.year} • ${album.albumType.title}",
+                        "${album.releaseDate.year} • ${album.albumType.shortTitle}",
                         style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
                       ),
                     ],

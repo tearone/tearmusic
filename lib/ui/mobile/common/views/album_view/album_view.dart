@@ -167,7 +167,7 @@ class _AlbumViewState extends State<AlbumView> {
                                     ),
                                   ),
                                   Text(
-                                    "${widget.album.realTitle} • ${widget.album.releaseDate.year}",
+                                    "${widget.album.title} • ${widget.album.releaseDate.year}",
                                     style: TextStyle(
                                       fontSize: 16.0,
                                       color: theme.colorScheme.primary,

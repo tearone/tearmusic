@@ -11,12 +11,12 @@ class SearchResults {
 
   SearchResults({required this.tracks, required this.playlists, required this.albums, required this.artists});
 
-  factory SearchResults.fromJson(Map json) {
+  factory SearchResults.decode(Map json) {
     return SearchResults(
-      tracks: json["tracks"].map((e) => MusicTrack.fromJson(e)).toList().cast<MusicTrack>(),
-      playlists: json["playlists"].map((e) => MusicPlaylist.fromJson(e)).toList().cast<MusicPlaylist>(),
-      albums: json["albums"].map((e) => MusicAlbum.fromJson(e)).toList().cast<MusicAlbum>(),
-      artists: json["artists"].map((e) => MusicArtist.fromJson(e)).toList().cast<MusicArtist>(),
+      tracks: MusicTrack.decodeList((json["tracks"] as List).cast<Map>()),
+      playlists: MusicPlaylist.decodeList((json["playlists"] as List).cast<Map>()),
+      albums: MusicAlbum.decodeList((json["albums"] as List).cast<Map>()),
+      artists: MusicArtist.decodeList((json["artists"] as List).cast<Map>()),
     );
   }
 

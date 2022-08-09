@@ -1,5 +1,9 @@
+import 'dart:convert';
+
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:tearmusic/api/base_api.dart';
 import 'package:tearmusic/api/music_api.dart';
+import 'package:tearmusic/models/model.dart';
 import 'package:tearmusic/models/music/album.dart';
 import 'package:tearmusic/models/music/artist.dart';
 import 'package:tearmusic/models/music/playlist.dart';
@@ -11,31 +15,177 @@ class MusicInfoProvider {
 
   final MusicApi _api;
 
+  /// Box cache keys
+  /// List<MusicTrack> "tracks_$track"
+  /// List<MusicAlbum> "albums_$album"
+  /// List<MusicPlaylist> "playlists_$playlist"
+  /// List<MusicArtist> "artists_$artist"
+  late Box _store;
+
+  Future<void> init() async {
+    _store = await Hive.openBox("music_cache");
+  }
+
   Future<SearchResults> search(String query) async {
-    return await _api.search(query);
+    SearchResults data;
+    final cacheKey = "search_results_$query";
+    final cache = jsonDecode(_store.get(cacheKey)) as Map?;
+    if (cache != null) {
+      List<MusicTrack> tracks = [];
+      List<MusicAlbum> albums = [];
+      List<MusicPlaylist> playlists = [];
+      List<MusicArtist> artists = [];
+      for (final id in cache['tracks']) {
+        tracks.add(MusicTrack.decode(jsonDecode(_store.get("tracks_$id"))));
+      }
+      for (final id in cache['albums']) {
+        albums.add(MusicAlbum.decode(jsonDecode(_store.get("albums_$id"))));
+      }
+      for (final id in cache['playlists']) {
+        playlists.add(MusicPlaylist.decode(jsonDecode(_store.get("playlists_$id"))));
+      }
+      for (final id in cache['artists']) {
+        artists.add(MusicArtist.decode(jsonDecode(_store.get("artists_$id"))));
+      }
+      data = SearchResults.decode({
+        "tracks": tracks,
+        "albums": albums,
+        "playlists": playlists,
+        "artists": artists,
+      });
+    } else {
+      data = await _api.search(query);
+      _store.put(
+          cacheKey,
+          jsonEncode({
+            'tracks': Model.encodeIdList(data.tracks),
+            'albums': Model.encodeIdList(data.albums),
+            'playlists': Model.encodeIdList(data.playlists),
+            'artists': Model.encodeIdList(data.artists),
+          }));
+      for (final e in data.tracks) {
+        _store.put("tracks_$e", jsonEncode(e.encode()));
+      }
+      for (final e in data.albums) {
+        _store.put("albums_$e", jsonEncode(e.encode()));
+      }
+      for (final e in data.playlists) {
+        _store.put("playlists_$e", jsonEncode(e.encode()));
+      }
+      for (final e in data.artists) {
+        _store.put("artists_$e", jsonEncode(e.encode()));
+      }
+    }
+    return data;
   }
 
   Future<PlaylistDetails> playlistTracks(MusicPlaylist playlist) async {
-    return await _api.playlistTracks(playlist);
+    PlaylistDetails data;
+    final cacheKey = "playlist_tracks_$playlist";
+    final cache = jsonDecode(_store.get(cacheKey)) as Map?;
+    if (cache != null) {
+      List<Map> tracks = [];
+      for (final id in cache['tracks']) {
+        tracks.add(jsonDecode(_store.get("tracks_$id")));
+      }
+      data = PlaylistDetails.decode({'tracks': tracks, 'followers': cache['followers']});
+    } else {
+      data = await _api.playlistTracks(playlist);
+      _store.put(cacheKey, jsonEncode({'tracks': Model.encodeIdList(data.tracks), 'followers': data.followers}));
+      for (final e in data.tracks) {
+        _store.put("tracks_$e", jsonEncode(e.encode()));
+      }
+    }
+    return data;
   }
 
   Future<List<MusicTrack>> albumTracks(MusicAlbum album) async {
-    return await _api.albumTracks(album);
+    List<MusicTrack> data = [];
+    final cacheKey = "album_tracks_$album";
+    final cache = jsonDecode(_store.get(cacheKey)) as List?;
+    if (cache != null) {
+      for (final id in cache) {
+        data.add(MusicTrack.decode(jsonDecode(_store.get("tracks_$id"))));
+      }
+    } else {
+      data = await _api.albumTracks(album);
+      _store.put(cacheKey, jsonEncode(Model.encodeIdList(data)));
+      for (final e in data) {
+        _store.put("tracks_$e", jsonEncode(e.encode()));
+      }
+    }
+    return data;
   }
 
   Future<List<MusicAlbum>> newReleases() async {
-    return await _api.newReleases();
+    List<MusicAlbum> data = [];
+    const cacheKey = "new_releases";
+    final cache = jsonDecode(_store.get(cacheKey)) as List?;
+    if (cache != null) {
+      for (final id in cache) {
+        data.add(MusicAlbum.decode(jsonDecode(_store.get("albums_$id"))));
+      }
+    } else {
+      data = await _api.newReleases();
+      _store.put(cacheKey, jsonEncode(Model.encodeIdList(data)));
+      for (final e in data) {
+        _store.put("albums_$e", jsonEncode(e.encode()));
+      }
+    }
+    return data;
   }
 
   Future<List<MusicAlbum>> artistAlbums(MusicArtist artist) async {
-    return await _api.artistAlbums(artist);
+    List<MusicAlbum> data = [];
+    final cacheKey = "artist_albums_$artist";
+    final cache = jsonDecode(_store.get(cacheKey)) as List?;
+    if (cache != null) {
+      for (final id in cache) {
+        data.add(MusicAlbum.decode(jsonDecode(_store.get("albums_$id"))));
+      }
+    } else {
+      data = await _api.artistAlbums(artist);
+      _store.put(cacheKey, jsonEncode(Model.encodeIdList(data)));
+      for (final e in data) {
+        _store.put("albums_$e", jsonEncode(e.encode()));
+      }
+    }
+    return data;
   }
 
   Future<List<MusicTrack>> artistTracks(MusicArtist artist) async {
-    return await _api.artistTracks(artist);
+    List<MusicTrack> data = [];
+    final cacheKey = "artist_tracks_$artist";
+    final cache = jsonDecode(_store.get(cacheKey)) as List?;
+    if (cache != null) {
+      for (final id in cache) {
+        data.add(MusicTrack.decode(jsonDecode(_store.get("tracks_$id"))));
+      }
+    } else {
+      data = await _api.artistTracks(artist);
+      _store.put(cacheKey, jsonEncode(Model.encodeIdList(data)));
+      for (final e in data) {
+        _store.put("tracks_$e", jsonEncode(e.encode()));
+      }
+    }
+    return data;
   }
 
   Future<List<MusicArtist>> artistRelated(MusicArtist artist) async {
-    return await _api.artistRelated(artist);
+    List<MusicArtist> data = [];
+    final cacheKey = "artist_related_$artist";
+    final cache = jsonDecode(_store.get(cacheKey)) as List?;
+    if (cache != null) {
+      for (final id in cache) {
+        data.add(MusicArtist.decode(jsonDecode(_store.get("artists_$id"))));
+      }
+    } else {
+      data = await _api.artistRelated(artist);
+      _store.put(cacheKey, jsonEncode(Model.encodeIdList(data)));
+      for (final e in data) {
+        _store.put("artists_$e", jsonEncode(e.encode()));
+      }
+    }
+    return data;
   }
 }

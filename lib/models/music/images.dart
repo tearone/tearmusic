@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:tearmusic/models/model.dart';
 
 class Images {
   final List<InternalImage> _internal;
@@ -8,11 +9,13 @@ class Images {
     assert(_internal.isNotEmpty);
   }
 
-  factory Images.fromJson(List<Map> json) {
+  factory Images.decode(List<Map> json) {
     return Images(
-      images: json.map((e) => InternalImage.fromJson(e)).toList(),
+      images: json.map((e) => InternalImage.decode(e)).toList(),
     );
   }
+
+  List<Map> encode() => _internal.map((e) => e.encode()).toList();
 
   String forSize(Size size) => _internal
       .firstWhere(
@@ -25,22 +28,26 @@ class Images {
   String get minSize => _internal.first.url;
 }
 
-class InternalImage {
+class InternalImage extends Model {
   final String url;
   final int width;
   final int height;
 
   InternalImage({
+    required Map json,
     required this.url,
     required this.width,
     required this.height,
-  });
+  }) : super(id: "${width}_${height}_$url", json: json);
 
-  factory InternalImage.fromJson(Map json) {
+  factory InternalImage.decode(Map json) {
     return InternalImage(
+      json: json,
       url: json["url"],
       width: json["width"] ?? 0,
       height: json["height"] ?? 0,
     );
   }
+
+  Map encode() => json;
 }

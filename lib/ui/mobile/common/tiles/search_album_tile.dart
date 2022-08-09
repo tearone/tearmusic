@@ -20,7 +20,7 @@ class SearchAlbumTile extends StatelessWidget {
         child: CachedImage(album.images!),
       ),
       title: Text(album.name),
-      subtitle: Text("${album.title} • ${album.releaseDate.year} • ${album.artists.first.name}"),
+      subtitle: Text("${album.shortTitle} • ${album.releaseDate.year} • ${album.artists.first.name}"),
       onTap: () {
         AlbumView.view(album, context: context).then((_) => context.read<ThemeProvider>().resetTheme());
       },

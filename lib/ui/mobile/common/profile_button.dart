@@ -1,9 +1,8 @@
 import 'package:animations/animations.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tearmusic/providers/user_provider.dart';
-import 'package:tearmusic/ui/mobile/pages/settings/settings_page.dart';
+import 'package:tearmusic/ui/mobile/screens/settings_screen.dart';
 
 class ProfileButton extends StatelessWidget {
   const ProfileButton({Key? key}) : super(key: key);
@@ -21,7 +20,7 @@ class ProfileButton extends StatelessWidget {
                 fillColor: Colors.transparent,
                 animation: primaryAnimation,
                 secondaryAnimation: secondaryAnimation,
-                child: const SettingsPage(),
+                child: const SettingsScreen(),
               );
             },
             transitionDuration: const Duration(milliseconds: 500),

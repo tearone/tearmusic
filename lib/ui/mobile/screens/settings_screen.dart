@@ -2,19 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:provider/provider.dart';
 import 'package:tearmusic/providers/user_provider.dart';
-import 'package:tearmusic/ui/mobile/common/settings/settings_alertdialog.dart';
+import 'package:tearmusic/ui/mobile/common/settings/settings_alert_dialog.dart';
 import 'package:tearmusic/ui/mobile/common/settings/settings_container.dart';
 import 'package:tearmusic/ui/mobile/common/settings/settings_stats.dart';
 import 'package:tearmusic/ui/mobile/common/settings/settings_switch.dart';
 
-class SettingsPage extends StatefulWidget {
-  const SettingsPage({Key? key}) : super(key: key);
+class SettingsScreen extends StatefulWidget {
+  const SettingsScreen({Key? key}) : super(key: key);
 
   @override
-  State<SettingsPage> createState() => _SettingsPageState();
+  State<SettingsScreen> createState() => _SettingsScreenState();
 }
 
-class _SettingsPageState extends State<SettingsPage> {
+class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final avatar = context.select<UserProvider, String>((user) => user.avatar);
@@ -70,9 +70,9 @@ class _SettingsPageState extends State<SettingsPage> {
                                               username,
                                               style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 22.0),
                                             ),
-                                            Text(
+                                            const Text(
                                               "View your profile",
-                                              style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14.0, color: Colors.grey),
+                                              style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14.0, color: Colors.grey),
                                             ),
                                           ],
                                         ),
@@ -80,7 +80,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                     ),
                                     IconButton(
                                       onPressed: () {},
-                                      icon: Icon(Icons.chevron_right),
+                                      icon: const Icon(Icons.chevron_right),
                                     )
                                   ],
                                 ),
@@ -88,7 +88,7 @@ class _SettingsPageState extends State<SettingsPage> {
                               Padding(
                                 padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 4.0),
                                 child: Row(
-                                  children: [
+                                  children: const [
                                     SettingsStatsItem(name: "Minute spent", value: "214"),
                                     SettingsStatsItem(name: "Likes received", value: "16"),
                                     SettingsStatsItem(name: "Followers", value: "7"),
@@ -169,8 +169,8 @@ class _SettingsPageState extends State<SettingsPage> {
                           label: const Text("Logout", style: TextStyle(fontWeight: FontWeight.w600)),
                           style: ButtonStyle(
                             padding: MaterialStateProperty.all(const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0)),
-                            backgroundColor: MaterialStateProperty.all(Color.fromARGB(255, 242, 88, 88).withOpacity(.25)),
-                            foregroundColor: MaterialStateProperty.all(Color.fromARGB(255, 242, 88, 88)),
+                            backgroundColor: MaterialStateProperty.all(const Color.fromARGB(255, 242, 88, 88).withOpacity(.25)),
+                            foregroundColor: MaterialStateProperty.all(const Color.fromARGB(255, 242, 88, 88)),
                           ),
                           onPressed: () {
                             SettingsAlertDialog().showCustomDialog(context);

@@ -42,8 +42,8 @@ class SettingsAlertDialog {
                           label: const Text("Yes!", style: TextStyle(fontWeight: FontWeight.w800)),
                           style: ButtonStyle(
                             padding: MaterialStateProperty.all(const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0)),
-                            backgroundColor: MaterialStateProperty.all(Color.fromARGB(255, 242, 88, 88).withOpacity(.25)),
-                            foregroundColor: MaterialStateProperty.all(Color.fromARGB(255, 242, 88, 88)),
+                            backgroundColor: MaterialStateProperty.all(const Color.fromARGB(255, 242, 88, 88).withOpacity(.25)),
+                            foregroundColor: MaterialStateProperty.all(const Color.fromARGB(255, 242, 88, 88)),
                           ),
                           onPressed: () {
                             Navigator.of(context, rootNavigator: true).pop('dialog');

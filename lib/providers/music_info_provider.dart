@@ -6,6 +6,7 @@ import 'package:tearmusic/api/music_api.dart';
 import 'package:tearmusic/models/model.dart';
 import 'package:tearmusic/models/music/album.dart';
 import 'package:tearmusic/models/music/artist.dart';
+import 'package:tearmusic/models/music/lyrics.dart';
 import 'package:tearmusic/models/music/playlist.dart';
 import 'package:tearmusic/models/music/search_results.dart';
 import 'package:tearmusic/models/music/track.dart';
@@ -205,6 +206,20 @@ class MusicInfoProvider {
       for (final e in data) {
         _store.put("artists_$e", jsonEncode(e.encode()));
       }
+    }
+    return data;
+  }
+
+  Future<MusicLyrics> lyrics(MusicTrack track) async {
+    MusicLyrics data;
+    final cacheKey = "track_lyrics_$track";
+    final String? cache = _store.get(cacheKey);
+    if (cache != null) {
+      final json = jsonDecode(cache) as Map;
+      data = MusicLyrics.decode(json);
+    } else {
+      data = await _api.lyrics(track);
+      _store.put(cacheKey, jsonEncode(data.encode()));
     }
     return data;
   }

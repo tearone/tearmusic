@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:tearmusic/exceptionts.dart';
 import 'package:tearmusic/models/music/album.dart';
 import 'package:tearmusic/models/music/artist.dart';
+import 'package:tearmusic/models/music/lyrics.dart';
 import 'package:tearmusic/models/music/playlist.dart';
 import 'package:tearmusic/models/music/search_results.dart';
 import 'package:tearmusic/models/music/track.dart';
@@ -34,7 +35,6 @@ class MusicApi {
     );
 
     _reschk(res, "search");
-
     return SearchResults.decode(jsonDecode(res.body));
   }
 
@@ -45,7 +45,6 @@ class MusicApi {
     );
 
     _reschk(res, "playlistTracks");
-
     return PlaylistDetails.decode(jsonDecode(res.body));
   }
 
@@ -58,7 +57,6 @@ class MusicApi {
     _reschk(res, "albumTracks");
 
     final json = (jsonDecode(res.body)['tracks'] as List).cast<Map>();
-
     return MusicTrack.decodeList(json);
   }
 
@@ -71,7 +69,6 @@ class MusicApi {
     _reschk(res, "newReleases");
 
     final json = (jsonDecode(res.body)['albums'] as List).cast<Map>();
-
     return MusicAlbum.decodeList(json);
   }
 
@@ -84,7 +81,6 @@ class MusicApi {
     _reschk(res, "artistAlbums");
 
     final json = (jsonDecode(res.body)['albums'] as List).cast<Map>();
-
     return MusicAlbum.decodeList(json);
   }
 
@@ -97,7 +93,6 @@ class MusicApi {
     _reschk(res, "artistTracks");
 
     final json = (jsonDecode(res.body)['tracks'] as List).cast<Map>();
-
     return MusicTrack.decodeList(json);
   }
 
@@ -110,7 +105,22 @@ class MusicApi {
     _reschk(res, "artistRelated");
 
     final json = (jsonDecode(res.body)['artists'] as List).cast<Map>();
-
     return MusicArtist.decodeList(json);
+  }
+
+  Future<MusicLyrics> lyrics(MusicTrack track) async {
+    final res = await http.get(
+      Uri.parse("${BaseApi.url}/music/lyrics"
+          "?artist=${Uri.encodeComponent(track.artists.first.name)}"
+          "&track=${Uri.encodeComponent(track.name)}"
+          "&duration=${track.duration.inSeconds}"),
+      headers: {"authorization": await base.getToken()},
+    );
+
+    _reschk(res, "lyrics");
+
+    final json = jsonDecode(res.body) as Map;
+    json['id'] = track.id;
+    return MusicLyrics.decode(json);
   }
 }

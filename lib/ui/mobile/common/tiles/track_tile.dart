@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tearmusic/models/music/track.dart';
 import 'package:tearmusic/ui/mobile/common/cached_image.dart';
 import 'package:tearmusic/ui/common/format.dart';
+import 'package:tearmusic/ui/mobile/common/player/lyrics_view.dart';
 
 class TrackTile extends StatelessWidget {
   const TrackTile(this.track, {Key? key, this.leadingTrackNumber = false, this.trailingDuration = false}) : super(key: key);
@@ -76,6 +77,7 @@ class TrackTile extends StatelessWidget {
       visualDensity: VisualDensity.compact,
       onTap: () {
         FocusScope.of(context).requestFocus(FocusNode());
+        LyricsView.view(track, context: context);
       },
     );
   }

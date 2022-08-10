@@ -12,9 +12,7 @@ class LyricsView extends StatefulWidget {
   final MusicTrack track;
 
   static Future<void> view(MusicTrack value, {required BuildContext context}) => Navigator.of(context, rootNavigator: true).push(
-        CupertinoPageRoute(
-          builder: (context) => LyricsView(value),
-        ),
+        CupertinoPageRoute(builder: (context) => LyricsView(value), fullscreenDialog: true),
       );
 
   @override
@@ -275,6 +273,13 @@ class _LyricsViewState extends State<LyricsView> with SingleTickerProviderStateM
                         ],
                       ),
                     ),
+                  ),
+                ),
+              if (snapshot.data!.lyricsType != LyricsType.unavailable)
+                const SafeArea(
+                  child: Padding(
+                    padding: EdgeInsets.all(12.0),
+                    child: BackButton(),
                   ),
                 ),
             ],

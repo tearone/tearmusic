@@ -6,7 +6,9 @@ import 'package:flutter/services.dart';
 import 'package:tearmusic/models/music/album.dart';
 import 'package:tearmusic/models/music/artist.dart';
 import 'package:tearmusic/models/music/images.dart';
+import 'package:tearmusic/models/music/lyrics.dart';
 import 'package:tearmusic/models/music/track.dart';
+import 'package:tearmusic/ui/mobile/common/player/lyrics_view.dart';
 import 'package:tearmusic/ui/mobile/common/player/queue_view.dart';
 import 'package:tearmusic/ui/mobile/common/player/slider.dart';
 import 'package:tearmusic/ui/mobile/common/player/track_image.dart';
@@ -58,12 +60,12 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
     MusicTrack(
         id: "id",
         json: {},
-        name: "Track 1",
-        duration: const Duration(seconds: 200),
+        name: "Good News",
+        duration: const Duration(seconds: 285),
         explicit: true,
         trackNumber: 1,
         album: MusicAlbum(
-          json: {},
+            json: {},
             id: "id",
             name: "name",
             albumType: AlbumType.single,
@@ -71,16 +73,16 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
             releaseDate: DateTime.now(),
             artists: [MusicArtist(json: {}, id: "id", name: "name", genres: [], images: null, followers: 0)],
             images: Images(images: [InternalImage(json: {}, url: "1", width: 100, height: 100)])),
-        artists: [MusicArtist(json: {}, id: "id", name: "Artist 1", genres: [], images: null, followers: 0)]),
+        artists: [MusicArtist(json: {}, id: "id", name: "Apashe", genres: [], images: null, followers: 0)]),
     MusicTrack(
-      json: {},
+        json: {},
         id: "id",
         name: "Track 2",
         duration: const Duration(seconds: 200),
         explicit: true,
         trackNumber: 1,
         album: MusicAlbum(
-          json: {},
+            json: {},
             id: "id",
             name: "name",
             albumType: AlbumType.single,
@@ -90,14 +92,14 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
             images: Images(images: [InternalImage(json: {}, url: "2", width: 100, height: 100)])),
         artists: [MusicArtist(json: {}, id: "id", name: "Artist 2", genres: [], images: null, followers: 0)]),
     MusicTrack(
-      json: {},
+        json: {},
         id: "id",
         name: "Track 3",
         duration: const Duration(seconds: 200),
         explicit: true,
         trackNumber: 1,
         album: MusicAlbum(
-          json: {},
+            json: {},
             id: "id",
             name: "name",
             albumType: AlbumType.single,
@@ -664,6 +666,32 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
                                       child: Text('Headphones', style: TextStyle(color: onSecondary)),
                                     ),
                                   ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                  /// Lyrics button
+                  if (opacity > 0.0)
+                    Material(
+                      type: MaterialType.transparency,
+                      child: Opacity(
+                        opacity: opacity,
+                        child: Transform.translate(
+                          offset: Offset(-46, -100 * ip),
+                          child: Align(
+                            alignment: Alignment.bottomRight,
+                            child: SafeArea(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+                                child: IconButton(
+                                  onPressed: () {
+                                    LyricsView.view(tracks[0], context: context);
+                                  },
+                                  icon: Icon(Icons.format_quote, size: 24.0, color: Theme.of(context).colorScheme.onSecondaryContainer),
                                 ),
                               ),
                             ),

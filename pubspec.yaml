@@ -28,6 +28,9 @@ dependencies:
   loading_animation_widget: ^1.2.0+2
   image: ^3.2.0
   intl: ^0.17.0
+  just_audio: ^0.9.28
+  audio_session: ^0.1.10
+  audio_service: ^0.18.7
 
 dev_dependencies:
   flutter_test:

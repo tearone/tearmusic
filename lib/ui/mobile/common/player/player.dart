@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 import 'package:tearmusic/models/music/album.dart';
 import 'package:tearmusic/models/music/artist.dart';
 import 'package:tearmusic/models/music/images.dart';
-import 'package:tearmusic/models/music/lyrics.dart';
 import 'package:tearmusic/models/music/track.dart';
 import 'package:tearmusic/ui/mobile/common/player/lyrics_view.dart';
 import 'package:tearmusic/ui/mobile/common/player/queue_view.dart';

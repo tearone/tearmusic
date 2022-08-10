@@ -63,12 +63,53 @@ class _LyricsViewState extends State<LyricsView> with SingleTickerProviderStateM
             children: [
               CustomScrollView(
                 slivers: [
-                  // SliverToBoxAdapter(
-                  //   child: Text(snapshot.data!.lyricsType.name),
-                  // ),
                   SliverToBoxAdapter(
-                    child: SizedBox(height: 32 + MediaQuery.of(context).padding.top),
+                    child: SizedBox(height: 200 + MediaQuery.of(context).padding.top),
                   ),
+                  if (snapshot.data!.lyricsType == LyricsType.unavailable)
+                    SliverToBoxAdapter(
+                      child: Center(
+                        child: Column(
+                          children: [
+                            const Text(
+                              "🫤",
+                              style: TextStyle(
+                                fontSize: 64.0,
+                              ),
+                            ),
+                            const Padding(
+                              padding: EdgeInsets.only(top: 12.0),
+                              child: Text(
+                                "Sorry, no lyrics...",
+                                style: TextStyle(
+                                  fontSize: 32.0,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 100.0),
+                              child: IconButton(
+                                icon: const Icon(Icons.arrow_back),
+                                iconSize: 32.0,
+                                padding: const EdgeInsets.all(12.0),
+                                style: ButtonStyle(
+                                  backgroundColor: MaterialStateProperty.all(Theme.of(context).colorScheme.secondaryContainer),
+                                  foregroundColor: MaterialStateProperty.all(Theme.of(context).colorScheme.onSecondaryContainer),
+                                ),
+                                onPressed: () {
+                                  Navigator.of(context, rootNavigator: true).pop();
+                                },
+                              ),
+                            ),
+                            const Padding(
+                              padding: EdgeInsets.only(top: 12.0),
+                              child: Text("Back"),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   if (snapshot.data!.lyricsType == LyricsType.fullText)
                     SliverToBoxAdapter(
                       child: Padding(
@@ -180,6 +221,7 @@ class _LyricsViewState extends State<LyricsView> with SingleTickerProviderStateM
                                     borderRadius: BorderRadius.circular(12.0),
                                   ),
                                   child: Wrap(
+                                    alignment: WrapAlignment.center,
                                     children: richSync.segments.map((e) {
                                       return AnimatedDefaultTextStyle(
                                         duration: const Duration(milliseconds: 200),
@@ -212,28 +254,29 @@ class _LyricsViewState extends State<LyricsView> with SingleTickerProviderStateM
                         },
                       ),
                     ),
-                  const SliverToBoxAdapter(
-                    child: SizedBox(height: 200),
+                  SliverToBoxAdapter(
+                    child: SizedBox(height: 200 + MediaQuery.of(context).padding.bottom),
                   ),
                 ],
               ),
-              Positioned.fill(
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      stops: const [0, .3, .6, 1],
-                      colors: [
-                        Theme.of(context).scaffoldBackgroundColor.withOpacity(.7),
-                        Theme.of(context).scaffoldBackgroundColor.withOpacity(0),
-                        Theme.of(context).scaffoldBackgroundColor.withOpacity(0),
-                        Theme.of(context).scaffoldBackgroundColor.withOpacity(.8),
-                      ],
+              if (snapshot.data!.lyricsType != LyricsType.unavailable)
+                Positioned.fill(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        stops: const [0, .3, .6, 1],
+                        colors: [
+                          Theme.of(context).scaffoldBackgroundColor.withOpacity(.7),
+                          Theme.of(context).scaffoldBackgroundColor.withOpacity(0),
+                          Theme.of(context).scaffoldBackgroundColor.withOpacity(0),
+                          Theme.of(context).scaffoldBackgroundColor.withOpacity(.8),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
             ],
           );
         },

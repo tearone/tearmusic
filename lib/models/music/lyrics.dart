@@ -39,7 +39,7 @@ class MusicLyrics extends Model {
           ? LyricsType.richsync
           : json["subtitle"] != null
               ? LyricsType.subtitle
-              : json["full_text"] != null
+              : json["full_text"] != null && json["full_text"] != ''
                   ? LyricsType.fullText
                   : LyricsType.unavailable,
       fullText: json["full_text"],

@@ -3,10 +3,12 @@ import 'dart:ui';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:tearmusic/models/music/album.dart';
 import 'package:tearmusic/models/music/artist.dart';
 import 'package:tearmusic/models/music/images.dart';
 import 'package:tearmusic/models/music/track.dart';
+import 'package:tearmusic/providers/current_music_provider.dart';
 import 'package:tearmusic/ui/mobile/common/player/lyrics_view.dart';
 import 'package:tearmusic/ui/mobile/common/player/queue_view.dart';
 import 'package:tearmusic/ui/mobile/common/player/slider.dart';
@@ -688,7 +690,8 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
                                 padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
                                 child: IconButton(
                                   onPressed: () {
-                                    LyricsView.view(tracks[0], context: context);
+                                    final track = context.read<CurrentMusicProvider>().playing!;
+                                    LyricsView.view(track, context: context);
                                   },
                                   icon: Icon(Icons.format_quote, size: 24.0, color: Theme.of(context).colorScheme.onSecondaryContainer),
                                 ),

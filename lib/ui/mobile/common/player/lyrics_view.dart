@@ -4,6 +4,7 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:tearmusic/models/music/lyrics.dart';
 import 'package:tearmusic/models/music/track.dart';
+import 'package:tearmusic/providers/current_music_provider.dart';
 import 'package:tearmusic/providers/music_info_provider.dart';
 
 class LyricsView extends StatefulWidget {
@@ -27,10 +28,14 @@ class _LyricsViewState extends State<LyricsView> with SingleTickerProviderStateM
   void initState() {
     super.initState();
 
+    final currentMusic = context.read<CurrentMusicProvider>();
+
     animation = AnimationController(
       vsync: this,
       duration: widget.track.duration,
     );
+
+    animation.animateTo(currentMusic.player.position.inMilliseconds / widget.track.duration.inMilliseconds, duration: Duration.zero);
     animation.forward();
   }
 
@@ -136,11 +141,14 @@ class _LyricsViewState extends State<LyricsView> with SingleTickerProviderStateM
                               builder: (context, child) {
                                 WidgetsBinding.instance.addPostFrameCallback((_) {
                                   if (animation.value > progress && animation.value < progressEnd) {
-                                    Scrollable.ensureVisible(
-                                      keys[(index + 3).clamp(0, keys.length - 1)].currentContext!,
-                                      duration: const Duration(milliseconds: 500),
-                                      alignment: 0.5,
-                                    );
+                                    final key = keys[(index + 2).clamp(0, keys.length - 1)].currentContext;
+                                    if (key != null) {
+                                      Scrollable.ensureVisible(
+                                        key,
+                                        duration: const Duration(milliseconds: 500),
+                                        alignment: 0.5,
+                                      );
+                                    }
                                   }
                                 });
 
@@ -200,7 +208,7 @@ class _LyricsViewState extends State<LyricsView> with SingleTickerProviderStateM
                                 WidgetsBinding.instance.addPostFrameCallback((_) {
                                   if (animation.value > progress() && animation.value < progressEnd()) {
                                     Scrollable.ensureVisible(
-                                      keys[(index + 3).clamp(0, keys.length - 1)].currentContext!,
+                                      keys[(index + 2).clamp(0, keys.length - 1)].currentContext!,
                                       duration: const Duration(milliseconds: 500),
                                       alignment: 0.5,
                                     );

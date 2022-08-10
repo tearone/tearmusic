@@ -223,4 +223,8 @@ class MusicInfoProvider {
     }
     return data;
   }
+
+  Future<String> playback(MusicTrack track) async {
+    return await _api.playback(track);
+  }
 }

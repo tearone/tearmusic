@@ -123,4 +123,19 @@ class MusicApi {
     json['id'] = track.id;
     return MusicLyrics.decode(json);
   }
+
+  Future<String> playback(MusicTrack track) async {
+    final res = await http.get(
+      Uri.parse("${BaseApi.url}/music/playback"
+          "?artist=${Uri.encodeComponent(track.artists.first.name)}"
+          "&track=${Uri.encodeComponent(track.name)}"
+          "&id=${Uri.encodeComponent(track.id)}"
+          "&duration=${track.duration.inSeconds}"),
+      headers: {"authorization": await base.getToken()},
+    );
+
+    _reschk(res, "playback");
+
+    return res.body;
+  }
 }

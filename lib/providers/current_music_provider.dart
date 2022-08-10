@@ -7,6 +7,7 @@ class CurrentMusicProvider extends ChangeNotifier {
   CurrentMusicProvider({required MusicInfoProvider api}) : _api = api;
 
   final MusicInfoProvider _api;
+  final player = AudioPlayer();
 
   Future<void> playTrack(MusicTrack track) async {
     String url = await _api.playback(track);
@@ -14,7 +15,7 @@ class CurrentMusicProvider extends ChangeNotifier {
   }
 
   Future<void> play(String streamUrl) async {
-    final player = AudioPlayer();
+    await player.stop();
     await player.setUrl(streamUrl);
     player.play();
   }

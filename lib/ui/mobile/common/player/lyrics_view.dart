@@ -267,18 +267,20 @@ class _LyricsViewState extends State<LyricsView> with SingleTickerProviderStateM
               ),
               if (snapshot.data!.lyricsType != LyricsType.unavailable)
                 Positioned.fill(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        stops: const [0, .3, .6, 1],
-                        colors: [
-                          Theme.of(context).scaffoldBackgroundColor.withOpacity(.7),
-                          Theme.of(context).scaffoldBackgroundColor.withOpacity(0),
-                          Theme.of(context).scaffoldBackgroundColor.withOpacity(0),
-                          Theme.of(context).scaffoldBackgroundColor.withOpacity(.8),
-                        ],
+                  child: IgnorePointer(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          stops: const [0, .3, .6, 1],
+                          colors: [
+                            Theme.of(context).scaffoldBackgroundColor.withOpacity(.7),
+                            Theme.of(context).scaffoldBackgroundColor.withOpacity(0),
+                            Theme.of(context).scaffoldBackgroundColor.withOpacity(0),
+                            Theme.of(context).scaffoldBackgroundColor.withOpacity(.8),
+                          ],
+                        ),
                       ),
                     ),
                   ),

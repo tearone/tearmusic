@@ -407,22 +407,28 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
                                     icon: Icon(Icons.expand_more, color: onSecondary),
                                     iconSize: 32.0,
                                   ),
-                                  Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        "Playing from",
-                                        style: TextStyle(
-                                          color: onSecondary.withOpacity(.8),
-                                          fontSize: 15.0,
-                                          fontWeight: FontWeight.w500,
+                                  Expanded(
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          "Playing from",
+                                          style: TextStyle(
+                                            color: onSecondary.withOpacity(.8),
+                                            fontSize: 15.0,
+                                            fontWeight: FontWeight.w500,
+                                          ),
                                         ),
-                                      ),
-                                      Text(
-                                        currentMusic.playing?.album?.name ?? "?",
-                                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20.0, color: onSecondary.withOpacity(.9)),
-                                      ),
-                                    ],
+                                        Text(
+                                          currentMusic.playing?.album?.name ?? "?",
+                                          textAlign: TextAlign.center,
+                                          maxLines: 1,
+                                          softWrap: false,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20.0, color: onSecondary.withOpacity(.9)),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                   IconButton(
                                     onPressed: () {},
@@ -658,7 +664,7 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
                                     final track = context.read<CurrentMusicProvider>().playing!;
                                     LyricsView.view(track, context: context);
                                   },
-                                  icon: Icon(Icons.format_quote, size: 24.0, color: Theme.of(context).colorScheme.onSecondaryContainer),
+                                  icon: Icon(Icons.format_quote, size: 28.0, color: Theme.of(context).colorScheme.onSecondaryContainer),
                                 ),
                               ),
                             ),

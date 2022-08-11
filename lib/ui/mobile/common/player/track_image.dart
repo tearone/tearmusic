@@ -4,7 +4,6 @@ import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/material.dart';
 import 'package:tearmusic/models/music/images.dart';
 import 'package:tearmusic/ui/mobile/common/cached_image.dart';
-import 'package:tearmusic/ui/mobile/common/player/image_placeholder.dart';
 import 'package:tearmusic/utils.dart';
 
 class TrackImage extends StatelessWidget {

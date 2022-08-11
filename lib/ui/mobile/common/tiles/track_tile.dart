@@ -6,7 +6,6 @@ import 'package:tearmusic/providers/theme_provider.dart';
 import 'package:tearmusic/ui/common/image_color.dart';
 import 'package:tearmusic/ui/mobile/common/cached_image.dart';
 import 'package:tearmusic/ui/common/format.dart';
-import 'package:tearmusic/ui/mobile/common/player/lyrics_view.dart';
 
 class TrackTile extends StatelessWidget {
   const TrackTile(this.track, {Key? key, this.leadingTrackNumber = false, this.trailingDuration = false}) : super(key: key);

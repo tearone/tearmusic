@@ -36,7 +36,7 @@ class _LyricsViewState extends State<LyricsView> with SingleTickerProviderStateM
     );
 
     animation.animateTo(currentMusic.player.position.inMilliseconds / widget.track.duration.inMilliseconds, duration: Duration.zero);
-    animation.forward();
+    if (currentMusic.player.playing) animation.forward();
   }
 
   @override

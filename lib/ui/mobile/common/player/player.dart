@@ -572,8 +572,8 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
                                     ),
                                     child: MultiProvider(
                                       providers: [
-                                        StreamProvider(create: (_) => currentMusic.player.positionStream, initialData: Duration.zero),
-                                        StreamProvider(create: (_) => currentMusic.player.playingStream, initialData: false),
+                                        StreamProvider(create: (_) => currentMusic.player.positionStream, initialData: currentMusic.player.position),
+                                        StreamProvider(create: (_) => currentMusic.player.playingStream, initialData: currentMusic.player.playing),
                                       ],
                                       builder: (context, snapshot) => Consumer2<bool, Duration>(
                                         builder: (context, value1, value2, child) => CustomPaint(

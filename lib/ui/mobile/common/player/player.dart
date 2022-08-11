@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:tearmusic/providers/current_music_provider.dart';
+import 'package:tearmusic/providers/will_pop_provider.dart';
 import 'package:tearmusic/ui/mobile/common/player/lyrics_view.dart';
 import 'package:tearmusic/ui/mobile/common/player/queue_view.dart';
 import 'package:tearmusic/ui/mobile/common/player/slider.dart';
@@ -113,26 +114,26 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
     }
   }
 
-  void snapToExpanded() {
+  void snapToExpanded({bool haptic = true}) {
     offset = maxOffset;
     if (prevOffset < maxOffset) bounceUp = true;
     if (prevOffset > maxOffset) bounceDown = true;
-    snap();
+    snap(haptic: haptic);
   }
 
-  void snapToMini() {
+  void snapToMini({bool haptic = true}) {
     offset = 0;
     bounceDown = false;
-    snap();
+    snap(haptic: haptic);
   }
 
-  void snapToQueue() {
+  void snapToQueue({bool haptic = true}) {
     offset = maxOffset * 2;
     bounceUp = false;
-    snap();
+    snap(haptic: haptic);
   }
 
-  void snap() {
+  void snap({bool haptic = true}) {
     widget.animation
         .animateTo(
       offset / maxOffset,
@@ -142,7 +143,7 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
         .then((_) {
       bounceUp = false;
     });
-    if ((prevOffset - offset).abs() > actuationOffset) HapticFeedback.lightImpact();
+    if (haptic && (prevOffset - offset).abs() > actuationOffset) HapticFeedback.lightImpact();
   }
 
   void snapToPrev() {
@@ -191,17 +192,20 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     final currentMusic = context.watch<CurrentMusicProvider>();
 
-    return WillPopScope(
-      onWillPop: () async {
-        if (offset > maxOffset) {
-          snapToExpanded();
-          return false;
-        }
-        if (offset > maxOffset / 2) {
-          snapToMini();
-          return false;
-        }
-        return true;
+    return Consumer<WillPopProvider>(
+      builder: (context, willPop, child) {
+        willPop.registerPopper(() {
+          if (offset > maxOffset) {
+            snapToExpanded(haptic: false);
+            return false;
+          }
+          if (offset > maxOffset / 2) {
+            snapToMini(haptic: false);
+            return false;
+          }
+          return true;
+        });
+        return child!;
       },
       child: Listener(
         onPointerDown: (event) {

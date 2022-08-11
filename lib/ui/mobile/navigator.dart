@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:tearmusic/providers/current_music_provider.dart';
 import 'package:tearmusic/providers/theme_provider.dart';
 import 'package:tearmusic/providers/user_provider.dart';
+import 'package:tearmusic/providers/will_pop_provider.dart';
 import 'package:tearmusic/ui/mobile/common/player/player.dart';
 import 'package:tearmusic/ui/mobile/pages/home/home_page.dart';
 import 'package:tearmusic/ui/mobile/pages/library/library_page.dart';
@@ -91,12 +92,17 @@ class _NavigationScreenState extends State<NavigationScreen> with SingleTickerPr
       return const LoginScreen();
     }
 
-    return WillPopScope(
-      onWillPop: () async {
-        if (_navigatorState.currentState?.canPop() ?? false) {
-          _navigatorState.currentState?.pop();
-        }
-        return false;
+    return Consumer<WillPopProvider>(
+      builder: (context, value, child) {
+        return WillPopScope(
+          onWillPop: () async {
+            if ((value.popper != null ? value.popper!() : true) && (_navigatorState.currentState?.canPop() ?? false)) {
+              _navigatorState.currentState?.pop();
+            }
+            return false;
+          },
+          child: child!,
+        );
       },
       child: Material(
         child: Container(

@@ -43,27 +43,32 @@ class TrackInfo extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              title,
-                              style: TextStyle(
-                                fontSize: vp(a: 18.0, b: 24.0, c: p),
-                                color: Colors.white.withOpacity(.9),
-                                fontWeight: FontWeight.w600,
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                title,
+                                style: TextStyle(
+                                  fontSize: vp(a: 18.0, b: 24.0, c: p),
+                                  color: Colors.white.withOpacity(.9),
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
-                            ),
-                            Text(
-                              artist,
-                              style: TextStyle(
-                                fontSize: vp(a: 15.0, b: 17.0, c: p),
-                                color: Colors.white.withOpacity(.5),
-                                fontWeight: FontWeight.w400,
+                              Text(
+                                artist,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: vp(a: 15.0, b: 17.0, c: p),
+                                  color: Colors.white.withOpacity(.5),
+                                  fontWeight: FontWeight.w400,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                       Opacity(

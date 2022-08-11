@@ -2,6 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+import 'package:tearmusic/providers/current_music_provider.dart';
 
 class WaveformSlider extends StatefulWidget {
   const WaveformSlider({Key? key}) : super(key: key);
@@ -15,6 +17,7 @@ class _WaveformSliderState extends State<WaveformSlider> {
   double progress = 0.0;
   late List<int> waveform;
   late List<bool> actives;
+  bool sliding = false;
 
   @override
   void initState() {
@@ -35,47 +38,63 @@ class _WaveformSliderState extends State<WaveformSlider> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> tickers = [];
+    final currentMusic = context.read<CurrentMusicProvider>();
 
-    for (int i = 0; i < tickerCount; i++) {
-      final bool active = tickerCount * progress >= i;
+    return StreamBuilder(
+      stream: currentMusic.player.positionStream,
+      builder: (context, snapshot) {
+        final List<Widget> tickers = [];
 
-      if (active != actives[i]) {
-        HapticFeedback.lightImpact();
-        actives[i] = active;
-      }
+        for (int i = 0; i < tickerCount; i++) {
+          final bool active = tickerCount * progress >= i;
 
-      tickers.add(AnimatedContainer(
-        duration: const Duration(milliseconds: 100),
-        width: 3.0,
-        height: waveform[i].toDouble() * (active ? 1.0 : 0.8),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primary.withOpacity(active ? 1.0 : 0.3),
-          borderRadius: BorderRadius.circular(45.0),
-        ),
-      ));
-    }
+          if (sliding && active != actives[i]) {
+            HapticFeedback.lightImpact();
+            actives[i] = active;
+          }
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return GestureDetector(
-          onTapUp: (details) {
-            progress = details.localPosition.dx / constraints.maxWidth;
-            setProgress();
-          },
-          onHorizontalDragStart: (details) {},
-          onHorizontalDragUpdate: (details) {
-            progress = details.localPosition.dx / constraints.maxWidth;
-            setProgress();
-          },
-          onHorizontalDragEnd: (details) {},
-          child: Container(
-            color: Colors.transparent,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: tickers,
+          tickers.add(AnimatedContainer(
+            duration: const Duration(milliseconds: 100),
+            width: 3.0,
+            height: waveform[i].toDouble() * (active ? 1.0 : 0.8),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primary.withOpacity(active ? 1.0 : 0.3),
+              borderRadius: BorderRadius.circular(45.0),
             ),
-          ),
+          ));
+        }
+
+        if (!sliding) progress = currentMusic.progress;
+
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            return GestureDetector(
+              onTapUp: (details) {
+                progress = details.localPosition.dx / constraints.maxWidth;
+                setProgress();
+                currentMusic.player.seek(Duration(milliseconds: ((currentMusic.player.duration?.inMilliseconds ?? 0) * progress).round()));
+                sliding = false;
+              },
+              onHorizontalDragStart: (details) {
+                sliding = true;
+              },
+              onHorizontalDragUpdate: (details) {
+                progress = details.localPosition.dx / constraints.maxWidth;
+                setProgress();
+              },
+              onHorizontalDragEnd: (details) {
+                currentMusic.player.seek(Duration(milliseconds: ((currentMusic.player.duration?.inMilliseconds ?? 0) * progress).round()));
+                sliding = false;
+              },
+              child: Container(
+                color: Colors.transparent,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: tickers,
+                ),
+              ),
+            );
+          },
         );
       },
     );

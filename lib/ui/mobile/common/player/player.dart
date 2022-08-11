@@ -1,13 +1,11 @@
+// ignore_for_file: dead_code
+
 import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:tearmusic/models/music/album.dart';
-import 'package:tearmusic/models/music/artist.dart';
-import 'package:tearmusic/models/music/images.dart';
-import 'package:tearmusic/models/music/track.dart';
 import 'package:tearmusic/providers/current_music_provider.dart';
 import 'package:tearmusic/ui/mobile/common/player/lyrics_view.dart';
 import 'package:tearmusic/ui/mobile/common/player/queue_view.dart';
@@ -56,60 +54,6 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
   bool queueScrollable = false;
   bool bounceUp = false;
   bool bounceDown = false;
-
-  final List<MusicTrack> tracks = [
-    MusicTrack(
-        id: "id",
-        json: {},
-        name: "Good News",
-        duration: const Duration(seconds: 285),
-        explicit: true,
-        trackNumber: 1,
-        album: MusicAlbum(
-            json: {},
-            id: "id",
-            name: "name",
-            albumType: AlbumType.single,
-            trackCount: 1,
-            releaseDate: DateTime.now(),
-            artists: [MusicArtist(json: {}, id: "id", name: "name", genres: [], images: null, followers: 0)],
-            images: Images(images: [InternalImage(json: {}, url: "1", width: 100, height: 100)])),
-        artists: [MusicArtist(json: {}, id: "id", name: "Apashe", genres: [], images: null, followers: 0)]),
-    MusicTrack(
-        json: {},
-        id: "id",
-        name: "Track 2",
-        duration: const Duration(seconds: 200),
-        explicit: true,
-        trackNumber: 1,
-        album: MusicAlbum(
-            json: {},
-            id: "id",
-            name: "name",
-            albumType: AlbumType.single,
-            trackCount: 1,
-            releaseDate: DateTime.now(),
-            artists: [MusicArtist(json: {}, id: "id", name: "name", genres: [], images: null, followers: 0)],
-            images: Images(images: [InternalImage(json: {}, url: "2", width: 100, height: 100)])),
-        artists: [MusicArtist(json: {}, id: "id", name: "Artist 2", genres: [], images: null, followers: 0)]),
-    MusicTrack(
-        json: {},
-        id: "id",
-        name: "Track 3",
-        duration: const Duration(seconds: 200),
-        explicit: true,
-        trackNumber: 1,
-        album: MusicAlbum(
-            json: {},
-            id: "id",
-            name: "name",
-            albumType: AlbumType.single,
-            trackCount: 1,
-            releaseDate: DateTime.now(),
-            artists: [MusicArtist(json: {}, id: "id", name: "name", genres: [], images: null, followers: 0)],
-            images: Images(images: [InternalImage(json: {}, url: "3", width: 100, height: 100)])),
-        artists: [MusicArtist(json: {}, id: "id", name: "Artist 3", genres: [], images: null, followers: 0)]),
-  ];
 
   @override
   void initState() {
@@ -213,7 +157,7 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
         .then((_) {
       sOffset = 0;
       sAnim.animateTo(0.0, duration: Duration.zero);
-      tracks.insert(0, tracks.removeLast());
+      // tracks.insert(0, tracks.removeLast());
     });
     if ((sPrevOffset - sOffset).abs() > actuationOffset) HapticFeedback.lightImpact();
   }
@@ -239,13 +183,15 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
         .then((_) {
       sOffset = 0;
       sAnim.animateTo(0.0, duration: Duration.zero);
-      tracks.add(tracks.removeAt(0));
+      // tracks.add(tracks.removeAt(0));
     });
     if ((sPrevOffset - sOffset).abs() > actuationOffset) HapticFeedback.lightImpact();
   }
 
   @override
   Widget build(BuildContext context) {
+    final currentMusic = context.watch<CurrentMusicProvider>();
+
     return WillPopScope(
       onWillPop: () async {
         if (offset > maxOffset) {
@@ -313,11 +259,13 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
 
           /// Horizontal
           onHorizontalDragStart: (details) {
+            return;
             if (offset > maxOffset) return;
 
             sPrevOffset = sOffset;
           },
           onHorizontalDragUpdate: (details) {
+            return;
             if (offset > maxOffset) return;
             if (details.globalPosition.dy > screenSize.height - deadSpace) return;
 
@@ -327,6 +275,7 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
             sAnim.animateTo(sOffset / sMaxOffset, duration: Duration.zero);
           },
           onHorizontalDragEnd: (details) {
+            return;
             if (offset > maxOffset) return;
 
             final distance = sPrevOffset - sOffset;
@@ -471,7 +420,7 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
                                         ),
                                       ),
                                       Text(
-                                        "Album",
+                                        currentMusic.playing?.album?.name ?? "?",
                                         style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20.0, color: onSecondary.withOpacity(.9)),
                                       ),
                                     ],
@@ -507,14 +456,17 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
                                   child: WaveformSlider(),
                                 ),
                               ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text("1:12", style: TextStyle(color: onSecondary)),
-                                    Text(tracks[0].duration.shortFormat(), style: TextStyle(color: onSecondary)),
-                                  ],
+                              StreamBuilder(
+                                stream: currentMusic.player.positionStream,
+                                builder: (context, snapshot) => Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(currentMusic.player.position.shortFormat(), style: TextStyle(color: onSecondary)),
+                                      Text(currentMusic.player.duration?.shortFormat() ?? "??:??", style: TextStyle(color: onSecondary)),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ],
@@ -619,13 +571,27 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
                                       color: Colors.black,
                                       borderRadius: BorderRadius.circular(16.0),
                                     ),
-                                    child: CustomPaint(
-                                      painter: MiniplayerProgressPainter(.68 * (1 - rcp)),
-                                      child: FloatingActionButton(
-                                        onPressed: () {},
-                                        elevation: 0,
-                                        backgroundColor: Theme.of(context).colorScheme.surfaceTint.withOpacity(.3),
-                                        child: const Icon(Icons.pause),
+                                    child: MultiProvider(
+                                      providers: [
+                                        StreamProvider(create: (_) => currentMusic.player.positionStream, initialData: Duration.zero),
+                                        StreamProvider(create: (_) => currentMusic.player.playingStream, initialData: false),
+                                      ],
+                                      builder: (context, snapshot) => Consumer2<bool, Duration>(
+                                        builder: (context, value1, value2, child) => CustomPaint(
+                                          painter: MiniplayerProgressPainter(currentMusic.progress * (1 - rcp)),
+                                          child: FloatingActionButton(
+                                            onPressed: () {
+                                              if (currentMusic.player.playing) {
+                                                currentMusic.player.pause();
+                                              } else {
+                                                currentMusic.player.play();
+                                              }
+                                            },
+                                            elevation: 0,
+                                            backgroundColor: Theme.of(context).colorScheme.surfaceTint.withOpacity(.3),
+                                            child: Icon(value1 ? Icons.pause : Icons.play_arrow),
+                                          ),
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -734,20 +700,20 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
                       builder: (context, child) {
                         return Stack(
                           children: [
-                            Opacity(
-                              opacity: -sAnim.value.clamp(-1.0, 0.0),
-                              child: Transform.translate(
-                                offset: Offset(-sAnim.value * sMaxOffset / stParallax - sMaxOffset / stParallax, 0),
-                                child: TrackInfo(
-                                    artist: tracks[0].artists.map((e) => e.name).join(", "),
-                                    title: tracks[0].name,
-                                    cp: cp,
-                                    p: p,
-                                    bottomOffset: bottomOffset,
-                                    maxOffset: maxOffset,
-                                    screenSize: screenSize),
-                              ),
-                            ),
+                            // Opacity(
+                            //   opacity: -sAnim.value.clamp(-1.0, 0.0),
+                            //   child: Transform.translate(
+                            //     offset: Offset(-sAnim.value * sMaxOffset / stParallax - sMaxOffset / stParallax, 0),
+                            //     child: TrackInfo(
+                            //         artist: tracks[0].artists.map((e) => e.name).join(", "),
+                            //         title: tracks[0].name,
+                            //         cp: cp,
+                            //         p: p,
+                            //         bottomOffset: bottomOffset,
+                            //         maxOffset: maxOffset,
+                            //         screenSize: screenSize),
+                            //   ),
+                            // ),
                             Opacity(
                               opacity: 1 - sAnim.value.abs(),
                               child: Transform.translate(
@@ -760,8 +726,8 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
                                                 : (1 - bp)
                                             : 0.0)),
                                 child: TrackInfo(
-                                    artist: tracks[1].artists.map((e) => e.name).join(", "),
-                                    title: tracks[1].name,
+                                    artist: currentMusic.playing?.artists.map((e) => e.name).join(", ") ?? "?",
+                                    title: currentMusic.playing?.name ?? "",
                                     p: bp,
                                     cp: bcp,
                                     bottomOffset: bottomOffset,
@@ -769,20 +735,20 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
                                     screenSize: screenSize),
                               ),
                             ),
-                            Opacity(
-                              opacity: sAnim.value.clamp(0.0, 1.0),
-                              child: Transform.translate(
-                                offset: Offset(-sAnim.value * sMaxOffset / stParallax + sMaxOffset / stParallax, 0),
-                                child: TrackInfo(
-                                    artist: tracks[2].artists.map((e) => e.name).join(", "),
-                                    title: tracks[2].name,
-                                    cp: cp,
-                                    p: p,
-                                    bottomOffset: bottomOffset,
-                                    maxOffset: maxOffset,
-                                    screenSize: screenSize),
-                              ),
-                            ),
+                            // Opacity(
+                            //   opacity: sAnim.value.clamp(0.0, 1.0),
+                            //   child: Transform.translate(
+                            //     offset: Offset(-sAnim.value * sMaxOffset / stParallax + sMaxOffset / stParallax, 0),
+                            //     child: TrackInfo(
+                            //         artist: tracks[2].artists.map((e) => e.name).join(", "),
+                            //         title: tracks[2].name,
+                            //         cp: cp,
+                            //         p: p,
+                            //         bottomOffset: bottomOffset,
+                            //         maxOffset: maxOffset,
+                            //         screenSize: screenSize),
+                            //   ),
+                            // ),
                           ],
                         );
                       },
@@ -795,21 +761,21 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
                     builder: (context, child) {
                       return Stack(
                         children: [
-                          Opacity(
-                            opacity: -sAnim.value.clamp(-1.0, 0.0),
-                            child: Transform.translate(
-                              offset: Offset(-sAnim.value * sMaxOffset / siParallax - sMaxOffset / siParallax, 0),
-                              child: TrackImage(
-                                image: tracks[0].album?.images!.maxSize,
-                                large: true,
-                                p: p,
-                                cp: cp,
-                                screenSize: screenSize,
-                                bottomOffset: bottomOffset,
-                                maxOffset: maxOffset,
-                              ),
-                            ),
-                          ),
+                          // Opacity(
+                          //   opacity: -sAnim.value.clamp(-1.0, 0.0),
+                          //   child: Transform.translate(
+                          //     offset: Offset(-sAnim.value * sMaxOffset / siParallax - sMaxOffset / siParallax, 0),
+                          //     child: TrackImage(
+                          //       image: tracks[0].album?.images!.maxSize,
+                          //       large: true,
+                          //       p: p,
+                          //       cp: cp,
+                          //       screenSize: screenSize,
+                          //       bottomOffset: bottomOffset,
+                          //       maxOffset: maxOffset,
+                          //     ),
+                          //   ),
+                          // ),
                           Opacity(
                             opacity: 1 - sAnim.value.abs(),
                             child: Transform.translate(
@@ -826,21 +792,21 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
                               ),
                             ),
                           ),
-                          Opacity(
-                            opacity: sAnim.value.clamp(0.0, 1.0),
-                            child: Transform.translate(
-                              offset: Offset(-sAnim.value * sMaxOffset / siParallax + sMaxOffset / siParallax, 0),
-                              child: TrackImage(
-                                image: tracks[2].album?.images!.maxSize,
-                                large: true,
-                                p: p,
-                                cp: cp,
-                                screenSize: screenSize,
-                                bottomOffset: bottomOffset,
-                                maxOffset: maxOffset,
-                              ),
-                            ),
-                          ),
+                          // Opacity(
+                          //   opacity: sAnim.value.clamp(0.0, 1.0),
+                          //   child: Transform.translate(
+                          //     offset: Offset(-sAnim.value * sMaxOffset / siParallax + sMaxOffset / siParallax, 0),
+                          //     child: TrackImage(
+                          //       image: tracks[2].album?.images!.maxSize,
+                          //       large: true,
+                          //       p: p,
+                          //       cp: cp,
+                          //       screenSize: screenSize,
+                          //       bottomOffset: bottomOffset,
+                          //       maxOffset: maxOffset,
+                          //     ),
+                          //   ),
+                          // ),
                         ],
                       );
                     },

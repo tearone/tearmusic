@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
@@ -10,6 +11,8 @@ import 'package:tearmusic/providers/will_pop_provider.dart';
 import 'package:tearmusic/ui/mobile/app.dart';
 
 void main() async {
+  if (kIsWeb) return;
+
   await Hive.initFlutter();
 
   final baseApi = BaseApi();

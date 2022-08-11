@@ -2,6 +2,7 @@ import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:tearmusic/providers/current_music_provider.dart';
 import 'package:tearmusic/providers/theme_provider.dart';
 import 'package:tearmusic/providers/user_provider.dart';
 import 'package:tearmusic/ui/mobile/common/player/player.dart';
@@ -97,10 +98,7 @@ class _NavigationScreenState extends State<NavigationScreen> with SingleTickerPr
         }
         return false;
       },
-      child: FutureBuilder<Uint8List>(
-        future: getImage(),
-        builder: (context, snapshot) {
-          return Material(
+      child: Material(
             child: Container(
               decoration: BoxDecoration(
                 gradient: RadialGradient(
@@ -183,13 +181,9 @@ class _NavigationScreenState extends State<NavigationScreen> with SingleTickerPr
                   ),
 
                   /// Miniplayer
-                  if (snapshot.hasData) Player(animation: animation, mainImageBytes: snapshot.data!),
+                  if (context.read<CurrentMusicProvider>().playing != null) Player(animation: animation),
                 ],
-              ),
-            ),
-          );
-        },
-      ),
+                    ),),        ),
     );
   }
 }

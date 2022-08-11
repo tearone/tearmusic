@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:tearmusic/providers/current_music_provider.dart';
-import 'package:tearmusic/ui/mobile/common/cached_image.dart';
 import 'package:tearmusic/ui/mobile/common/player/lyrics_view.dart';
 import 'package:tearmusic/ui/mobile/common/player/queue_view.dart';
 import 'package:tearmusic/ui/mobile/common/player/slider.dart';
@@ -19,10 +18,9 @@ import 'package:tearmusic/utils.dart';
 enum PlayerState { mini, expanded, queue }
 
 class Player extends StatefulWidget {
-  const Player({Key? key, required this.animation, required this.mainImageBytes}) : super(key: key);
+  const Player({Key? key, required this.animation}) : super(key: key);
 
   final AnimationController animation;
-  final Uint8List mainImageBytes;
 
   @override
   State<Player> createState() => _PlayerState();

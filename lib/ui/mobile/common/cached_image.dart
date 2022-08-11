@@ -8,10 +8,11 @@ import 'package:tearmusic/models/music/images.dart';
 import 'package:http/http.dart' as http;
 
 class CachedImage extends StatelessWidget {
-  const CachedImage(this.images, {Key? key, this.borderRadius = 4.0}) : super(key: key);
+  const CachedImage(this.images, {Key? key, this.borderRadius = 4.0, this.setTheme = false}) : super(key: key);
 
   final Images images;
   final double borderRadius;
+  final bool setTheme;
 
   Future<Uint8List> getImage(Size size) async {
     final uri = images.forSize(size);
@@ -22,9 +23,8 @@ class CachedImage extends StatelessWidget {
     if (bytes == null) {
       final res = await http.get(Uri.parse(uri));
       bytes = res.bodyBytes;
+      box.put(uri, bytes);
     }
-
-    box.put(uri, bytes);
 
     return bytes;
   }

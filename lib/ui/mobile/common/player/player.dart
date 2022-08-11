@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:tearmusic/providers/current_music_provider.dart';
+import 'package:tearmusic/ui/mobile/common/cached_image.dart';
 import 'package:tearmusic/ui/mobile/common/player/lyrics_view.dart';
 import 'package:tearmusic/ui/mobile/common/player/queue_view.dart';
 import 'package:tearmusic/ui/mobile/common/player/slider.dart';
@@ -781,8 +782,8 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
                             child: Transform.translate(
                               offset: Offset(-sAnim.value * sMaxOffset / siParallax,
                                   !bounceUp ? (-maxOffset + topInset + 108.0) * (!bounceDown ? qp : (1 - bp)) : 0.0),
-                              child: TrackImage.fromBytes(
-                                bytes: widget.mainImageBytes,
+                              child: TrackImage(
+                                images: currentMusic.playing?.album?.images,
                                 p: bp,
                                 cp: bcp,
                                 width: vp(a: 82.0, b: 92.0, c: qp),

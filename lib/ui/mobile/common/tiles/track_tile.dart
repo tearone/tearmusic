@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tearmusic/models/music/track.dart';
 import 'package:tearmusic/providers/current_music_provider.dart';
+import 'package:tearmusic/providers/theme_provider.dart';
+import 'package:tearmusic/ui/common/image_color.dart';
 import 'package:tearmusic/ui/mobile/common/cached_image.dart';
 import 'package:tearmusic/ui/common/format.dart';
 import 'package:tearmusic/ui/mobile/common/player/lyrics_view.dart';
@@ -80,6 +82,13 @@ class TrackTile extends StatelessWidget {
       onTap: () {
         FocusScope.of(context).requestFocus(FocusNode());
         context.read<CurrentMusicProvider>().playTrack(track);
+        if (track.album?.images != null) {
+          CachedImage(track.album!.images!).getImage(const Size(64, 64)).then((value) {
+            final colors = generateColorPalette(value);
+            final theme = context.read<ThemeProvider>();
+            if (theme.key != colors[1]) theme.setThemeKey(colors[1]);
+          });
+        }
       },
     );
   }

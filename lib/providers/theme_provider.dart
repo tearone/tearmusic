@@ -11,9 +11,11 @@ class ThemeProvider extends ChangeNotifier {
   late ThemeData _navigationThemeA;
   ThemeData? _appThemeB;
   ThemeData? _navigationThemeB;
+  Color? _key;
 
   ThemeData get appTheme => _appThemeB ?? _appThemeA;
   ThemeData get navigationTheme => _navigationThemeB ?? _navigationThemeA;
+  Color get key => _key ?? Colors.blue;
 
   void tempAppTheme(ThemeData theme) {
     _appThemeB = theme;
@@ -35,6 +37,11 @@ class ThemeProvider extends ChangeNotifier {
     _appThemeA = theme;
     _navigationThemeA = theme;
     notifyListeners();
+  }
+
+  void setThemeKey(Color color) {
+    _key = color;
+    setTheme(coloredTheme(color));
   }
 
   static ThemeData coloredTheme(Color color) {

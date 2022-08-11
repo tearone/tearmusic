@@ -65,6 +65,7 @@ class TrackImage extends StatelessWidget {
                         images!,
                         borderRadius: radius,
                         setTheme: true,
+                        size: const Size(400, 400),
                       )
                     : null,
               ),

@@ -80,12 +80,14 @@ class TrackTile extends StatelessWidget {
       visualDensity: VisualDensity.compact,
       onTap: () {
         FocusScope.of(context).requestFocus(FocusNode());
-        context.read<CurrentMusicProvider>().playTrack(track);
+        final currentMusic = context.read<CurrentMusicProvider>();
         if (track.album?.images != null) {
           CachedImage(track.album!.images!).getImage(const Size(64, 64)).then((value) {
             final colors = generateColorPalette(value);
-            final theme = context.read<ThemeProvider>();
-            if (theme.key != colors[1]) theme.setThemeKey(colors[1]);
+            currentMusic.playTrack(track).then((_) {
+              final theme = context.read<ThemeProvider>();
+              if (theme.key != colors[1]) theme.setThemeKey(colors[1]);
+            });
           });
         }
       },

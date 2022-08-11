@@ -1,0 +1,9 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "one.tear.tearmusic",
+    "sha256_cert_fingerprints":
+    ["98:9F:DA:C2:3D:0A:A8:A3:C0:92:22:D5:20:1E:B5:47:80:76:53:A8:62:9C:E3:C7:08:32:E6:42:82:1D:7A:69"]
+  }
+}]

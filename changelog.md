@@ -1,1 +1,2 @@
-- bugfixes
+- compact like display in playlists
+- haptics in lyrics

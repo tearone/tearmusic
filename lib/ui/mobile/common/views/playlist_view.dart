@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:like_button/like_button.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
@@ -177,7 +178,7 @@ class _PlaylistViewState extends State<PlaylistView> {
                                             labelPadding: const EdgeInsets.only(left: 2.0, right: 4.0),
                                             avatar: Icon(Icons.favorite, color: theme.colorScheme.primary, size: 18.0),
                                             label: Text(
-                                              "${snapshot.data!.followers} likes",
+                                              "${NumberFormat.compact().format(snapshot.data!.followers)} likes",
                                               style: TextStyle(
                                                 fontSize: 14.0,
                                                 color: theme.colorScheme.primary,

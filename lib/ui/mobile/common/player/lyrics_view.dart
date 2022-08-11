@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:tearmusic/models/music/lyrics.dart';
@@ -23,6 +24,7 @@ class LyricsView extends StatefulWidget {
 class _LyricsViewState extends State<LyricsView> with SingleTickerProviderStateMixin {
   late AnimationController animation;
   List<GlobalKey> keys = [];
+  List<List<bool>> actives = [];
 
   @override
   void initState() {
@@ -35,7 +37,7 @@ class _LyricsViewState extends State<LyricsView> with SingleTickerProviderStateM
       duration: widget.track.duration,
     );
 
-    animation.animateTo(currentMusic.player.position.inMilliseconds / widget.track.duration.inMilliseconds, duration: Duration.zero);
+    animation.animateTo((currentMusic.player.position.inMilliseconds) / widget.track.duration.inMilliseconds, duration: Duration.zero);
     if (currentMusic.player.playing) animation.forward();
   }
 
@@ -60,7 +62,22 @@ class _LyricsViewState extends State<LyricsView> with SingleTickerProviderStateM
             );
           }
 
-          if (keys.isEmpty) keys = List.generate(snapshot.data!.richSync?.length ?? snapshot.data!.subtitle?.length ?? 0, (index) => GlobalKey());
+          final dataLength = snapshot.data!.richSync?.length ?? snapshot.data!.subtitle?.length ?? 0;
+
+          if (keys.isEmpty) keys = List.generate(dataLength, (index) => GlobalKey());
+          if (actives.isEmpty) {
+            actives = List.generate(dataLength, (index) {
+              if (snapshot.data!.richSync != null) {
+                final line = snapshot.data!.richSync!.elementAt(index);
+                return List.generate(line.segments.length,
+                    (i) => (line.start + line.segments[i].offset).inMilliseconds / widget.track.duration.inMilliseconds > animation.value);
+              }
+              if (snapshot.data!.subtitle != null) {
+                return [animation.value > snapshot.data!.subtitle!.elementAt(index).offset.inMilliseconds / widget.track.duration.inMilliseconds];
+              }
+              return [false];
+            });
+          }
 
           return Stack(
             children: [
@@ -152,6 +169,11 @@ class _LyricsViewState extends State<LyricsView> with SingleTickerProviderStateM
                                   }
                                 });
 
+                                if (actives[index][0] != (animation.value > progress)) {
+                                  actives[index][0] = animation.value > progress;
+                                  if (subtitle.text.replaceAll(" ", "") != "") HapticFeedback.lightImpact();
+                                }
+
                                 return AnimatedContainer(
                                   key: keys[index],
                                   duration: const Duration(milliseconds: 500),
@@ -228,32 +250,46 @@ class _LyricsViewState extends State<LyricsView> with SingleTickerProviderStateM
                                   ),
                                   child: Wrap(
                                     alignment: WrapAlignment.center,
-                                    children: richSync.segments.map((e) {
-                                      return AnimatedDefaultTextStyle(
-                                        duration: const Duration(milliseconds: 200),
-                                        style: TextStyle(
-                                          color: animation.value > progress(e.offset)
-                                              ? animation.value < progressEnd()
-                                                  ? Theme.of(context).colorScheme.primary
-                                                  : Theme.of(context).colorScheme.secondary
-                                              : Theme.of(context).colorScheme.secondary.withOpacity(.3),
-                                          fontFamily: Theme.of(context).textTheme.bodyText2!.fontFamily,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 22.0,
-                                          shadows: [
-                                            Shadow(
-                                              offset: const Offset(5.0, 6.0),
-                                              blurRadius: 0.0,
-                                              color: Theme.of(context).colorScheme.secondary.withOpacity(animation.value > progressEnd() ? .15 : 0),
-                                            ),
-                                          ],
-                                        ),
-                                        child: Text(
-                                          e.text,
-                                          textAlign: TextAlign.center,
-                                        ),
-                                      );
-                                    }).toList(),
+                                    children: richSync.segments
+                                        .asMap()
+                                        .map((i, e) {
+                                          if (actives[index][i] != (progress(e.offset) > animation.value)) {
+                                            actives[index][i] = progress(e.offset) > animation.value;
+                                            if (e.text.replaceAll(" ", "") != "") HapticFeedback.lightImpact();
+                                          }
+
+                                          return MapEntry(
+                                              i,
+                                              AnimatedDefaultTextStyle(
+                                                duration: const Duration(milliseconds: 200),
+                                                style: TextStyle(
+                                                  color: animation.value > progress(e.offset)
+                                                      ? animation.value < progressEnd()
+                                                          ? Theme.of(context).colorScheme.primary
+                                                          : Theme.of(context).colorScheme.secondary
+                                                      : Theme.of(context).colorScheme.secondary.withOpacity(.3),
+                                                  fontFamily: Theme.of(context).textTheme.bodyText2!.fontFamily,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 22.0,
+                                                  shadows: [
+                                                    Shadow(
+                                                      offset: const Offset(5.0, 6.0),
+                                                      blurRadius: 0.0,
+                                                      color: Theme.of(context)
+                                                          .colorScheme
+                                                          .secondary
+                                                          .withOpacity(animation.value > progressEnd() ? .15 : 0),
+                                                    ),
+                                                  ],
+                                                ),
+                                                child: Text(
+                                                  e.text,
+                                                  textAlign: TextAlign.center,
+                                                ),
+                                              ));
+                                        })
+                                        .values
+                                        .toList(),
                                   ),
                                 );
                               });

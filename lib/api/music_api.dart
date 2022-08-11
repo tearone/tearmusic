@@ -57,7 +57,7 @@ class MusicApi {
     _reschk(res, "albumTracks");
 
     final json = (jsonDecode(res.body)['tracks'] as List).cast<Map>();
-    return MusicTrack.decodeList(json);
+    return MusicTrack.decodeList(json, album: album);
   }
 
   Future<List<MusicAlbum>> newReleases() async {

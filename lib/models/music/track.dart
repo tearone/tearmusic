@@ -21,7 +21,7 @@ class MusicTrack extends Model {
     required this.artists,
   }) : super(id: id, json: json, key: "$name ${artists.first.name}");
 
-  factory MusicTrack.decode(Map json) {
+  factory MusicTrack.decode(Map json, {MusicAlbum? album}) {
     return MusicTrack(
       json: json,
       id: json["id"] ?? "",
@@ -29,14 +29,15 @@ class MusicTrack extends Model {
       duration: Duration(milliseconds: json["duration_ms"]),
       explicit: json["explicit"],
       trackNumber: json["track_number"],
-      album: json["album"] != null ? MusicAlbum.decode(json["album"]) : null,
+      album: album ?? (json["album"] != null ? MusicAlbum.decode(json["album"]) : null),
       artists: json["artists"].map((e) => MusicArtist.decode(e)).toList().cast<MusicArtist>(),
     );
   }
 
   Map encode() => json;
 
-  static List<MusicTrack> decodeList(List<Map> encoded) => encoded.where((e) => e["id"] != null).map((e) => MusicTrack.decode(e)).toList().cast<MusicTrack>();
+  static List<MusicTrack> decodeList(List<Map> encoded, {MusicAlbum? album}) =>
+      encoded.where((e) => e["id"] != null).map((e) => MusicTrack.decode(e, album: album)).toList().cast<MusicTrack>();
   static List<Map> encodeList(List<MusicTrack> models) => models.map((e) => e.encode()).toList().cast<Map>();
 
   String get artistsLabel {

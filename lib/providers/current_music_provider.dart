@@ -13,9 +13,9 @@ class CurrentMusicProvider extends ChangeNotifier {
   double get progress => player.duration != null ? player.position.inMilliseconds / player.duration!.inMilliseconds : 0;
 
   Future<void> playTrack(MusicTrack track) async {
+    String url = await _api.playback(track);
     playing = track;
     notifyListeners();
-    String url = await _api.playback(track);
     await play(url);
   }
 

@@ -22,6 +22,8 @@ class MusicTrack extends Model {
   }) : super(id: id, json: json, key: "$name ${artists.first.name}");
 
   factory MusicTrack.decode(Map json, {MusicAlbum? album}) {
+    if (album != null) json['album'] = album.json;
+
     return MusicTrack(
       json: json,
       id: json["id"] ?? "",

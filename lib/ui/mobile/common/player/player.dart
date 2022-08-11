@@ -473,7 +473,7 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(currentMusic.player.position.shortFormat(), style: TextStyle(color: onSecondary)),
-                                      Text(currentMusic.player.duration?.shortFormat() ?? "??:??", style: TextStyle(color: onSecondary)),
+                                      Text(currentMusic.player.duration?.shortFormat() ?? "00:00", style: TextStyle(color: onSecondary)),
                                     ],
                                   ),
                                 ),
@@ -589,6 +589,7 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
                                         builder: (context, value1, value2, child) => CustomPaint(
                                           painter: MiniplayerProgressPainter(currentMusic.progress * (1 - rcp)),
                                           child: FloatingActionButton(
+                                            heroTag: currentMusic.playing,
                                             onPressed: () {
                                               if (currentMusic.player.playing) {
                                                 currentMusic.player.pause();
@@ -852,7 +853,7 @@ class MiniplayerProgressPainter extends CustomPainter {
   MiniplayerProgressPainter(this.progress);
 
   final double progress;
-  final strokeWidth = 4.0;
+  static const strokeWidth = 4.0;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -890,7 +891,5 @@ class MiniplayerProgressPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return true;
-  }
+  bool shouldRepaint(covariant MiniplayerProgressPainter oldDelegate) => oldDelegate.progress != progress;
 }

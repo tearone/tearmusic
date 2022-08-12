@@ -138,4 +138,13 @@ class MusicApi {
 
     return res.body;
   }
+
+  Future<void> purgeCache(MusicTrack track) async {
+    final res = await http.delete(
+      Uri.parse("${BaseApi.url}/music/playback?id=${Uri.encodeComponent(track.id)}"),
+      headers: {"authorization": await base.getToken()},
+    );
+
+    _reschk(res, "purgeCache");
+  }
 }

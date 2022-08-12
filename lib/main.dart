@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:tearmusic/api/base_api.dart';
 import 'package:tearmusic/providers/current_music_provider.dart';
 import 'package:tearmusic/providers/music_info_provider.dart';
+import 'package:tearmusic/providers/navigator_provider.dart';
 import 'package:tearmusic/providers/theme_provider.dart';
 import 'package:tearmusic/providers/user_provider.dart';
 import 'package:tearmusic/providers/will_pop_provider.dart';
@@ -18,8 +19,8 @@ void main() async {
   final baseApi = BaseApi();
   final userProvider = UserProvider(base: baseApi);
   final musicInfoProvider = MusicInfoProvider(base: baseApi);
-
   final currentMusicProvider = CurrentMusicProvider(api: musicInfoProvider);
+  final themeProvider = ThemeProvider();
 
   await userProvider.init();
   await musicInfoProvider.init();
@@ -27,9 +28,10 @@ void main() async {
   final providers = [
     ChangeNotifierProvider(create: (_) => userProvider),
     Provider(create: (_) => musicInfoProvider),
-    ChangeNotifierProvider(create: (_) => ThemeProvider()),
+    ChangeNotifierProvider(create: (_) => themeProvider),
     ChangeNotifierProvider(create: (_) => currentMusicProvider),
     Provider(create: (_) => WillPopProvider()),
+    Provider(create: (_) => NavigatorProvider(theme: themeProvider)),
   ];
 
   runApp(App(providers: providers));

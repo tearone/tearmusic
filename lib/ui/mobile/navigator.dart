@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:tearmusic/providers/current_music_provider.dart';
+import 'package:tearmusic/providers/navigator_provider.dart';
 import 'package:tearmusic/providers/theme_provider.dart';
 import 'package:tearmusic/providers/user_provider.dart';
 import 'package:tearmusic/providers/will_pop_provider.dart';
@@ -92,6 +93,8 @@ class _NavigationScreenState extends State<NavigationScreen> with SingleTickerPr
       return const LoginScreen();
     }
 
+    context.read<NavigatorProvider>().setState(ScaffoldMessenger.of(context));
+
     return Consumer<WillPopProvider>(
       builder: (context, value, child) {
         return WillPopScope(
@@ -104,91 +107,93 @@ class _NavigationScreenState extends State<NavigationScreen> with SingleTickerPr
           child: child!,
         );
       },
-      child: Material(
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: RadialGradient(
-              center: const Alignment(0.95, -0.95),
-              radius: 1.0,
-              colors: [
-                Theme.of(context).colorScheme.onSecondary.withOpacity(.4),
-                Theme.of(context).colorScheme.onSecondary.withOpacity(.2),
-              ],
-            ),
-          ),
-          child: Stack(
-            alignment: Alignment.bottomCenter,
-            children: [
-              Navigator(
-                key: _navigatorState,
-                initialRoute: MobileRoutes.home.name,
-                onGenerateRoute: (route) => _handleRoute(route),
+      child: Scaffold(
+        body: Material(
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: RadialGradient(
+                center: const Alignment(0.95, -0.95),
+                radius: 1.0,
+                colors: [
+                  Theme.of(context).colorScheme.onSecondary.withOpacity(.4),
+                  Theme.of(context).colorScheme.onSecondary.withOpacity(.2),
+                ],
               ),
+            ),
+            child: Stack(
+              alignment: Alignment.bottomCenter,
+              children: [
+                Navigator(
+                  key: _navigatorState,
+                  initialRoute: MobileRoutes.home.name,
+                  onGenerateRoute: (route) => _handleRoute(route),
+                ),
 
-              AnimatedTheme(
-                data: context.select<ThemeProvider, ThemeData>((e) => e.navigationTheme),
-                child: AnimatedBuilder(
-                  animation: animation,
-                  builder: (context, child) {
-                    return Transform.translate(
-                      offset: Offset(0, (animation.value * 120).clamp(0, 120)),
-                      child: child,
-                    );
-                  },
-                  child: MediaQuery.removePadding(
-                    context: context,
-                    removeTop: true,
-                    child: NavigationBar(
-                      selectedIndex: _selected.index,
-                      onDestinationSelected: (value) {
-                        if (value == _selected.index) return;
-                        setState(() => _selected = MobileRoutes.values[value]);
-                        _navigatorState.currentState?.pushNamedAndRemoveUntil(MobileRoutes.values[value].name, (route) => false);
-                        context.read<ThemeProvider>().resetTheme();
-                      },
-                      destinations: const [
-                        NavigationDestination(
-                          label: "Home",
-                          icon: Icon(Icons.home_outlined),
-                          selectedIcon: Icon(Icons.home_filled),
-                        ),
-                        NavigationDestination(
-                          label: "Search",
-                          icon: Icon(Icons.search_outlined),
-                        ),
-                        NavigationDestination(
-                          label: "Library",
-                          icon: Icon(Icons.library_music_outlined),
-                          selectedIcon: Icon(Icons.library_music),
-                        ),
-                      ],
+                AnimatedTheme(
+                  data: context.select<ThemeProvider, ThemeData>((e) => e.navigationTheme),
+                  child: AnimatedBuilder(
+                    animation: animation,
+                    builder: (context, child) {
+                      return Transform.translate(
+                        offset: Offset(0, (animation.value * 120).clamp(0, 120)),
+                        child: child,
+                      );
+                    },
+                    child: MediaQuery.removePadding(
+                      context: context,
+                      removeTop: true,
+                      child: NavigationBar(
+                        selectedIndex: _selected.index,
+                        onDestinationSelected: (value) {
+                          if (value == _selected.index) return;
+                          setState(() => _selected = MobileRoutes.values[value]);
+                          _navigatorState.currentState?.pushNamedAndRemoveUntil(MobileRoutes.values[value].name, (route) => false);
+                          context.read<ThemeProvider>().resetTheme();
+                        },
+                        destinations: const [
+                          NavigationDestination(
+                            label: "Home",
+                            icon: Icon(Icons.home_outlined),
+                            selectedIcon: Icon(Icons.home_filled),
+                          ),
+                          NavigationDestination(
+                            label: "Search",
+                            icon: Icon(Icons.search_outlined),
+                          ),
+                          NavigationDestination(
+                            label: "Library",
+                            icon: Icon(Icons.library_music_outlined),
+                            selectedIcon: Icon(Icons.library_music),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
 
-              /// Opacity
-              Positioned.fill(
-                child: AnimatedBuilder(
-                  animation: animation,
-                  builder: (context, child) {
-                    if (animation.value > 0.01) {
-                      return Container(
-                        color: Colors.black.withOpacity((animation.value * 1.2).clamp(0, 1)),
-                        child: Container(
-                          color: Theme.of(context).colorScheme.onSecondary.withOpacity((animation.value * 3 - 2).clamp(0, .45)),
-                        ),
-                      );
-                    } else {
-                      return const SizedBox();
-                    }
-                  },
+                /// Opacity
+                Positioned.fill(
+                  child: AnimatedBuilder(
+                    animation: animation,
+                    builder: (context, child) {
+                      if (animation.value > 0.01) {
+                        return Container(
+                          color: Colors.black.withOpacity((animation.value * 1.2).clamp(0, 1)),
+                          child: Container(
+                            color: Theme.of(context).colorScheme.onSecondary.withOpacity((animation.value * 3 - 2).clamp(0, .45)),
+                          ),
+                        );
+                      } else {
+                        return const SizedBox();
+                      }
+                    },
+                  ),
                 ),
-              ),
 
-              /// Miniplayer
-              if (context.read<CurrentMusicProvider>().playing != null) Player(animation: animation),
-            ],
+                /// Miniplayer
+                if (context.read<CurrentMusicProvider>().playing != null) Player(animation: animation),
+              ],
+            ),
           ),
         ),
       ),

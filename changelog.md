@@ -1,2 +1,1 @@
-- compact like display in playlists
-- haptics in lyrics
+- experimental context menu for tracks

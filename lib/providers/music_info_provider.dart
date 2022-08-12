@@ -227,4 +227,8 @@ class MusicInfoProvider {
   Future<String> playback(MusicTrack track) async {
     return await _api.playback(track);
   }
+
+  Future<void> purgeCache(MusicTrack track) async {
+    await _api.purgeCache(track);
+  }
 }

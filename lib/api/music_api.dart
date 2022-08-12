@@ -125,12 +125,15 @@ class MusicApi {
   }
 
   Future<String> playback(MusicTrack track) async {
+    String url = "${BaseApi.url}/music/playback";
+    url += "?artist=${Uri.encodeComponent(track.artists.first.name)}";
+    url += "&track=${Uri.encodeComponent(track.name)}";
+    url += "&id=${Uri.encodeComponent(track.id)}";
+    url += "&duration=${track.duration.inSeconds}";
+    url += (track.album != null ? "&album=${Uri.encodeComponent(track.album!.name)}" : "");
+
     final res = await http.get(
-      Uri.parse("${BaseApi.url}/music/playback"
-          "?artist=${Uri.encodeComponent(track.artists.first.name)}"
-          "&track=${Uri.encodeComponent(track.name)}"
-          "&id=${Uri.encodeComponent(track.id)}"
-          "&duration=${track.duration.inSeconds}"),
+      Uri.parse(url),
       headers: {"authorization": await base.getToken()},
     );
 

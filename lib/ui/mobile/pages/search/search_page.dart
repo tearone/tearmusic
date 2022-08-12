@@ -16,7 +16,7 @@ import 'package:tearmusic/ui/mobile/pages/search/top_result_container.dart';
 
 enum SearchResult { prepare, empty, loading, done }
 
-// Part of the filter code is stolen from https://github.com/filc/naplo
+// Part of the filter code were stolen from https://github.com/filc/naplo
 
 class SearchPage extends StatefulWidget {
   const SearchPage({Key? key}) : super(key: key);

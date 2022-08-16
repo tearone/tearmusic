@@ -1,3 +1,4 @@
+import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:like_button/like_button.dart';
 import 'package:tearmusic/utils.dart';
@@ -44,30 +45,45 @@ class TrackInfo extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Padding(
-                          padding: const EdgeInsets.only(right: 8.0),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                title,
-                                style: TextStyle(
-                                  fontSize: vp(a: 18.0, b: 24.0, c: p),
-                                  color: Colors.white.withOpacity(.9),
-                                  fontWeight: FontWeight.w600,
+                          padding: const EdgeInsets.only(right: 32.0),
+                          child: PageTransitionSwitcher(
+                            transitionBuilder: (child, primaryAnimation, secondaryAnimation) {
+                              return SharedAxisTransition(
+                                fillColor: Colors.transparent,
+                                animation: primaryAnimation,
+                                secondaryAnimation: secondaryAnimation,
+                                transitionType: SharedAxisTransitionType.horizontal,
+                                child: child,
+                              );
+                            },
+                            layoutBuilder: (entries) => Stack(children: entries),
+                            child: Column(
+                              key: Key(title),
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  title,
+                                  maxLines: 2,
+                                  style: TextStyle(
+                                    fontSize: vp(a: 18.0, b: 24.0, c: p),
+                                    color: Colors.white.withOpacity(.9),
+                                    fontWeight: FontWeight.w600,
+                                    height: 1,
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                artist,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontSize: vp(a: 15.0, b: 17.0, c: p),
-                                  color: Colors.white.withOpacity(.5),
-                                  fontWeight: FontWeight.w400,
+                                Text(
+                                  artist,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: vp(a: 15.0, b: 17.0, c: p),
+                                    color: Colors.white.withOpacity(.5),
+                                    fontWeight: FontWeight.w400,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ),

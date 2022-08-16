@@ -1,5 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:developer';
 
+import 'package:cbor/simple.dart';
 import 'package:tearmusic/api/base_api.dart';
 import 'package:http/http.dart' as http;
 import 'package:tearmusic/exceptionts.dart';
@@ -9,6 +12,7 @@ import 'package:tearmusic/models/music/lyrics.dart';
 import 'package:tearmusic/models/music/playlist.dart';
 import 'package:tearmusic/models/music/search_results.dart';
 import 'package:tearmusic/models/music/track.dart';
+import 'package:tearmusic/models/playback.dart';
 
 class MusicApi {
   MusicApi({required this.base});
@@ -24,6 +28,7 @@ class MusicApi {
       throw NotFoundException(cause);
     }
     if (res.statusCode != 200) {
+      log("Unknown Request: ${res.statusCode}");
       throw UnknownRequestException(cause);
     }
   }
@@ -124,11 +129,11 @@ class MusicApi {
     return MusicLyrics.decode(json);
   }
 
-  Future<String> playback(MusicTrack track) async {
+  Future<PlaybackHead> playbackHead(MusicTrack track) async {
     String url = "${BaseApi.url}/music/playback";
-    url += "?artist=${Uri.encodeComponent(track.artists.first.name)}";
+    url += "?id=${Uri.encodeComponent(track.id)}";
+    url += "&artist=${Uri.encodeComponent(track.artists.first.name)}";
     url += "&track=${Uri.encodeComponent(track.name)}";
-    url += "&id=${Uri.encodeComponent(track.id)}";
     url += "&duration=${track.duration.inSeconds}";
     url += (track.album != null ? "&album=${Uri.encodeComponent(track.album!.name)}" : "");
 
@@ -137,9 +142,35 @@ class MusicApi {
       headers: {"authorization": await base.getToken()},
     );
 
+    _reschk(res, "playbackHead");
+
+    final data = cbor.decode(res.bodyBytes);
+
+    return PlaybackHead.decode(data);
+  }
+
+  Future<Playback> playback(MusicTrack track, {required String userId, String? videoId, bool sub = true}) async {
+    String url = "${BaseApi.url}/music/playback";
+    url += "?id=${Uri.encodeComponent(track.id)}";
+    if (videoId != null) {
+      url += "&video_id=${Uri.encodeComponent(videoId)}";
+    } else {
+      url += "&artist=${Uri.encodeComponent(track.artists.first.name)}";
+      url += "&track=${Uri.encodeComponent(track.name)}";
+      url += "&duration=${track.duration.inSeconds}";
+      url += (track.album != null ? "&album=${Uri.encodeComponent(track.album!.name)}" : "");
+    }
+
+    final res = await http.post(
+      Uri.parse(url),
+      headers: {"authorization": await base.getToken()},
+    );
+
     _reschk(res, "playback");
 
-    return res.body;
+    final data = jsonDecode(res.body);
+
+    return Playback.decode(data);
   }
 
   Future<void> purgeCache(MusicTrack track) async {

@@ -2,6 +2,7 @@
 
 import 'dart:ui';
 
+import 'package:animations/animations.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -447,43 +448,6 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
                       ),
                     ),
 
-                  /// Slider
-                  if (fastOpacity > 0.0)
-                    Opacity(
-                      opacity: fastOpacity,
-                      child: Transform.translate(
-                        offset: Offset(0, bottomOffset + (-maxOffset / 4.4 * p)),
-                        child: Align(
-                          alignment: Alignment.bottomLeft,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const SizedBox(
-                                height: 65.0,
-                                child: Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 24.0),
-                                  child: WaveformSlider(),
-                                ),
-                              ),
-                              StreamBuilder(
-                                stream: currentMusic.player.positionStream,
-                                builder: (context, snapshot) => Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(currentMusic.player.position.shortFormat(), style: TextStyle(color: onSecondary)),
-                                      Text(currentMusic.player.duration?.shortFormat() ?? "00:00", style: TextStyle(color: onSecondary)),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-
                   // Align(
                   //   alignment: Alignment.topLeft,
                   //   child: SafeArea(
@@ -821,6 +785,43 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
                       );
                     },
                   ),
+
+                  /// Slider
+                  if (fastOpacity > 0.0)
+                    Opacity(
+                      opacity: fastOpacity,
+                      child: Transform.translate(
+                        offset: Offset(0, bottomOffset + (-maxOffset / 4.4 * p)),
+                        child: Align(
+                          alignment: Alignment.bottomLeft,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const SizedBox(
+                                height: 65.0,
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 24.0),
+                                  child: WaveformSlider(),
+                                ),
+                              ),
+                              StreamBuilder(
+                                stream: currentMusic.player.positionStream,
+                                builder: (context, snapshot) => Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(currentMusic.player.position.shortFormat(), style: TextStyle(color: onSecondary)),
+                                      Text(currentMusic.player.duration?.shortFormat() ?? "00:00", style: TextStyle(color: onSecondary)),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
 
                   if (queueOpacity > 0.0)
                     Opacity(

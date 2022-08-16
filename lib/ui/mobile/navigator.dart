@@ -108,6 +108,7 @@ class _NavigationScreenState extends State<NavigationScreen> with SingleTickerPr
         );
       },
       child: Scaffold(
+        resizeToAvoidBottomInset: false,
         body: Material(
           child: Container(
             decoration: BoxDecoration(

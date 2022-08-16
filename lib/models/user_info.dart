@@ -9,7 +9,7 @@ class UserInfo extends Model {
     required Map json,
     required this.username,
     required this.avatar,
-  }): super(id: id, json: json, key: username);
+  }) : super(id: id, json: json, key: username);
 
   factory UserInfo.fromJson(Map json) {
     return UserInfo(

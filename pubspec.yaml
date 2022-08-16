@@ -32,6 +32,13 @@ dependencies:
   audio_session: ^0.1.10
   audio_service: ^0.18.7
   firebase_core: ^1.20.1
+  cbor: ^5.1.0
+  uuid: ^3.0.6
+  pubnub:
+    git:
+      url: https://github.com/55nknown/pubnub
+      ref: master
+      path: pubnub
 
 dev_dependencies:
   flutter_test:

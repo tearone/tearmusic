@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:tearmusic/api/base_api.dart';
@@ -10,6 +11,7 @@ import 'package:tearmusic/models/music/lyrics.dart';
 import 'package:tearmusic/models/music/playlist.dart';
 import 'package:tearmusic/models/music/search_results.dart';
 import 'package:tearmusic/models/music/track.dart';
+import 'package:tearmusic/models/playback.dart';
 
 class MusicInfoProvider {
   MusicInfoProvider({required BaseApi base}) : _api = MusicApi(base: base);
@@ -22,6 +24,8 @@ class MusicInfoProvider {
   /// List<MusicPlaylist> "playlists_$playlist"
   /// List<MusicArtist> "artists_$artist"
   late Box _store;
+
+  late String userId;
 
   Future<void> init() async {
     _store = await Hive.openBox("music_cache");
@@ -224,8 +228,12 @@ class MusicInfoProvider {
     return data;
   }
 
-  Future<String> playback(MusicTrack track) async {
-    return await _api.playback(track);
+  Future<Playback> playback(MusicTrack track, {bool sub = true, String? videoId}) async {
+    return await _api.playback(track, userId: userId, sub: sub, videoId: videoId);
+  }
+
+  Future<PlaybackHead> playbackHead(MusicTrack track) async {
+    return await _api.playbackHead(track);
   }
 
   Future<void> purgeCache(MusicTrack track) async {

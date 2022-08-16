@@ -23,8 +23,8 @@ void main() async {
   );
 
   final baseApi = BaseApi();
-  final userProvider = UserProvider(base: baseApi);
   final musicInfoProvider = MusicInfoProvider(base: baseApi);
+  final userProvider = UserProvider(base: baseApi, musicInfo: musicInfoProvider);
   final currentMusicProvider = CurrentMusicProvider(api: musicInfoProvider);
   final themeProvider = ThemeProvider();
 

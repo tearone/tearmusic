@@ -3,20 +3,25 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:tearmusic/api/base_api.dart';
 import 'package:tearmusic/api/user_api.dart';
 import 'package:tearmusic/exceptionts.dart';
+import 'package:tearmusic/providers/music_info_provider.dart';
 
 class UserProvider extends ChangeNotifier {
-  UserProvider({required BaseApi base}) : _api = UserApi(base: base);
+  UserProvider({required BaseApi base, required MusicInfoProvider musicInfo})
+      : _api = UserApi(base: base),
+        _musicInfoProvider = musicInfo;
 
   Future<void> init() async {
     _store = await Hive.openBox("user");
     _username = _store.get("username");
     _avatar = _store.get("avatar");
+    _id = _store.get("id");
 
     String? accessToken = _store.get("access_token");
     String? refreshToken = _store.get("refresh_token");
 
     _api.base.refreshCallback = loginCallback;
     _api.base.setAuth(accessToken, refreshToken);
+    _musicInfoProvider.userId = _id ?? "";
 
     if (accessToken != null) loggedIn = true;
     notifyListeners();
@@ -26,9 +31,11 @@ class UserProvider extends ChangeNotifier {
 
   late Box _store;
   final UserApi _api;
+  final MusicInfoProvider _musicInfoProvider;
 
   bool loggedIn = false;
 
+  String? _id;
   String? _username;
   String? _avatar;
   String get username => _username ?? "";
@@ -68,10 +75,14 @@ class UserProvider extends ChangeNotifier {
 
       _username = user.username;
       _avatar = user.avatar;
+      _id = user.id;
       notifyListeners();
+
+      _musicInfoProvider.userId = _id ?? "";
 
       _store.put("username", _username);
       _store.put("avatar", _avatar);
+      _store.put("id", _id);
     } on AuthException {
       loggedIn = false;
       notifyListeners();

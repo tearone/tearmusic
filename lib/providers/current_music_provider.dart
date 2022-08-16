@@ -3,7 +3,6 @@ import 'dart:developer';
 import 'package:flutter/widgets.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:tearmusic/models/music/track.dart';
-import 'package:tearmusic/models/playback.dart';
 import 'package:tearmusic/player/audio_source.dart';
 import 'package:tearmusic/providers/music_info_provider.dart';
 
@@ -13,6 +12,7 @@ class CurrentMusicProvider extends ChangeNotifier {
   final MusicInfoProvider _api;
   final player = AudioPlayer();
   MusicTrack? playing;
+  TearMusicAudioSource? tma;
 
   double get progress => player.duration != null ? player.position.inMilliseconds / player.duration!.inMilliseconds : 0;
 
@@ -23,11 +23,11 @@ class CurrentMusicProvider extends ChangeNotifier {
     playing = track;
     notifyListeners();
 
-    final tma = TearMusicAudioSource(track, api: _api);
-    await tma.head();
+    tma = TearMusicAudioSource(track, api: _api);
+    await tma!.head();
 
-    await player.setAudioSource(tma);
-    final silence = await tma.silence();
+    await player.setAudioSource(tma!);
+    final silence = await tma!.silence();
 
     if (silence.isNotEmpty) {
       silence.sort((a, b) => a.start.compareTo(b.start));
@@ -39,6 +39,6 @@ class CurrentMusicProvider extends ChangeNotifier {
 
     player.play();
 
-    if (!tma.playback.isCompleted) await tma.body();
+    if (!tma!.playback.isCompleted) await tma!.body();
   }
 }

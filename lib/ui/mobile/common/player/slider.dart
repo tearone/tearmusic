@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -15,7 +13,7 @@ class WaveformSlider extends StatefulWidget {
 class _WaveformSliderState extends State<WaveformSlider> {
   static const int tickerCount = 50;
   double progress = 0.0;
-  late List<int> waveform;
+  late List<double> waveform;
   late List<bool> actives;
   bool sliding = false;
 
@@ -23,12 +21,17 @@ class _WaveformSliderState extends State<WaveformSlider> {
   void initState() {
     super.initState();
 
+    final currentMusic = context.read<CurrentMusicProvider>();
+
     actives = [];
     waveform = [];
-    for (int i = 0; i < tickerCount; i++) {
-      actives.add(i == 0);
-      waveform.add(Random().nextInt(30) + 10);
-    }
+
+    currentMusic.tma!.playback.future.then((value) {
+      for (int i = 0; i < tickerCount; i++) {
+        actives.add(i == 0);
+        waveform.add(value.waveform[(value.waveform.length / tickerCount * i).floor()]);
+      }
+    });
   }
 
   void setProgress() {

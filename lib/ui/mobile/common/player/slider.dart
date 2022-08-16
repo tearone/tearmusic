@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:tearmusic/providers/current_music_provider.dart';
+import 'dart:math' as math;
 
 class WaveformSlider extends StatefulWidget {
   const WaveformSlider({Key? key}) : super(key: key);
@@ -16,6 +19,9 @@ class _WaveformSliderState extends State<WaveformSlider> {
   late List<double> waveform;
   late List<bool> actives;
   bool sliding = false;
+
+  double whereCenter = 0.0;
+  late Timer loadingTimer;
 
   @override
   void initState() {
@@ -32,11 +38,26 @@ class _WaveformSliderState extends State<WaveformSlider> {
         waveform.add(value.waveform[(value.waveform.length / tickerCount * i).floor()]);
       }
     });
+
+    loadingTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
+      if (waveform.isNotEmpty) loadingTimer.cancel();
+
+      setState(() {
+        whereCenter += 0.5;
+        if (whereCenter > 6) whereCenter = 0;
+      });
+    });
   }
 
   void setProgress() {
     progress = progress.clamp(0.0, 1.0);
     setState(() {});
+  }
+
+  @override
+  void dispose() {
+    loadingTimer.cancel();
+    super.dispose();
   }
 
   @override
@@ -57,9 +78,11 @@ class _WaveformSliderState extends State<WaveformSlider> {
           }
 
           tickers.add(AnimatedContainer(
-            duration: const Duration(milliseconds: 100),
+            duration: const Duration(milliseconds: 250),
             width: 3.0,
-            height: waveform[i].toDouble() * (active ? 1.0 : 0.8),
+            height: waveform.isEmpty
+                ? normalizeInRange(math.sin(i > tickerCount / 2 ? whereCenter - i * 0.75 : whereCenter + i * 0.75), -1.0, 1.0, 7.5, 35.0)
+                : waveform[i].toDouble() * (active ? 1.0 : 0.9),
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.primary.withOpacity(active ? 1.0 : 0.3),
               borderRadius: BorderRadius.circular(45.0),
@@ -102,4 +125,8 @@ class _WaveformSliderState extends State<WaveformSlider> {
       },
     );
   }
+}
+
+double normalizeInRange(double val, double min1, double max1, double min2, double max2) {
+  return min2 + ((val - min1) * (max2 - min2)) / (max1 - min1);
 }

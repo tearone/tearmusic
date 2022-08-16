@@ -1,1 +1,2 @@
-- experimental context menu for tracks
+- new playback system
+- bugfixes

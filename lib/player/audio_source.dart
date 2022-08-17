@@ -36,23 +36,27 @@ class TearMusicAudioSource extends StreamAudioSource {
     );
   }
 
-  Future<void> head() async {
+  Future<bool> head() async {
     try {
       playbackHead = await _api.playbackHead(track);
       bytes = playbackHead.prefetch;
       cached.complete(true);
+      return true;
     } catch (e) {
-      await body(sub: false);
+      return await body(sub: false);
     }
   }
 
-  Future<void> body({bool sub = true}) async {
-    final pb = await _api.playback(track, sub: sub, videoId: playbackHead.videoId);
-    final res = await http.get(Uri.parse(pb.streamUrl));
-    if (res.statusCode < 400) bytes = res.bodyBytes;
-    playback.complete(pb);
+  Future<bool> body({bool sub = true}) async {
     try {
+      final pb = await _api.playback(track, sub: sub, videoId: playbackHead.videoId);
+      final res = await http.get(Uri.parse(pb.streamUrl));
+      if (res.statusCode < 400) bytes = res.bodyBytes;
+      playback.complete(pb);
       cached.complete(true);
-    } catch (_) {}
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 }

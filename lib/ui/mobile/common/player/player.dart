@@ -6,6 +6,7 @@ import 'package:animations/animations.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:tearmusic/providers/current_music_provider.dart';
 import 'package:tearmusic/providers/will_pop_provider.dart';
@@ -28,7 +29,7 @@ class Player extends StatefulWidget {
   State<Player> createState() => _PlayerState();
 }
 
-class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
+class _PlayerState extends State<Player> with TickerProviderStateMixin {
   double offset = 0.0;
   double prevOffset = 0.0;
   late Size screenSize;
@@ -51,6 +52,8 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
   late double sMaxOffset;
   late AnimationController sAnim;
 
+  late AnimationController playPauseAnim;
+
   late ScrollController scrollController;
   bool queueScrollable = false;
   bool bounceUp = false;
@@ -70,6 +73,10 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
       lowerBound: -1,
       upperBound: 1,
       value: 0.0,
+    );
+    playPauseAnim = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
     );
     scrollController = ScrollController();
   }
@@ -539,36 +546,92 @@ class _PlayerState extends State<Player> with SingleTickerProviderStateMixin {
                                       iconSize: vp(a: 32.0, b: 46.0, c: rp),
                                     ),
                                   ),
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.black,
-                                      borderRadius: BorderRadius.circular(16.0),
-                                    ),
-                                    child: MultiProvider(
-                                      providers: [
-                                        StreamProvider(create: (_) => currentMusic.player.positionStream, initialData: currentMusic.player.position),
-                                        StreamProvider(create: (_) => currentMusic.player.playingStream, initialData: currentMusic.player.playing),
-                                      ],
-                                      builder: (context, snapshot) => Consumer2<bool, Duration>(
-                                        builder: (context, value1, value2, child) => CustomPaint(
-                                          painter: MiniplayerProgressPainter(currentMusic.progress * (1 - rcp)),
-                                          child: FloatingActionButton(
-                                            heroTag: currentMusic.playing,
-                                            onPressed: () {
-                                              if (currentMusic.player.playing) {
-                                                currentMusic.player.pause();
-                                              } else {
-                                                currentMusic.player.play();
-                                              }
-                                            },
-                                            elevation: 0,
-                                            backgroundColor: Theme.of(context).colorScheme.surfaceTint.withOpacity(.3),
-                                            child: Icon(value1 ? Icons.pause : Icons.play_arrow),
+                                  child: Builder(builder: (context) {
+                                    final audioLoading = context.select<CurrentMusicProvider, AudioLoadingState>((value) => value.audioLoading);
+                                    Widget playbackIndicator;
+
+                                    if (audioLoading == AudioLoadingState.loading) {
+                                      playbackIndicator = SizedBox(
+                                        key: const Key("loading"),
+                                        height: vp(a: 60.0, b: 80.0, c: rp),
+                                        width: vp(a: 60.0, b: 80.0, c: rp),
+                                        child: Center(
+                                          child: LoadingAnimationWidget.staggeredDotsWave(
+                                              color: Theme.of(context).colorScheme.secondary.withOpacity(.2), size: 42.0),
+                                        ),
+                                      );
+                                    } else if (audioLoading == AudioLoadingState.error) {
+                                      playbackIndicator = SizedBox(
+                                        key: const Key("error"),
+                                        height: vp(a: 60.0, b: 80.0, c: rp),
+                                        width: vp(a: 60.0, b: 80.0, c: rp),
+                                        child: Center(
+                                          child: Icon(
+                                            Icons.warning,
+                                            size: 42.0,
+                                            color: Theme.of(context).colorScheme.error,
                                           ),
                                         ),
-                                      ),
-                                    ),
-                                  ),
+                                      );
+                                    } else {
+                                      playbackIndicator = MultiProvider(
+                                        key: const Key("ready"),
+                                        providers: [
+                                          StreamProvider(
+                                              create: (_) => currentMusic.player.positionStream, initialData: currentMusic.player.position),
+                                          StreamProvider(create: (_) => currentMusic.player.playingStream, initialData: currentMusic.player.playing),
+                                        ],
+                                        builder: (context, snapshot) => Consumer2<bool, Duration>(
+                                          builder: (context, value1, value2, child) {
+                                            if (value1) {
+                                              playPauseAnim.forward();
+                                            } else {
+                                              playPauseAnim.reverse();
+                                            }
+                                            return Container(
+                                              decoration: BoxDecoration(
+                                                color: Colors.black,
+                                                borderRadius: BorderRadius.circular(16.0),
+                                              ),
+                                              child: CustomPaint(
+                                                painter: MiniplayerProgressPainter(currentMusic.progress * (1 - rcp)),
+                                                child: FloatingActionButton(
+                                                  heroTag: currentMusic.playing,
+                                                  onPressed: () {
+                                                    if (currentMusic.player.playing) {
+                                                      currentMusic.player.pause();
+                                                      playPauseAnim.reverse();
+                                                    } else {
+                                                      currentMusic.player.play();
+                                                      playPauseAnim.forward();
+                                                    }
+                                                  },
+                                                  elevation: 0,
+                                                  backgroundColor: Theme.of(context).colorScheme.surfaceTint.withOpacity(.3),
+                                                  child: AnimatedIcon(
+                                                    progress: playPauseAnim,
+                                                    icon: AnimatedIcons.play_pause,
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      );
+                                    }
+
+                                    return PageTransitionSwitcher(
+                                      transitionBuilder: (child, primaryAnimation, secondaryAnimation) {
+                                        return FadeThroughTransition(
+                                          animation: primaryAnimation,
+                                          secondaryAnimation: secondaryAnimation,
+                                          fillColor: Colors.transparent,
+                                          child: child,
+                                        );
+                                      },
+                                      child: playbackIndicator,
+                                    );
+                                  }),
                                 ),
                               ),
                             ],

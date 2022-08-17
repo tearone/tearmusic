@@ -557,7 +557,9 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                                         width: vp(a: 60.0, b: 80.0, c: rp),
                                         child: Center(
                                           child: LoadingAnimationWidget.staggeredDotsWave(
-                                              color: Theme.of(context).colorScheme.secondary.withOpacity(.2), size: 42.0),
+                                            color: Theme.of(context).colorScheme.secondary,
+                                            size: 42.0,
+                                          ),
                                         ),
                                       );
                                     } else if (audioLoading == AudioLoadingState.error) {

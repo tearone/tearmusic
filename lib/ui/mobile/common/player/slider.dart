@@ -14,7 +14,7 @@ class WaveformSlider extends StatefulWidget {
 }
 
 class _WaveformSliderState extends State<WaveformSlider> {
-  static const int tickerCount = 50;
+  int get tickerCount => waveform.isNotEmpty ? waveform.length : 50;
   double progress = 0.0;
   late List<double> waveform;
   late List<bool> actives;
@@ -33,9 +33,27 @@ class _WaveformSliderState extends State<WaveformSlider> {
     waveform = [];
 
     currentMusic.tma!.playback.future.then((value) {
+      final effects = [];
+      final List<double> chunks = [];
+      final chunkLen = value.waveform.length / tickerCount;
+
+      final min = value.waveform.reduce(math.min);
+      final max = value.waveform.reduce(math.max);
+
+      for (var sample in value.waveform) {
+        chunks.add(sample);
+
+        if (chunks.length >= chunkLen) {
+          final average = chunks.fold<double>(0, (a, b) => a + b) / chunks.length;
+          effects.add(normalizeInRange(average, min, max, 1.0, 40.0));
+          chunks.clear();
+        }
+      }
+
+      waveform = List.castFrom(effects);
+
       for (int i = 0; i < tickerCount; i++) {
         actives.add(i == 0);
-        waveform.add(value.waveform[(value.waveform.length / tickerCount * i).floor()]);
       }
     });
 

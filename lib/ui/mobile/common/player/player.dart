@@ -721,7 +721,9 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
                                 child: IconButton(
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    snapToQueue();
+                                  },
                                   icon: Icon(Icons.queue_music, size: 24.0, color: Theme.of(context).colorScheme.onSecondaryContainer),
                                 ),
                               ),

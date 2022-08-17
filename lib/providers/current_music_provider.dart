@@ -2,11 +2,14 @@ import 'dart:developer';
 
 import 'package:flutter/widgets.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:tearmusic/models/music/playlist.dart';
 import 'package:tearmusic/models/music/track.dart';
 import 'package:tearmusic/player/audio_source.dart';
 import 'package:tearmusic/providers/music_info_provider.dart';
 
 enum AudioLoadingState { ready, loading, error }
+
+enum PlayingFrom { none, album, playlist }
 
 class CurrentMusicProvider extends ChangeNotifier {
   CurrentMusicProvider({required MusicInfoProvider api}) : _api = api;
@@ -14,8 +17,10 @@ class CurrentMusicProvider extends ChangeNotifier {
   final MusicInfoProvider _api;
   final player = AudioPlayer();
   AudioLoadingState audioLoading = AudioLoadingState.ready;
+  PlayingFrom playingFrom = PlayingFrom.none;
   MusicTrack? playing;
   TearMusicAudioSource? tma;
+  MusicPlaylist? playlist;
 
   double get progress => player.duration != null ? player.position.inMilliseconds / player.duration!.inMilliseconds : 0;
 

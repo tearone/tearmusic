@@ -62,7 +62,7 @@ class _WaveformSliderState extends State<WaveformSlider> {
 
       setState(() {
         whereCenter += 0.5;
-        if (whereCenter > 6) whereCenter = 0;
+        if (whereCenter > 50) whereCenter = 0;
       });
     });
   }
@@ -99,7 +99,7 @@ class _WaveformSliderState extends State<WaveformSlider> {
             duration: const Duration(milliseconds: 250),
             width: 3.0,
             height: waveform.isEmpty
-                ? normalizeInRange(math.sin(i > tickerCount / 2 ? whereCenter - i * 0.75 : whereCenter + i * 0.75), -1.0, 1.0, 7.5, 35.0)
+                ? normalizeInRange(math.sin(whereCenter - i * 0.75), -1.0, 1.0, 7.5, 25.0)
                 : waveform[i].toDouble() * (active ? 1.0 : 0.9),
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.primary.withOpacity(active ? 1.0 : 0.3),

@@ -174,6 +174,11 @@ class _LyricsViewState extends State<LyricsView> with SingleTickerProviderStateM
                                   if (subtitle.text.replaceAll(" ", "") != "") HapticFeedback.lightImpact();
                                 }
 
+                                String text = snapshot.data!.subtitle![index].text;
+                                if (text.trim() == "") {
+                                  text = "🎶";
+                                }
+
                                 return AnimatedContainer(
                                   key: keys[index],
                                   duration: const Duration(milliseconds: 500),
@@ -205,7 +210,7 @@ class _LyricsViewState extends State<LyricsView> with SingleTickerProviderStateM
                                       ],
                                     ),
                                     child: Text(
-                                      snapshot.data!.subtitle![index].text,
+                                      text,
                                       textAlign: TextAlign.center,
                                     ),
                                   ),

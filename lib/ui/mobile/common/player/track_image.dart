@@ -35,10 +35,10 @@ class TrackImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final radius = vp(a: 18.0, b: 32.0, c: cp);
+    final radius = vp(a: 14.0, b: 32.0, c: cp);
     final borderRadius = SmoothBorderRadius(cornerRadius: radius, cornerSmoothing: 1.0);
     final size = vp(a: width, b: screenSize.width - 84.0, c: cp);
-    final imgSize = const Size(400, 400);
+    const imgSize = Size(400, 400);
 
     return Transform.translate(
       offset: Offset(0, bottomOffset + (-maxOffset / 2.15 * p.clamp(0, 2))),

@@ -1,2 +1,5 @@
-- new playback system
+- actual waveform
+- playback feedback
+- improvments
+- waveform loading animation
 - bugfixes

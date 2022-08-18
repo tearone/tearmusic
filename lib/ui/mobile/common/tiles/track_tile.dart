@@ -103,8 +103,16 @@ class TrackTile extends StatelessWidget {
                     duration: const Duration(milliseconds: 500),
                     opacity: track == value ? 1 : 0,
                     child: Container(
-                      color: Colors.black.withOpacity(.5),
-                      child: Center(child: Icon(Icons.volume_up, color: Theme.of(context).colorScheme.onSecondaryContainer)),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(.5),
+                        borderRadius: BorderRadius.circular(4.0),
+                      ),
+                      child: Center(
+                        child: Icon(
+                          Icons.volume_up,
+                          color: Theme.of(context).colorScheme.onSecondaryContainer,
+                        ),
+                      ),
                     ),
                   )
                 ],

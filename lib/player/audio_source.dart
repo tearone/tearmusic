@@ -28,7 +28,7 @@ class TearMusicAudioSource extends StreamAudioSource {
     start ??= 0;
 
     await cached.future;
-    if (playback.isCompleted) {
+    if (playback.isCompleted || start >= bytes.length) {
       final pb = await playback.future;
       end ??= sourceLength;
 

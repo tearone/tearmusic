@@ -30,7 +30,7 @@ class LyricsView extends StatefulWidget {
 class _LyricsViewState extends State<LyricsView> with SingleTickerProviderStateMixin {
   final ScrollController _controller = ScrollController();
   List<List<bool>> actives = [];
-  double lastPos = 0.0;
+  double? lastPos;
   bool autoScroll = true;
   Timer scrollTimer = Timer(Duration.zero, () {});
   late StreamSubscription<Duration> progressSub;
@@ -79,7 +79,7 @@ class _LyricsViewState extends State<LyricsView> with SingleTickerProviderStateM
 
     if (_controller.positions.isNotEmpty) {
       height = (height + 200 - MediaQuery.of(context).size.height / 2).clamp(0, _controller.position.maxScrollExtent);
-      if (lastPos == 0) {
+      if (lastPos == null) {
         _controller.jumpTo(height);
         autoScroll = true;
       } else if (height != lastPos && autoScroll) {

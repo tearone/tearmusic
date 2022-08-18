@@ -17,7 +17,7 @@ class MusicPlaylist extends Model {
     required this.images,
     required this.trackCount,
     required this.owner,
-  }) : super(id: id, json: json, key: name);
+  }) : super(id: id, json: json, key: name, type: "playlist");
 
   factory MusicPlaylist.decode(Map json) {
     final images = json["images"] as List?;
@@ -48,7 +48,7 @@ class PlaylistDetails extends Model {
     required String id,
     required this.tracks,
     required this.followers,
-  }) : super(id: id, json: json);
+  }) : super(id: id, json: json, type: "playlistextras");
 
   factory PlaylistDetails.decode(Map json) {
     final tracks = MusicTrack.decodeList((json['tracks'] as List).cast<Map>());

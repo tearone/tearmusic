@@ -9,6 +9,7 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:tearmusic/models/music/playlist.dart';
 import 'package:tearmusic/providers/music_info_provider.dart';
+import 'package:tearmusic/providers/navigator_provider.dart';
 import 'package:tearmusic/providers/theme_provider.dart';
 import 'package:tearmusic/ui/common/image_color.dart';
 import 'package:tearmusic/ui/mobile/common/cached_image.dart';
@@ -20,10 +21,11 @@ class PlaylistView extends StatefulWidget {
 
   final MusicPlaylist playlist;
 
-  static Future<void> view(MusicPlaylist value, {required BuildContext context}) => Navigator.of(context).push(
+  static Future<void> view(MusicPlaylist value, {required BuildContext context}) => context.read<NavigatorProvider>().push(
         CupertinoPageRoute(
           builder: (context) => PlaylistView(value),
         ),
+        uri: value.uri,
       );
 
   @override

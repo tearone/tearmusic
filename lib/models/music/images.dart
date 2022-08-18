@@ -38,7 +38,7 @@ class InternalImage extends Model {
     required this.url,
     required this.width,
     required this.height,
-  }) : super(id: "${width}_${height}_$url", json: json);
+  }) : super(id: "${width}_${height}_$url", json: json, type: "image");
 
   factory InternalImage.decode(Map json) {
     return InternalImage(

@@ -45,7 +45,7 @@ class MusicAlbum extends Model {
     required this.releaseDate,
     required this.artists,
     required this.images,
-  }) : super(id: id, json: json, key: "$name ${artists.first.name}");
+  }) : super(id: id, json: json, key: "$name ${artists.first.name}", type: "album");
 
   factory MusicAlbum.decode(Map json) {
     final images = json["images"] as List?;

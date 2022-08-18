@@ -12,7 +12,6 @@ import 'package:tearmusic/ui/mobile/pages/home/home_page.dart';
 import 'package:tearmusic/ui/mobile/pages/library/library_page.dart';
 import 'package:tearmusic/ui/mobile/pages/search/search_page.dart';
 import 'package:tearmusic/ui/mobile/screens/login_screen.dart';
-import 'package:http/http.dart' as http;
 
 enum MobileRoutes { home, search, library }
 
@@ -55,6 +54,7 @@ class _NavigationScreenState extends State<NavigationScreen> with SingleTickerPr
   Route _navigationRoute(Widget Function(BuildContext) builder) {
     return PageRouteBuilder(
       pageBuilder: (context, primaryAnimation, secondaryAnimation) {
+        context.read<NavigatorProvider>().setState(Navigator.of(context));
         return FadeThroughTransition(
           fillColor: Colors.transparent,
           animation: primaryAnimation,
@@ -65,11 +65,6 @@ class _NavigationScreenState extends State<NavigationScreen> with SingleTickerPr
       transitionDuration: const Duration(milliseconds: 500),
       reverseTransitionDuration: const Duration(milliseconds: 500),
     );
-  }
-
-  Future<Uint8List> getImage() async {
-    final res = await http.get(Uri.parse("https://random.imagecdn.app/500/500"));
-    return res.bodyBytes;
   }
 
   @override
@@ -93,14 +88,14 @@ class _NavigationScreenState extends State<NavigationScreen> with SingleTickerPr
       return const LoginScreen();
     }
 
-    context.read<NavigatorProvider>().setState(ScaffoldMessenger.of(context));
+    context.read<NavigatorProvider>().setScaffoldState(ScaffoldMessenger.of(context));
 
     return Consumer<WillPopProvider>(
       builder: (context, value, child) {
         return WillPopScope(
           onWillPop: () async {
             if ((value.popper != null ? value.popper!() : true) && (_navigatorState.currentState?.canPop() ?? false)) {
-              _navigatorState.currentState?.pop();
+              context.read<NavigatorProvider>().pop();
             }
             return false;
           },
@@ -110,91 +105,79 @@ class _NavigationScreenState extends State<NavigationScreen> with SingleTickerPr
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         body: Material(
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: RadialGradient(
-                center: const Alignment(0.95, -0.95),
-                radius: 1.0,
-                colors: [
-                  Theme.of(context).colorScheme.onSecondary.withOpacity(.4),
-                  Theme.of(context).colorScheme.onSecondary.withOpacity(.2),
-                ],
+          child: Stack(
+            alignment: Alignment.bottomCenter,
+            children: [
+              Navigator(
+                key: _navigatorState,
+                initialRoute: MobileRoutes.home.name,
+                onGenerateRoute: (route) => _handleRoute(route),
               ),
-            ),
-            child: Stack(
-              alignment: Alignment.bottomCenter,
-              children: [
-                Navigator(
-                  key: _navigatorState,
-                  initialRoute: MobileRoutes.home.name,
-                  onGenerateRoute: (route) => _handleRoute(route),
-                ),
 
-                AnimatedTheme(
-                  data: context.select<ThemeProvider, ThemeData>((e) => e.navigationTheme),
-                  child: AnimatedBuilder(
-                    animation: animation,
-                    builder: (context, child) {
-                      return Transform.translate(
-                        offset: Offset(0, (animation.value * 120).clamp(0, 120)),
-                        child: child,
-                      );
-                    },
-                    child: MediaQuery.removePadding(
-                      context: context,
-                      removeTop: true,
-                      child: NavigationBar(
-                        selectedIndex: _selected.index,
-                        onDestinationSelected: (value) {
-                          if (value == _selected.index) return;
-                          setState(() => _selected = MobileRoutes.values[value]);
-                          _navigatorState.currentState?.pushNamedAndRemoveUntil(MobileRoutes.values[value].name, (route) => false);
-                          context.read<ThemeProvider>().resetTheme();
-                        },
-                        destinations: const [
-                          NavigationDestination(
-                            label: "Home",
-                            icon: Icon(Icons.home_outlined),
-                            selectedIcon: Icon(Icons.home_filled),
-                          ),
-                          NavigationDestination(
-                            label: "Search",
-                            icon: Icon(Icons.search_outlined),
-                          ),
-                          NavigationDestination(
-                            label: "Library",
-                            icon: Icon(Icons.library_music_outlined),
-                            selectedIcon: Icon(Icons.library_music),
-                          ),
-                        ],
-                      ),
+              AnimatedTheme(
+                data: context.select<ThemeProvider, ThemeData>((e) => e.navigationTheme),
+                child: AnimatedBuilder(
+                  animation: animation,
+                  builder: (context, child) {
+                    return Transform.translate(
+                      offset: Offset(0, (animation.value * 120).clamp(0, 120)),
+                      child: child,
+                    );
+                  },
+                  child: MediaQuery.removePadding(
+                    context: context,
+                    removeTop: true,
+                    child: NavigationBar(
+                      selectedIndex: _selected.index,
+                      onDestinationSelected: (value) {
+                        if (value == _selected.index) return;
+                        setState(() => _selected = MobileRoutes.values[value]);
+                        _navigatorState.currentState?.pushNamedAndRemoveUntil(MobileRoutes.values[value].name, (route) => false);
+                        context.read<ThemeProvider>().resetTheme();
+                      },
+                      destinations: const [
+                        NavigationDestination(
+                          label: "Home",
+                          icon: Icon(Icons.home_outlined),
+                          selectedIcon: Icon(Icons.home_filled),
+                        ),
+                        NavigationDestination(
+                          label: "Search",
+                          icon: Icon(Icons.search_outlined),
+                        ),
+                        NavigationDestination(
+                          label: "Library",
+                          icon: Icon(Icons.library_music_outlined),
+                          selectedIcon: Icon(Icons.library_music),
+                        ),
+                      ],
                     ),
                   ),
                 ),
+              ),
 
-                /// Opacity
-                Positioned.fill(
-                  child: AnimatedBuilder(
-                    animation: animation,
-                    builder: (context, child) {
-                      if (animation.value > 0.01) {
-                        return Container(
-                          color: Colors.black.withOpacity((animation.value * 1.2).clamp(0, 1)),
-                          child: Container(
-                            color: Theme.of(context).colorScheme.onSecondary.withOpacity((animation.value * 3 - 2).clamp(0, .45)),
-                          ),
-                        );
-                      } else {
-                        return const SizedBox();
-                      }
-                    },
-                  ),
+              /// Opacity
+              Positioned.fill(
+                child: AnimatedBuilder(
+                  animation: animation,
+                  builder: (context, child) {
+                    if (animation.value > 0.01) {
+                      return Container(
+                        color: Colors.black.withOpacity((animation.value * 1.2).clamp(0, 1)),
+                        child: Container(
+                          color: Theme.of(context).colorScheme.onSecondary.withOpacity((animation.value * 3 - 2).clamp(0, .45)),
+                        ),
+                      );
+                    } else {
+                      return const SizedBox();
+                    }
+                  },
                 ),
+              ),
 
-                /// Miniplayer
-                if (context.read<CurrentMusicProvider>().playing != null) Player(animation: animation),
-              ],
-            ),
+              /// Miniplayer
+              if (context.read<CurrentMusicProvider>().playing != null) Player(animation: animation),
+            ],
           ),
         ),
       ),

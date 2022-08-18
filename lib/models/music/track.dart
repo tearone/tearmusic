@@ -19,7 +19,7 @@ class MusicTrack extends Model {
     required this.trackNumber,
     required this.album,
     required this.artists,
-  }) : super(id: id, json: json, key: "$name ${artists.first.name}");
+  }) : super(id: id, json: json, key: "$name ${artists.first.name}", type: "track");
 
   factory MusicTrack.decode(Map json, {MusicAlbum? album}) {
     if (album != null) json['album'] = album.json;

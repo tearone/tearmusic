@@ -18,7 +18,7 @@ class MusicLyrics extends Model {
     required this.fullText,
     required this.richSync,
     required this.subtitle,
-  }) : super(id: id, json: json);
+  }) : super(id: id, json: json, type: "lyrics");
 
   factory MusicLyrics.decode(Map json) {
     Subtitle? subtitle;

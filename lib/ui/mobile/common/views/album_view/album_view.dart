@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:tearmusic/models/music/album.dart';
 import 'package:tearmusic/models/music/track.dart';
 import 'package:tearmusic/providers/music_info_provider.dart';
+import 'package:tearmusic/providers/navigator_provider.dart';
 import 'package:tearmusic/providers/theme_provider.dart';
 import 'package:tearmusic/ui/common/image_color.dart';
 import 'package:tearmusic/ui/mobile/common/tiles/album_track_tile.dart';
@@ -19,10 +20,11 @@ class AlbumView extends StatefulWidget {
 
   final MusicAlbum album;
 
-  static Future<void> view(MusicAlbum value, {required BuildContext context}) => Navigator.of(context).push(
+  static Future<void> view(MusicAlbum value, {required BuildContext context}) => context.read<NavigatorProvider>().push(
         CupertinoPageRoute(
           builder: (context) => AlbumView(value),
         ),
+        uri: value.uri,
       );
 
   @override

@@ -2,8 +2,9 @@ class Model {
   final Map json;
   final String id;
   final String? key;
+  final String type;
 
-  Model({required this.json, required this.id, this.key});
+  Model({required this.json, required this.id, required this.type, this.key});
 
   static List<String> encodeIdList(List<Model> models) => models.map((e) => "$e").toList();
 
@@ -22,6 +23,8 @@ class Model {
 
   @override
   String toString() => id;
+
+  String get uri => "$type:$id";
 }
 
 class SearchUtils {

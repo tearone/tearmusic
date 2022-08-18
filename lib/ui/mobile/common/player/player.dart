@@ -16,6 +16,7 @@ import 'package:tearmusic/ui/mobile/common/player/slider.dart';
 import 'package:tearmusic/ui/mobile/common/player/track_image.dart';
 import 'package:tearmusic/ui/mobile/common/player/track_info.dart';
 import 'package:tearmusic/ui/common/format.dart';
+import 'package:tearmusic/ui/mobile/common/views/album_view/album_view.dart';
 import 'package:tearmusic/utils.dart';
 
 enum PlayerState { mini, expanded, queue }
@@ -420,26 +421,35 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                                     iconSize: 32.0,
                                   ),
                                   Expanded(
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(
-                                          "Playing from",
-                                          style: TextStyle(
-                                            color: onSecondary.withOpacity(.8),
-                                            fontSize: 15.0,
-                                            fontWeight: FontWeight.w500,
+                                    child: InkWell(
+                                      borderRadius: BorderRadius.circular(45.0),
+                                      onTap: () {
+                                        if (currentMusic.playing != null && currentMusic.playing!.album != null) {
+                                          snapToMini();
+                                          AlbumView.view(currentMusic.playing!.album!, context: context);
+                                        }
+                                      },
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            "Playing from",
+                                            style: TextStyle(
+                                              color: onSecondary.withOpacity(.8),
+                                              fontSize: 15.0,
+                                              fontWeight: FontWeight.w500,
+                                            ),
                                           ),
-                                        ),
-                                        Text(
-                                          currentMusic.playing?.album?.name ?? "?",
-                                          textAlign: TextAlign.center,
-                                          maxLines: 1,
-                                          softWrap: false,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20.0, color: onSecondary.withOpacity(.9)),
-                                        ),
-                                      ],
+                                          Text(
+                                            currentMusic.playing?.album?.name ?? "?",
+                                            textAlign: TextAlign.center,
+                                            maxLines: 1,
+                                            softWrap: false,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20.0, color: onSecondary.withOpacity(.9)),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                   IconButton(

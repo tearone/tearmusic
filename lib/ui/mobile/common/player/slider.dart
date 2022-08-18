@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -30,8 +29,11 @@ class _WaveformSliderState extends State<WaveformSlider> {
 
     final currentMusic = context.read<CurrentMusicProvider>();
 
+    progress =
+        currentMusic.player.duration != null ? currentMusic.player.position.inMilliseconds / currentMusic.player.duration!.inMilliseconds : 0.0;
+
     waveform = [];
-    actives = List.generate(tickerCount, (i) => i == 0);
+    actives = List.generate(tickerCount, (i) => tickerCount * progress >= i);
 
     currentMusic.tma!.playback.future.then((value) {
       final List<double> effects = [];
@@ -52,9 +54,6 @@ class _WaveformSliderState extends State<WaveformSlider> {
       }
 
       waveform = List.castFrom(effects);
-      if (waveform.isEmpty) waveform = List.generate(tickerCount, (_) => math.Random().nextInt(30).toDouble());
-    }).onError((error, stackTrace) {
-      waveform = List.generate(tickerCount, (_) => math.Random().nextInt(30).toDouble());
     });
 
     loadingTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {

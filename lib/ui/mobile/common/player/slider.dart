@@ -30,8 +30,8 @@ class _WaveformSliderState extends State<WaveformSlider> {
 
     final currentMusic = context.read<CurrentMusicProvider>();
 
-    actives = [];
     waveform = [];
+    actives = List.generate(tickerCount, (i) => i == 0);
 
     currentMusic.tma!.playback.future.then((value) {
       final List<double> effects = [];
@@ -52,10 +52,9 @@ class _WaveformSliderState extends State<WaveformSlider> {
       }
 
       waveform = List.castFrom(effects);
-
-      for (int i = 0; i < tickerCount; i++) {
-        actives.add(i == 0);
-      }
+      if (waveform.isEmpty) waveform = List.generate(tickerCount, (_) => math.Random().nextInt(30).toDouble());
+    }).onError((error, stackTrace) {
+      waveform = List.generate(tickerCount, (_) => math.Random().nextInt(30).toDouble());
     });
 
     loadingTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
@@ -97,7 +96,7 @@ class _WaveformSliderState extends State<WaveformSlider> {
           }
 
           tickers.add(AnimatedContainer(
-            duration: const Duration(milliseconds: 250),
+            duration: const Duration(milliseconds: 150),
             width: 3.0,
             height: waveform.isEmpty
                 ? normalizeInRange(math.sin(whereCenter - i * 0.75), -1.0, 1.0, 7.5, 25.0)

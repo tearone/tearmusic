@@ -78,7 +78,7 @@ class TrackTile extends StatelessWidget {
                       ? Icon(
                           Icons.volume_up,
                           key: const Key("playing"),
-                          color: Theme.of(context).colorScheme.onSecondaryContainer,
+                          color: Theme.of(context).colorScheme.primary,
                         )
                       : Text(
                           track.trackNumber.toString(),
@@ -98,6 +98,18 @@ class TrackTile extends StatelessWidget {
               height: 42,
               child: Stack(
                 children: [
+                  AnimatedOpacity(
+                    duration: const Duration(milliseconds: 500),
+                    opacity: track == value ? 1 : 0,
+                    child: Container(
+                      decoration: BoxDecoration(boxShadow: [
+                        BoxShadow(
+                          color: Theme.of(context).colorScheme.secondary.withOpacity(.3),
+                          blurRadius: 6.0,
+                        ),
+                      ]),
+                    ),
+                  ),
                   if (track.album != null && track.album!.images != null) CachedImage(track.album!.images!, size: const Size(64, 64)),
                   AnimatedOpacity(
                     duration: const Duration(milliseconds: 500),

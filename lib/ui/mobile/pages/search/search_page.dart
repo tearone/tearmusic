@@ -89,7 +89,7 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
 
   Future<void> searchResults(String value) async {
     results = await context.read<MusicInfoProvider>().search(value);
-    if (lastTerm != value) results = null;
+    if (lastTerm != value) return;
     setState(() {
       if (results == null) {
       } else if (results?.isEmpty ?? true) {

@@ -1,12 +1,18 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:tearmusic/models/music/lyrics.dart';
 import 'package:tearmusic/models/music/track.dart';
 import 'package:tearmusic/providers/current_music_provider.dart';
 import 'package:tearmusic/providers/music_info_provider.dart';
+import 'package:tearmusic/providers/theme_provider.dart';
+import 'package:tearmusic/ui/mobile/common/player/lyrics_view/unavailable.dart';
+import 'package:tearmusic/ui/mobile/common/player/lyrics_view/full_text.dart';
+import 'package:tearmusic/ui/mobile/common/player/lyrics_view/subtitle.dart';
+import 'package:tearmusic/ui/mobile/common/player/lyrics_view/rich_sync.dart';
 
 class LyricsView extends StatefulWidget {
   const LyricsView(this.track, {Key? key}) : super(key: key);
@@ -22,28 +28,82 @@ class LyricsView extends StatefulWidget {
 }
 
 class _LyricsViewState extends State<LyricsView> with SingleTickerProviderStateMixin {
-  late AnimationController animation;
-  List<GlobalKey> keys = [];
+  final ScrollController _controller = ScrollController();
   List<List<bool>> actives = [];
+  double lastPos = 0.0;
+  bool autoScroll = true;
+  Timer scrollTimer = Timer(Duration.zero, () {});
+  late StreamSubscription<Duration> progressSub;
+  List<TimedSegment>? lSub;
+  List<LyricsLine>? lRich;
+
+  void scrollListener() {
+    autoScroll = false;
+    scrollTimer.cancel();
+    scrollTimer = Timer(const Duration(seconds: 3), () => autoScroll = true);
+  }
+
+  void progressListener(Duration event) {
+    double height = 0;
+    if (lRich != null) {
+      for (var line in lRich!) {
+        if (line.start.inMilliseconds > event.inMilliseconds) break;
+        final span = TextSpan(
+          text: line.segments.map((e) => e.text).join(),
+          style: TextStyle(
+            fontFamily: ThemeProvider.defaultTheme.textTheme.bodyText2!.fontFamily,
+            fontWeight: FontWeight.bold,
+            fontSize: 22.0,
+          ),
+        );
+        final painter = TextPainter(text: span, textDirection: TextDirection.ltr, textAlign: TextAlign.center);
+        painter.layout(maxWidth: MediaQuery.of(context).size.width - 28.0 * 2);
+        height += painter.height + 14.0 * 2;
+      }
+    } else if (lSub != null) {
+      for (var line in lSub!) {
+        if (line.offset.inMilliseconds > event.inMilliseconds) break;
+        final span = TextSpan(
+          text: line.text,
+          style: TextStyle(
+            fontFamily: ThemeProvider.defaultTheme.textTheme.bodyText2!.fontFamily,
+            fontWeight: FontWeight.bold,
+            fontSize: 22.0,
+          ),
+        );
+        final painter = TextPainter(text: span, textDirection: TextDirection.ltr, textAlign: TextAlign.center);
+        painter.layout(maxWidth: MediaQuery.of(context).size.width - 28.0 * 2);
+        height += painter.height + 14.0 * 2;
+      }
+    }
+
+    if (_controller.positions.isNotEmpty) {
+      height = (height + 200 - MediaQuery.of(context).size.height / 2).clamp(0, _controller.position.maxScrollExtent);
+      if (lastPos == 0) {
+        _controller.jumpTo(height);
+        autoScroll = true;
+      } else if (height != lastPos && autoScroll) {
+        _controller.animateTo(height, duration: const Duration(milliseconds: 500), curve: Curves.easeIn);
+        autoScroll = true;
+      }
+      lastPos = height;
+    }
+  }
 
   @override
   void initState() {
     super.initState();
+    _controller.addListener(scrollListener);
 
     final currentMusic = context.read<CurrentMusicProvider>();
-
-    animation = AnimationController(
-      vsync: this,
-      duration: widget.track.duration,
-    );
-
-    animation.animateTo((currentMusic.player.position.inMilliseconds) / widget.track.duration.inMilliseconds, duration: Duration.zero);
-    if (currentMusic.player.playing) animation.forward();
+    progressSub = currentMusic.player.positionStream.distinct().listen(progressListener);
   }
 
   @override
   void dispose() {
-    animation.dispose();
+    progressSub.cancel();
+    _controller.removeListener(scrollListener);
+    _controller.dispose();
     super.dispose();
   }
 
@@ -62,243 +122,53 @@ class _LyricsViewState extends State<LyricsView> with SingleTickerProviderStateM
             );
           }
 
-          final dataLength = snapshot.data!.richSync?.length ?? snapshot.data!.subtitle?.length ?? 0;
+          // final dataLength = snapshot.data!.richSync?.length ?? snapshot.data!.subtitle?.length ?? 0;
 
-          if (keys.isEmpty) keys = List.generate(dataLength, (index) => GlobalKey());
-          if (actives.isEmpty) {
-            actives = List.generate(dataLength, (index) {
-              if (snapshot.data!.richSync != null) {
-                final line = snapshot.data!.richSync!.elementAt(index);
-                return List.generate(line.segments.length,
-                    (i) => (line.start + line.segments[i].offset).inMilliseconds / widget.track.duration.inMilliseconds > animation.value);
-              }
-              if (snapshot.data!.subtitle != null) {
-                return [animation.value > snapshot.data!.subtitle!.elementAt(index).offset.inMilliseconds / widget.track.duration.inMilliseconds];
-              }
-              return [false];
-            });
-          }
+          // if (actives.isEmpty) {
+          //   actives = List.generate(dataLength, (index) {
+          //     if (snapshot.data!.richSync != null) {
+          //       final line = snapshot.data!.richSync!.elementAt(index);
+          //       return List.generate(line.segments.length,
+          //           (i) => (line.start + line.segments[i].offset).inMilliseconds / widget.track.duration.inMilliseconds > animation.value);
+          //     }
+          //     if (snapshot.data!.subtitle != null) {
+          //       return [animation.value > snapshot.data!.subtitle!.elementAt(index).offset.inMilliseconds / widget.track.duration.inMilliseconds];
+          //     }
+          //     return [false];
+          //   });
+          // }
+
+          lSub = snapshot.data!.subtitle;
+          lRich = snapshot.data!.richSync;
 
           return Stack(
             children: [
               CustomScrollView(
+                controller: _controller,
                 slivers: [
                   SliverToBoxAdapter(
                     child: SizedBox(height: 200 + MediaQuery.of(context).padding.top),
                   ),
                   if (snapshot.data!.lyricsType == LyricsType.unavailable)
-                    SliverToBoxAdapter(
-                      child: Center(
-                        child: Column(
-                          children: [
-                            const Text(
-                              "🫤",
-                              style: TextStyle(
-                                fontSize: 64.0,
-                              ),
-                            ),
-                            const Padding(
-                              padding: EdgeInsets.only(top: 12.0),
-                              child: Text(
-                                "Sorry, no lyrics...",
-                                style: TextStyle(
-                                  fontSize: 32.0,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 100.0),
-                              child: IconButton(
-                                icon: const Icon(Icons.arrow_back),
-                                iconSize: 32.0,
-                                padding: const EdgeInsets.all(12.0),
-                                style: ButtonStyle(
-                                  backgroundColor: MaterialStateProperty.all(Theme.of(context).colorScheme.secondaryContainer),
-                                  foregroundColor: MaterialStateProperty.all(Theme.of(context).colorScheme.onSecondaryContainer),
-                                ),
-                                onPressed: () {
-                                  Navigator.of(context, rootNavigator: true).pop();
-                                },
-                              ),
-                            ),
-                            const Padding(
-                              padding: EdgeInsets.only(top: 12.0),
-                              child: Text("Back"),
-                            ),
-                          ],
-                        ),
-                      ),
+                    const SliverToBoxAdapter(
+                      child: LyricsUnavailalbe(),
                     ),
                   if (snapshot.data!.lyricsType == LyricsType.fullText)
                     SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          snapshot.data!.fullText!,
-                          style: const TextStyle(
-                            fontSize: 24.0,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
+                      child: LyricsFullText(snapshot.data!.fullText!),
                     ),
                   if (snapshot.data!.lyricsType == LyricsType.subtitle)
                     SliverList(
                       delegate: SliverChildBuilderDelegate(
                         childCount: snapshot.data!.subtitle!.length,
-                        (context, index) {
-                          final subtitle = snapshot.data!.subtitle![index];
-                          final subtitleNext = snapshot.data!.subtitle![(index + 1).clamp(0, snapshot.data!.subtitle!.length - 1)];
-                          final progress = subtitle.offset.inMilliseconds / widget.track.duration.inMilliseconds;
-                          final progressEnd = (subtitleNext.offset.inMilliseconds - 200) / widget.track.duration.inMilliseconds;
-
-                          return AnimatedBuilder(
-                              animation: animation,
-                              builder: (context, child) {
-                                WidgetsBinding.instance.addPostFrameCallback((_) {
-                                  if (animation.value > progress && animation.value < progressEnd) {
-                                    final key = keys[(index + 2).clamp(0, keys.length - 1)].currentContext;
-                                    if (key != null) {
-                                      Scrollable.ensureVisible(
-                                        key,
-                                        duration: const Duration(milliseconds: 500),
-                                        alignment: 0.5,
-                                      );
-                                    }
-                                  }
-                                });
-
-                                if (actives[index][0] != (animation.value > progress)) {
-                                  actives[index][0] = animation.value > progress;
-                                  if (subtitle.text.replaceAll(" ", "") != "") HapticFeedback.lightImpact();
-                                }
-
-                                String text = snapshot.data!.subtitle![index].text;
-                                if (text.trim() == "") {
-                                  text = "🎶";
-                                }
-
-                                return AnimatedContainer(
-                                  key: keys[index],
-                                  duration: const Duration(milliseconds: 500),
-                                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
-                                  margin: const EdgeInsets.symmetric(horizontal: 12.0),
-                                  decoration: BoxDecoration(
-                                    color: animation.value > progress && animation.value < progressEnd
-                                        ? Theme.of(context).colorScheme.secondary.withOpacity(.1)
-                                        : Colors.transparent,
-                                    borderRadius: BorderRadius.circular(12.0),
-                                  ),
-                                  child: AnimatedDefaultTextStyle(
-                                    duration: const Duration(milliseconds: 200),
-                                    style: TextStyle(
-                                      color: animation.value > progress
-                                          ? animation.value < progressEnd
-                                              ? Theme.of(context).colorScheme.primary
-                                              : Theme.of(context).colorScheme.secondary
-                                          : Theme.of(context).colorScheme.secondary.withOpacity(.3),
-                                      fontFamily: Theme.of(context).textTheme.bodyText2!.fontFamily,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 22.0,
-                                      shadows: [
-                                        Shadow(
-                                          offset: const Offset(5.0, 6.0),
-                                          blurRadius: 0.0,
-                                          color: Theme.of(context).colorScheme.secondary.withOpacity(animation.value > progressEnd ? .15 : 0),
-                                        ),
-                                      ],
-                                    ),
-                                    child: Text(
-                                      text,
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ),
-                                );
-                              });
-                        },
+                        subtitleListBuilder(snapshot.data!.subtitle!, widget.track),
                       ),
                     ),
                   if (snapshot.data!.lyricsType == LyricsType.richsync)
                     SliverList(
                       delegate: SliverChildBuilderDelegate(
                         childCount: snapshot.data!.richSync!.length,
-                        (context, index) {
-                          final richSync = snapshot.data!.richSync![index];
-                          double progress([Duration? o]) =>
-                              (richSync.start + (o ?? Duration.zero)).inMilliseconds / widget.track.duration.inMilliseconds;
-                          double progressEnd() => richSync.end.inMilliseconds / widget.track.duration.inMilliseconds;
-
-                          return AnimatedBuilder(
-                              animation: animation,
-                              builder: (context, child) {
-                                WidgetsBinding.instance.addPostFrameCallback((_) {
-                                  if (animation.value > progress() && animation.value < progressEnd()) {
-                                    Scrollable.ensureVisible(
-                                      keys[(index + 2).clamp(0, keys.length - 1)].currentContext!,
-                                      duration: const Duration(milliseconds: 500),
-                                      alignment: 0.5,
-                                    );
-                                  }
-                                });
-
-                                return AnimatedContainer(
-                                  key: keys[index],
-                                  duration: const Duration(milliseconds: 500),
-                                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
-                                  margin: const EdgeInsets.symmetric(horizontal: 12.0),
-                                  decoration: BoxDecoration(
-                                    color: animation.value > progress() && animation.value < progressEnd()
-                                        ? Theme.of(context).colorScheme.secondary.withOpacity(.1)
-                                        : Colors.transparent,
-                                    borderRadius: BorderRadius.circular(12.0),
-                                  ),
-                                  child: Wrap(
-                                    alignment: WrapAlignment.center,
-                                    children: richSync.segments
-                                        .asMap()
-                                        .map((i, e) {
-                                          if (actives[index][i] != (progress(e.offset) > animation.value)) {
-                                            actives[index][i] = progress(e.offset) > animation.value;
-                                            if (e.text.replaceAll(" ", "") != "") HapticFeedback.lightImpact();
-                                          }
-
-                                          return MapEntry(
-                                              i,
-                                              AnimatedDefaultTextStyle(
-                                                duration: const Duration(milliseconds: 200),
-                                                style: TextStyle(
-                                                  color: animation.value > progress(e.offset)
-                                                      ? animation.value < progressEnd()
-                                                          ? Theme.of(context).colorScheme.primary
-                                                          : Theme.of(context).colorScheme.secondary
-                                                      : Theme.of(context).colorScheme.secondary.withOpacity(.3),
-                                                  fontFamily: Theme.of(context).textTheme.bodyText2!.fontFamily,
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 22.0,
-                                                  shadows: [
-                                                    Shadow(
-                                                      offset: const Offset(5.0, 6.0),
-                                                      blurRadius: 0.0,
-                                                      color: Theme.of(context)
-                                                          .colorScheme
-                                                          .secondary
-                                                          .withOpacity(animation.value > progressEnd() ? .15 : 0),
-                                                    ),
-                                                  ],
-                                                ),
-                                                child: Text(
-                                                  e.text,
-                                                  textAlign: TextAlign.center,
-                                                ),
-                                              ));
-                                        })
-                                        .values
-                                        .toList(),
-                                  ),
-                                );
-                              });
-                        },
+                        richSyncListBuilder(snapshot.data!.richSync!, widget.track),
                       ),
                     ),
                   SliverToBoxAdapter(

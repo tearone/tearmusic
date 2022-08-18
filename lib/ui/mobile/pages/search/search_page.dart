@@ -51,7 +51,7 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
   void initState() {
     super.initState();
 
-    searchAfterTyping = Timer(const Duration(), () => {});
+    searchAfterTyping = Timer(Duration.zero, () => {});
 
     listOrder = List.generate(tabs.length, (i) => "$i");
     _tabController = TabController(length: tabs.length, vsync: this);

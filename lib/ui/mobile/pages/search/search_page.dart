@@ -102,6 +102,29 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
+    final noResultsWidget = Padding(
+      padding: const EdgeInsets.only(bottom: 200.0),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              "🫥",
+              style: TextStyle(fontSize: 64.0),
+            ),
+            Text(
+              "No results...",
+              style: TextStyle(
+                fontSize: 18.0,
+                fontWeight: FontWeight.w500,
+                color: Theme.of(context).colorScheme.secondary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.only(top: 24.0),
@@ -211,28 +234,7 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                         ),
                       );
                     case SearchResult.empty:
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 200.0),
-                        child: Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Text(
-                                "🫥",
-                                style: TextStyle(fontSize: 64.0),
-                              ),
-                              Text(
-                                "No results...",
-                                style: TextStyle(
-                                  fontSize: 18.0,
-                                  fontWeight: FontWeight.w500,
-                                  color: Theme.of(context).colorScheme.secondary,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
+                      return noResultsWidget;
                     case SearchResult.loading:
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 200.0),
@@ -335,10 +337,14 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                                 switch (pageIndex) {
                                   case 1:
                                     return ListView.builder(
-                                      itemCount: (results?.tracks.length ?? 0) + 1,
+                                      itemCount: (results?.tracks.length ?? 0).clamp(1, 50) + 1,
                                       itemBuilder: (context, index) {
                                         if (index == results!.tracks.length) {
                                           return const SizedBox(height: 200);
+                                        }
+
+                                        if (results?.tracks.isEmpty ?? true) {
+                                          return noResultsWidget;
                                         }
 
                                         return SearchTrackTile(results!.tracks[index]);
@@ -346,10 +352,14 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                                     );
                                   case 2:
                                     return ListView.builder(
-                                      itemCount: (results?.albums.length ?? 0) + 1,
+                                      itemCount: (results?.albums.length ?? 0).clamp(1, 50) + 1,
                                       itemBuilder: (context, index) {
                                         if (index == results!.albums.length) {
                                           return const SizedBox(height: 200);
+                                        }
+
+                                        if (results?.albums.isEmpty ?? true) {
+                                          return noResultsWidget;
                                         }
 
                                         return SearchAlbumTile(results!.albums[index]);
@@ -357,10 +367,14 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                                     );
                                   case 3:
                                     return ListView.builder(
-                                      itemCount: (results?.playlists.length ?? 0) + 1,
+                                      itemCount: (results?.playlists.length ?? 0).clamp(1, 50) + 1,
                                       itemBuilder: (context, index) {
                                         if (index == results!.playlists.length) {
                                           return const SizedBox(height: 200);
+                                        }
+
+                                        if (results?.playlists.isEmpty ?? true) {
+                                          return noResultsWidget;
                                         }
 
                                         return SearchPlaylistTile(results!.playlists[index]);
@@ -368,10 +382,14 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                                     );
                                   case 4:
                                     return ListView.builder(
-                                      itemCount: (results?.artists.length ?? 0) + 1,
+                                      itemCount: (results?.artists.length ?? 0).clamp(1, 50) + 1,
                                       itemBuilder: (context, index) {
                                         if (index == results!.artists.length) {
                                           return const SizedBox(height: 200);
+                                        }
+
+                                        if (results?.artists.isEmpty ?? true) {
+                                          return noResultsWidget;
                                         }
 
                                         return SearchArtistTile(results!.artists[index]);

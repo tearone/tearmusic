@@ -18,6 +18,8 @@ class TopResultContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (results.isEmpty) return const SizedBox();
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
       child: Card(

@@ -228,8 +228,8 @@ class MusicInfoProvider {
     return data;
   }
 
-  Future<Playback> playback(MusicTrack track, {bool sub = true, String? videoId}) async {
-    return await _api.playback(track, userId: userId, sub: sub, videoId: videoId);
+  Future<Playback> playback(MusicTrack track, {String? videoId}) async {
+    return await _api.playback(track, userId: userId, videoId: videoId);
   }
 
   Future<PlaybackHead> playbackHead(MusicTrack track) async {

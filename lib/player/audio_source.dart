@@ -1,5 +1,6 @@
 // Feed your own stream of bytes into the player
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:just_audio/just_audio.dart';
 import 'package:tearmusic/models/music/track.dart';
@@ -13,18 +14,38 @@ class TearMusicAudioSource extends StreamAudioSource {
   List<int> bytes = [];
   final cached = Completer<bool>();
   final playback = Completer<Playback>();
-  late PlaybackHead playbackHead;
+  int sourceLength = 0;
+  PlaybackHead? playbackHead;
   final MusicInfoProvider _api;
 
   TearMusicAudioSource(this.track, {required MusicInfoProvider api}) : _api = api;
 
-  Future<List<SilenceData>> silence() async => playback.isCompleted ? (await playback.future).silence : playbackHead.silence;
+  Future<List<SilenceData>> silence() async => playback.isCompleted ? (await playback.future).silence : playbackHead?.silence ?? [];
 
   @override
   Future<StreamAudioResponse> request([int? start, int? end]) async {
-    await cached.future;
+    log("StreamAudioRequest($start-$end)");
     start ??= 0;
-    if (start >= bytes.length && end == null) await playback.future;
+
+    await cached.future;
+    if (playback.isCompleted) {
+      final pb = await playback.future;
+      end ??= sourceLength;
+
+      var req = http.Request('GET', Uri.parse(pb.streamUrl));
+      req.headers['range'] = 'bytes=$start-$end';
+
+      final res = await req.send();
+
+      return StreamAudioResponse(
+        sourceLength: sourceLength,
+        contentLength: int.tryParse(res.headers['content-length'] ?? "") ?? 0,
+        offset: start,
+        stream: res.stream,
+        contentType: 'audio/mp4',
+      );
+    }
+
     end ??= bytes.length;
 
     return StreamAudioResponse(
@@ -39,23 +60,24 @@ class TearMusicAudioSource extends StreamAudioSource {
   Future<bool> head() async {
     try {
       playbackHead = await _api.playbackHead(track);
-      bytes = playbackHead.prefetch;
+      bytes = playbackHead!.prefetch;
       cached.complete(true);
       return true;
     } catch (e) {
-      return await body(sub: false);
+      return await body();
     }
   }
 
-  Future<bool> body({bool sub = true}) async {
+  Future<bool> body() async {
     try {
-      final pb = await _api.playback(track, sub: sub, videoId: playbackHead.videoId);
-      final res = await http.get(Uri.parse(pb.streamUrl));
-      if (res.statusCode < 400) bytes = res.bodyBytes;
-      playback.complete(pb);
-      cached.complete(true);
+      final pb = await _api.playback(track, videoId: playbackHead?.videoId);
+      final res = await http.head(Uri.parse(pb.streamUrl), headers: {"range": "bytes=-"});
+      sourceLength = int.tryParse(res.headers['content-range']?.split("/").last ?? "") ?? bytes.length;
+      if (!playback.isCompleted) playback.complete(pb);
+      if (!cached.isCompleted) cached.complete(true);
       return true;
-    } catch (_) {
+    } catch (err) {
+      log(err.toString());
       return false;
     }
   }

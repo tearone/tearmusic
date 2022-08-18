@@ -36,7 +36,7 @@ class Playback {
   factory Playback.decode(Map json) {
     return Playback(
       streamUrl: json['cdn'],
-      waveform: json['proc']['waveform'].cast<double>(),
+      waveform: (json['proc']['waveform'] as List).cast<num?>().map((e) => e?.toDouble() ?? 0.0).toList(), // yes this is needed
       silence: SilenceData.decodeList((json['proc']['silence'] as List).cast<Map>()),
     );
   }

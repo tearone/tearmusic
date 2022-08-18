@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -33,18 +34,18 @@ class _WaveformSliderState extends State<WaveformSlider> {
     waveform = [];
 
     currentMusic.tma!.playback.future.then((value) {
-      final effects = [];
+      final List<double> effects = [];
       final List<double> chunks = [];
       final chunkLen = value.waveform.length / tickerCount;
 
-      final min = value.waveform.reduce(math.min);
-      final max = value.waveform.reduce(math.max);
+      final double min = value.waveform.reduce((a, b) => math.min(a.toDouble(), b.toDouble())).toDouble();
+      final double max = value.waveform.reduce((a, b) => math.max(a.toDouble(), b.toDouble())).toDouble();
 
       for (var sample in value.waveform) {
         chunks.add(sample);
 
         if (chunks.length >= chunkLen) {
-          final average = chunks.fold<double>(0, (a, b) => a + b) / chunks.length;
+          final double average = chunks.fold<double>(0, (a, b) => a + b) / chunks.length;
           effects.add(normalizeInRange(average, min, max, 1.0, 40.0));
           chunks.clear();
         }
@@ -62,7 +63,7 @@ class _WaveformSliderState extends State<WaveformSlider> {
 
       setState(() {
         whereCenter += 0.5;
-        if (whereCenter > 50) whereCenter = 0;
+        if (whereCenter > 6) whereCenter = 0;
       });
     });
   }

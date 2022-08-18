@@ -8,7 +8,6 @@ import 'package:tearmusic/player/audio_source.dart';
 import 'package:tearmusic/providers/music_info_provider.dart';
 
 enum AudioLoadingState { ready, loading, error }
-
 enum PlayingFrom { none, album, playlist }
 
 class CurrentMusicProvider extends ChangeNotifier {

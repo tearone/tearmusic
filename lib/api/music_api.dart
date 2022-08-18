@@ -132,7 +132,7 @@ class MusicApi {
   Future<PlaybackHead> playbackHead(MusicTrack track) async {
     String url = "${BaseApi.url}/music/playback";
     url += "?id=${Uri.encodeComponent(track.id)}";
-    url += "&artist=${Uri.encodeComponent(track.artists.first.name)}";
+    url += "&artists=${Uri.encodeComponent(jsonEncode(track.artists.map((e) => e.name)))}";
     url += "&track=${Uri.encodeComponent(track.name)}";
     url += "&duration=${track.duration.inSeconds}";
     url += (track.album != null ? "&album=${Uri.encodeComponent(track.album!.name)}" : "");
@@ -155,7 +155,7 @@ class MusicApi {
     if (videoId != null) {
       url += "&video_id=${Uri.encodeComponent(videoId)}";
     } else {
-      url += "&artist=${Uri.encodeComponent(track.artists.first.name)}";
+      url += "&artists=${Uri.encodeComponent(jsonEncode(track.artists.map((e) => e.name)))}";
       url += "&track=${Uri.encodeComponent(track.name)}";
       url += "&duration=${track.duration.inSeconds}";
       url += (track.album != null ? "&album=${Uri.encodeComponent(track.album!.name)}" : "");

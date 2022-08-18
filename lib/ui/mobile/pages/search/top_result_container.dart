@@ -23,7 +23,7 @@ class TopResultContainer extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
       child: Card(
-        elevation: 3.0,
+        elevation: 2.0,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

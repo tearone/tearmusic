@@ -17,7 +17,6 @@ import 'package:tearmusic/ui/mobile/common/player/track_image.dart';
 import 'package:tearmusic/ui/mobile/common/player/track_info.dart';
 import 'package:tearmusic/ui/common/format.dart';
 import 'package:tearmusic/ui/mobile/common/views/album_view/album_view.dart';
-import 'package:tearmusic/ui/mobile/common/views/artist_view.dart';
 import 'package:tearmusic/utils.dart';
 
 enum PlayerState { mini, expanded, queue }
@@ -400,7 +399,6 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                   ),
 
                   /// Top Row
-                  //! A bug causes performance issues when pressing the icon buttons multiple times
                   if (rcp > 0.0)
                     Material(
                       type: MaterialType.transparency,

@@ -10,7 +10,7 @@ import 'package:tearmusic/models/music/album.dart';
 import 'package:tearmusic/models/music/artist.dart';
 import 'package:tearmusic/models/music/lyrics.dart';
 import 'package:tearmusic/models/music/playlist.dart';
-import 'package:tearmusic/models/music/search_results.dart';
+import 'package:tearmusic/models/search.dart';
 import 'package:tearmusic/models/music/track.dart';
 import 'package:tearmusic/models/playback.dart';
 
@@ -31,6 +31,18 @@ class MusicApi {
       log("Unknown Request: ${res.statusCode}");
       throw UnknownRequestException(cause);
     }
+  }
+
+  Future<List<SearchSuggestion>> searchSuggest(String query) async {
+    final res = await http.get(
+      Uri.parse("${BaseApi.url}/music/search-suggest?query=${Uri.encodeComponent(query)}"),
+      headers: {"authorization": await base.getToken()},
+    );
+
+    _reschk(res, "searchSuggest");
+
+    final json = (jsonDecode(res.body) as List).cast<List>();
+    return SearchSuggestion.decodeList(json);
   }
 
   Future<SearchResults> search(String query) async {

@@ -8,7 +8,7 @@ import 'package:tearmusic/models/music/album.dart';
 import 'package:tearmusic/models/music/artist.dart';
 import 'package:tearmusic/models/music/lyrics.dart';
 import 'package:tearmusic/models/music/playlist.dart';
-import 'package:tearmusic/models/music/search_results.dart';
+import 'package:tearmusic/models/search.dart';
 import 'package:tearmusic/models/music/track.dart';
 import 'package:tearmusic/models/playback.dart';
 
@@ -29,6 +29,10 @@ class MusicInfoProvider {
   Future<void> init() async {
     _store = await Hive.openBox("music_cache");
     await _store.clear();
+  }
+
+  Future<List<SearchSuggestion>> searchSuggest(String query) async {
+    return await _api.searchSuggest(query);
   }
 
   Future<SearchResults> search(String query) async {

@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:tearmusic/models/music/album.dart';
 import 'package:tearmusic/models/music/artist.dart';
 import 'package:tearmusic/models/music/playlist.dart';
@@ -36,4 +37,49 @@ class SearchResults {
 
   bool get isEmpty => tracks.isEmpty && playlists.isEmpty && albums.isEmpty && artists.isEmpty;
   bool get isNotEmpty => !isEmpty;
+}
+
+class SearchSuggestionPart {
+  final String text;
+  final bool bold;
+
+  SearchSuggestionPart({
+    required this.text,
+    required this.bold,
+  });
+}
+
+class SearchSuggestion {
+  final List<SearchSuggestionPart> _parts;
+
+  SearchSuggestion({
+    required List<SearchSuggestionPart> parts,
+  }) : _parts = parts;
+
+  factory SearchSuggestion.decode(List json) {
+    return SearchSuggestion(
+      parts: json
+          .map((e) => SearchSuggestionPart(
+                text: e['text'],
+                bold: e['bold'] ?? false,
+              ))
+          .toList(),
+    );
+  }
+
+  static List<SearchSuggestion> decodeList(List<List> encoded) => encoded.map((e) => SearchSuggestion.decode(e)).toList().cast<SearchSuggestion>();
+
+  String get raw => _parts.map((e) => e.text).join();
+
+  List<TextSpan> render(BuildContext context) {
+    return _parts
+        .map((e) => TextSpan(
+              text: e.text,
+              style: TextStyle(
+                fontWeight: e.bold ? FontWeight.bold : FontWeight.w500,
+                color: e.bold ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.secondary,
+              ),
+            ))
+        .toList();
+  }
 }

@@ -3,9 +3,11 @@ import 'dart:math';
 
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
+import 'package:fuzzy/data/result.dart';
+import 'package:fuzzy/fuzzy.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
-import 'package:tearmusic/models/music/search_results.dart';
+import 'package:tearmusic/models/search.dart';
 import 'package:tearmusic/providers/music_info_provider.dart';
 import 'package:tearmusic/ui/mobile/common/filter_bar.dart';
 import 'package:tearmusic/ui/mobile/common/tiles/search_album_tile.dart';
@@ -42,17 +44,19 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
   late List<String> listOrder;
 
   SearchResults? results;
+  List<SearchSuggestion> suggestions = [];
+  List<Result<String>> suggestionResults = [];
   SearchResult result = SearchResult.prepare;
 
-  late Timer searchAfterTyping;
   String lastTerm = "";
-  final Duration searchAfterDuration = const Duration(milliseconds: 350);
+  Timer searchDebounce = Timer(Duration.zero, () {});
+  Timer suggestionDebounce = Timer(Duration.zero, () {});
+  static const Duration serdd = Duration(milliseconds: 500); // search debounce timeout
+  static const Duration sugdd = Duration(milliseconds: 300); // suggestion debounce timeout
 
   @override
   void initState() {
     super.initState();
-
-    searchAfterTyping = Timer(Duration.zero, () => {});
 
     listOrder = List.generate(tabs.length, (i) => "$i");
     _tabController = TabController(length: tabs.length, vsync: this);
@@ -73,6 +77,7 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
 
   void onHandlerChanged(value) {
     if (value == "") {
+      suggestions = [];
       setState(() => result = SearchResult.prepare);
       lastTerm = value;
       return;
@@ -80,12 +85,28 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
     if (lastTerm == value) return;
     lastTerm = value;
 
-    setState(() {
-      result = SearchResult.loading;
-    });
+    if (suggestions.isNotEmpty) {
+      final fuzzy = Fuzzy(suggestions.map((e) => e.raw).toList());
+      setState(() {
+        suggestionResults = fuzzy.search(value);
+      });
+    }
 
-    if (searchAfterTyping.isActive) setState(() => searchAfterTyping.cancel());
-    setState(() => searchAfterTyping = Timer(searchAfterDuration, () => searchResults(value)));
+    suggest(value);
+  }
+
+  Future<void> suggest(String value) async {
+    final results = await context.read<MusicInfoProvider>().searchSuggest(value);
+    if (lastTerm != value) return;
+    setState(() {
+      if (results.isEmpty) {
+        suggestions = [];
+      } else {
+        suggestions = results;
+        final fuzzy = Fuzzy(suggestions.map((e) => e.raw).toList());
+        suggestionResults = fuzzy.search(value);
+      }
+    });
   }
 
   Future<void> searchResults(String value) async {
@@ -171,7 +192,11 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                         icon: const Icon(Icons.close),
                         onPressed: () {
                           _searchInputController.text = "";
-                          setState(() {});
+                          if (searchDebounce.isActive) searchDebounce.cancel();
+                          setState(() {
+                            suggestions = [];
+                            if (results == null) result = SearchResult.prepare;
+                          });
                           _searchInputFocus.requestFocus();
                         },
                       ),
@@ -222,6 +247,91 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                   child: () {
                     switch (result) {
                       case SearchResult.prepare:
+                        if (suggestions.isNotEmpty) {
+                          final sugg = suggestionResults.map((e) {
+                            List<InlineSpan> renderSuggestion(Result<String> result) {
+                              if (result.matches.isEmpty) return [];
+
+                              List<InlineSpan> parts = [];
+                              final match = result.matches.first;
+                              final matches = result.matches.first.matchedIndices;
+
+                              final secStyle = TextStyle(
+                                fontWeight: FontWeight.w500,
+                                color: Theme.of(context).colorScheme.secondary,
+                              );
+
+                              final primStyle = TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.primary,
+                              );
+
+                              for (int i = 0; i < matches.length; i++) {
+                                if (i == 0) {
+                                  parts.add(TextSpan(
+                                    text: match.value.substring(i == 0 ? 0 : matches[i - 1].end + 1, matches[i].start),
+                                    style: secStyle,
+                                  ));
+                                }
+                                parts.add(TextSpan(
+                                  text: match.value.substring(matches[i].start, matches[i].end + 1),
+                                  style: primStyle,
+                                ));
+                                parts.add(TextSpan(
+                                  text: match.value.substring(matches[i].end + 1, (i == matches.length - 1) ? null : matches[i + 1].start),
+                                  style: secStyle,
+                                ));
+                              }
+
+                              return parts;
+                            }
+
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                              child: InkWell(
+                                onTap: () {},
+                                borderRadius: BorderRadius.circular(8.0),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
+                                  width: double.infinity,
+                                  child: Row(
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.only(right: 12.0),
+                                        child: Icon(
+                                          Icons.music_note,
+                                          color: Theme.of(context).colorScheme.onSecondaryContainer,
+                                        ),
+                                      ),
+                                      Text.rich(
+                                        TextSpan(children: renderSuggestion(e)),
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: 16.0,
+                                          fontFamily: Theme.of(context).textTheme.bodyText2!.fontFamily,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          });
+
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: ListView(
+                                    children: sugg.toList(),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 200.0),
                           child: Center(

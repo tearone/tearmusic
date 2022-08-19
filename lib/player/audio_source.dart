@@ -5,7 +5,7 @@ import 'dart:developer';
 import 'package:just_audio/just_audio.dart';
 import 'package:tearmusic/models/music/track.dart';
 import 'package:tearmusic/models/playback.dart';
-import 'package:tearmusic/models/silence.dart';
+import 'package:tearmusic/models/segmented.dart';
 import 'package:tearmusic/providers/music_info_provider.dart';
 import 'package:http/http.dart' as http;
 
@@ -20,7 +20,7 @@ class TearMusicAudioSource extends StreamAudioSource {
 
   TearMusicAudioSource(this.track, {required MusicInfoProvider api}) : _api = api;
 
-  Future<List<SilenceData>> silence() async => playback.isCompleted ? (await playback.future).silence : playbackHead?.silence ?? [];
+  Future<List<Segmented>> silence() async => playback.isCompleted ? (await playback.future).silence : playbackHead?.silence ?? [];
 
   @override
   Future<StreamAudioResponse> request([int? start, int? end]) async {
@@ -63,7 +63,8 @@ class TearMusicAudioSource extends StreamAudioSource {
       bytes = playbackHead!.prefetch;
       cached.complete(true);
       return true;
-    } catch (e) {
+    } catch (err) {
+      log(err.toString());
       return await body();
     }
   }

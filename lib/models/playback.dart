@@ -1,15 +1,17 @@
 import 'dart:typed_data';
-import 'package:tearmusic/models/silence.dart';
+import 'package:tearmusic/models/segmented.dart';
 
 class PlaybackHead {
   final Uint8List prefetch;
   final String videoId;
-  final List<SilenceData> silence;
+  final List<Segmented> silence;
+  final List<TempoSegment> tempo;
 
   PlaybackHead({
     required this.prefetch,
     required this.videoId,
     required this.silence,
+    required this.tempo,
   });
 
   factory PlaybackHead.decode(Object? data) {
@@ -17,7 +19,8 @@ class PlaybackHead {
     return PlaybackHead(
       prefetch: json['buffer'].buffer.asUint8List(),
       videoId: json['videoId'],
-      silence: SilenceData.decodeList((json['silence'] as List).cast<Map>()),
+      silence: Segmented.decodeList((json['silence'] as List).cast<Map>()),
+      tempo: TempoSegment.decodeList((json['tempo'] as List).cast<Map>()),
     );
   }
 }
@@ -25,7 +28,7 @@ class PlaybackHead {
 class Playback {
   final String streamUrl;
   final List<double> waveform;
-  final List<SilenceData> silence;
+  final List<Segmented> silence;
 
   Playback({
     required this.streamUrl,
@@ -37,7 +40,7 @@ class Playback {
     return Playback(
       streamUrl: json['cdn'],
       waveform: (json['proc']['waveform'] as List).cast<num?>().map((e) => e?.toDouble() ?? 0.0).toList(), // yes this is needed
-      silence: SilenceData.decodeList((json['proc']['silence'] as List).cast<Map>()),
+      silence: Segmented.decodeList((json['proc']['silence'] as List).cast<Map>()),
     );
   }
 }

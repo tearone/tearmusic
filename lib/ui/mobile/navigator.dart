@@ -8,6 +8,7 @@ import 'package:tearmusic/providers/theme_provider.dart';
 import 'package:tearmusic/providers/user_provider.dart';
 import 'package:tearmusic/providers/will_pop_provider.dart';
 import 'package:tearmusic/ui/mobile/common/player/player.dart';
+import 'package:tearmusic/ui/mobile/common/wallpaper.dart';
 import 'package:tearmusic/ui/mobile/pages/home/home_page.dart';
 import 'package:tearmusic/ui/mobile/pages/library/library_page.dart';
 import 'package:tearmusic/ui/mobile/pages/search/search_page.dart';
@@ -169,6 +170,23 @@ class _NavigationScreenState extends State<NavigationScreen> with SingleTickerPr
                         child: Container(
                           color: Theme.of(context).colorScheme.onSecondary.withOpacity((animation.value * 3 - 2).clamp(0, .45)),
                         ),
+                      );
+                    } else {
+                      return const SizedBox();
+                    }
+                  },
+                ),
+              ),
+
+              /// Player Wallpaper
+              Positioned.fill(
+                child: AnimatedBuilder(
+                  animation: animation,
+                  builder: (context, child) {
+                    if (animation.value > 0.01) {
+                      return Opacity(
+                        opacity: animation.value.clamp(0.0, 1.0),
+                        child: const Wallpaper(gradient: false, particleOpacity: .3),
                       );
                     } else {
                       return const SizedBox();

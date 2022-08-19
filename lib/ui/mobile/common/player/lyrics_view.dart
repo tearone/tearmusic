@@ -13,6 +13,7 @@ import 'package:tearmusic/ui/mobile/common/player/lyrics_view/unavailable.dart';
 import 'package:tearmusic/ui/mobile/common/player/lyrics_view/full_text.dart';
 import 'package:tearmusic/ui/mobile/common/player/lyrics_view/subtitle.dart';
 import 'package:tearmusic/ui/mobile/common/player/lyrics_view/rich_sync.dart';
+import 'package:tearmusic/ui/mobile/common/wallpaper.dart';
 
 class LyricsView extends StatefulWidget {
   const LyricsView(this.track, {Key? key}) : super(key: key);
@@ -143,6 +144,7 @@ class _LyricsViewState extends State<LyricsView> with SingleTickerProviderStateM
 
           return Stack(
             children: [
+              if (snapshot.data!.lyricsType != LyricsType.unavailable) const Wallpaper(particleOpacity: .07),
               CustomScrollView(
                 controller: _controller,
                 slivers: [

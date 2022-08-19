@@ -10,6 +10,7 @@ import 'package:tearmusic/providers/theme_provider.dart';
 import 'package:tearmusic/ui/common/image_color.dart';
 import 'package:tearmusic/ui/mobile/common/cached_image.dart';
 import 'package:tearmusic/ui/common/format.dart';
+import 'package:tearmusic/ui/mobile/common/tiles/track_tile_preview.dart';
 import 'package:tearmusic/ui/mobile/common/views/album_view/album_view.dart';
 import 'package:tearmusic/ui/mobile/common/views/artist_view.dart';
 
@@ -23,6 +24,9 @@ class TrackTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CupertinoContextMenu(
+      previewBuilder: (context, animation, child) {
+        return TrackTilePreview(track, animation: animation);
+      },
       actions: [
         CupertinoContextMenuAction(
           child: const Text("View Artist"),

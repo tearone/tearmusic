@@ -249,7 +249,11 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                         );
                       case SearchResult.done:
                         WidgetsBinding.instance.addPostFrameCallback((_) {
-                          _pageController.jumpToPage(_tabController.index);
+                          if (_pageController.positions.isNotEmpty) {
+                            _pageController.jumpToPage(_tabController.index);
+                          } else {
+                            _tabController.animateTo(0);
+                          }
                         });
                         if (results == null) return const SizedBox();
                         return NotificationListener<ScrollNotification>(

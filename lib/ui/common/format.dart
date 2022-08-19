@@ -4,6 +4,6 @@ extension DurationFormat on Duration {
   }
 
   String shortFormat() {
-    return "${inHours > 0 ? '$inHours:' : ''}${(inMinutes % 60).toString().padLeft(2, '0')}:${(inSeconds % 60).toString().padLeft(2, '0')}";
+    return "${inHours > 0 ? '$inHours:' : ''}${(inMinutes % 60).toString().padLeft(inHours > 0 ? 2 : 0, '0')}:${(inSeconds % 60).toString().padLeft(2, '0')}";
   }
 }

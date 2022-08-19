@@ -75,50 +75,68 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
     super.dispose();
   }
 
-  void onHandlerChanged(value) {
+  void onHandlerChanged(value, {bool force = false}) {
     if (value == "") {
       suggestions = [];
       setState(() => result = SearchResult.prepare);
-      lastTerm = value;
+      lastTerm = "";
       return;
     }
     if (lastTerm == value) return;
     lastTerm = value;
 
-    if (suggestions.isNotEmpty) {
-      final fuzzy = Fuzzy(suggestions.map((e) => e.raw).toList());
+    if (!force) {
+      if (suggestions.isNotEmpty) {
+        final fuzzy = Fuzzy(suggestions.map((e) => e.raw).toList());
+        setState(() {
+          suggestionResults = fuzzy.search(value);
+        });
+      }
+
+      suggest(value);
+    } else {
       setState(() {
-        suggestionResults = fuzzy.search(value);
+        results = null;
+        result = SearchResult.loading;
+      });
+
+      searchResults(value).then((_) {
+        setState(() {
+          if (results?.isEmpty ?? true) {
+            result = SearchResult.empty;
+          } else {
+            result = SearchResult.done;
+          }
+        });
       });
     }
-
-    suggest(value);
   }
 
   Future<void> suggest(String value) async {
-    final results = await context.read<MusicInfoProvider>().searchSuggest(value);
+    final res = await context.read<MusicInfoProvider>().searchSuggest(value);
     if (lastTerm != value) return;
     setState(() {
-      if (results.isEmpty) {
+      if (res.isEmpty) {
         suggestions = [];
       } else {
-        suggestions = results;
+        suggestions = res;
         final fuzzy = Fuzzy(suggestions.map((e) => e.raw).toList());
         suggestionResults = fuzzy.search(value);
+        result = SearchResult.prepare;
+
+        suggestionDebounce = Timer(sugdd, () {
+          lastTerm = suggestionResults[0].item;
+          searchResults(suggestionResults[0].item);
+        });
       }
     });
   }
 
   Future<void> searchResults(String value) async {
-    results = await context.read<MusicInfoProvider>().search(value);
+    final res = await context.read<MusicInfoProvider>().search(value);
     if (lastTerm != value) return;
     setState(() {
-      if (results == null) {
-      } else if (results?.isEmpty ?? true) {
-        result = SearchResult.empty;
-      } else {
-        result = SearchResult.done;
-      }
+      results = res;
     });
   }
 
@@ -175,7 +193,7 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                           autocorrect: false,
                           autofocus: false,
                           onChanged: onHandlerChanged,
-                          onSubmitted: (value) => onHandlerChanged(value),
+                          onSubmitted: (value) => onHandlerChanged(value, force: true),
                           controller: _searchInputController,
                           textInputAction: TextInputAction.search,
                           style: const TextStyle(fontWeight: FontWeight.w500),
@@ -248,83 +266,104 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                     switch (result) {
                       case SearchResult.prepare:
                         if (suggestions.isNotEmpty) {
-                          final sugg = suggestionResults.map((e) {
-                            List<InlineSpan> renderSuggestion(Result<String> result) {
-                              if (result.matches.isEmpty) return [];
-
-                              List<InlineSpan> parts = [];
-                              final match = result.matches.first;
-                              final matches = result.matches.first.matchedIndices;
-
-                              final secStyle = TextStyle(
-                                fontWeight: FontWeight.w500,
-                                color: Theme.of(context).colorScheme.secondary,
-                              );
-
-                              final primStyle = TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).colorScheme.primary,
-                              );
-
-                              for (int i = 0; i < matches.length; i++) {
-                                if (i == 0) {
-                                  parts.add(TextSpan(
-                                    text: match.value.substring(i == 0 ? 0 : matches[i - 1].end + 1, matches[i].start),
-                                    style: secStyle,
-                                  ));
-                                }
-                                parts.add(TextSpan(
-                                  text: match.value.substring(matches[i].start, matches[i].end + 1),
-                                  style: primStyle,
-                                ));
-                                parts.add(TextSpan(
-                                  text: match.value.substring(matches[i].end + 1, (i == matches.length - 1) ? null : matches[i + 1].start),
-                                  style: secStyle,
-                                ));
-                              }
-
-                              return parts;
-                            }
-
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                              child: InkWell(
-                                onTap: () {},
-                                borderRadius: BorderRadius.circular(8.0),
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
-                                  width: double.infinity,
-                                  child: Row(
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsets.only(right: 12.0),
-                                        child: Icon(
-                                          Icons.music_note,
-                                          color: Theme.of(context).colorScheme.onSecondaryContainer,
-                                        ),
-                                      ),
-                                      Text.rich(
-                                        TextSpan(children: renderSuggestion(e)),
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          fontSize: 16.0,
-                                          fontFamily: Theme.of(context).textTheme.bodyText2!.fontFamily,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            );
-                          });
-
                           return Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 12.0),
                             child: Row(
                               children: [
                                 Expanded(
-                                  child: ListView(
-                                    children: sugg.toList(),
+                                  child: ListView.builder(
+                                    itemCount: suggestionResults.length,
+                                    itemBuilder: (context, index) {
+                                      List<InlineSpan> renderSuggestion(Result<String> result) {
+                                        if (result.matches.isEmpty) return [];
+
+                                        List<InlineSpan> parts = [];
+                                        final match = result.matches.first;
+                                        final matches = result.matches.first.matchedIndices;
+
+                                        final secStyle = TextStyle(
+                                          fontWeight: FontWeight.w500,
+                                          color: Theme.of(context).colorScheme.secondary,
+                                        );
+
+                                        final primStyle = TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Theme.of(context).colorScheme.primary,
+                                        );
+
+                                        for (int i = 0; i < matches.length; i++) {
+                                          if (i == 0) {
+                                            parts.add(TextSpan(
+                                              text: match.value.substring(i == 0 ? 0 : matches[i - 1].end + 1, matches[i].start),
+                                              style: secStyle,
+                                            ));
+                                          }
+                                          parts.add(TextSpan(
+                                            text: match.value.substring(matches[i].start, matches[i].end + 1),
+                                            style: primStyle,
+                                          ));
+                                          parts.add(TextSpan(
+                                            text: match.value.substring(matches[i].end + 1, (i == matches.length - 1) ? null : matches[i + 1].start),
+                                            style: secStyle,
+                                          ));
+                                        }
+
+                                        return parts;
+                                      }
+
+                                      return Padding(
+                                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                                        child: InkWell(
+                                          onTap: () {
+                                            _searchInputFocus.unfocus();
+
+                                            if (index == 0 && results != null && lastTerm == suggestionResults[0].item) {
+                                              setState(() {
+                                                _searchInputController.text = suggestionResults[0].item;
+                                                result = SearchResult.done;
+                                              });
+                                            } else {
+                                              setState(() {
+                                                _searchInputController.text = suggestionResults[index].item;
+                                                result = SearchResult.loading;
+                                              });
+                                              onHandlerChanged(suggestionResults[index].item, force: true);
+                                            }
+                                          },
+                                          borderRadius: BorderRadius.circular(8.0),
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
+                                            width: double.infinity,
+                                            child: Row(
+                                              children: [
+                                                Padding(
+                                                  padding: const EdgeInsets.only(right: 12.0),
+                                                  child: Icon(
+                                                    Icons.music_note,
+                                                    color: Theme.of(context).colorScheme.onSecondaryContainer,
+                                                  ),
+                                                ),
+                                                Expanded(
+                                                  child: Text.rich(
+                                                    TextSpan(children: renderSuggestion(suggestionResults[index])),
+                                                    overflow: TextOverflow.ellipsis,
+                                                    style: TextStyle(
+                                                      fontSize: 16.0,
+                                                      fontFamily: Theme.of(context).textTheme.bodyText2!.fontFamily,
+                                                    ),
+                                                  ),
+                                                ),
+                                                AnimatedOpacity(
+                                                  duration: const Duration(milliseconds: 300),
+                                                  opacity: index == 0 && results != null && lastTerm == suggestionResults[0].item ? 1 : 0,
+                                                  child: const Icon(Icons.arrow_forward),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
                                   ),
                                 ),
                               ],

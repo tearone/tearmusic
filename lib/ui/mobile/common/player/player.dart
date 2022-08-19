@@ -2,6 +2,7 @@
 
 import 'dart:ui';
 
+import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:animations/animations.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -774,15 +775,15 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                                                 ? qp
                                                 : (1 - bp)
                                             : 0.0)),
-                                child:  TrackInfo(
-                                    artist: currentMusic.playing?.artistsLabel ?? "?",
-                                    title: currentMusic.playing?.name ?? "?",
-                                    p: bp,
-                                    cp: bcp,
-                                    bottomOffset: bottomOffset,
-                                    maxOffset: maxOffset,
-                                    screenSize: screenSize,
-                                  ),
+                                child: TrackInfo(
+                                  artist: currentMusic.playing?.artistsLabel ?? "?",
+                                  title: currentMusic.playing?.name ?? "?",
+                                  p: bp,
+                                  cp: bcp,
+                                  bottomOffset: bottomOffset,
+                                  maxOffset: maxOffset,
+                                  screenSize: screenSize,
+                                ),
                               ),
                             ),
                             // Opacity(
@@ -882,16 +883,47 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                               ),
                               StreamBuilder(
                                 stream: currentMusic.player.positionStream,
-                                builder: (context, snapshot) => Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(currentMusic.player.position.shortFormat(), style: TextStyle(color: onSecondary)),
-                                      Text(currentMusic.player.duration?.shortFormat() ?? "00:00", style: TextStyle(color: onSecondary)),
-                                    ],
-                                  ),
-                                ),
+                                builder: (context, snapshot) {
+                                  final pos = currentMusic.player.position;
+                                  final dHours = (currentMusic.player.duration?.inHours ?? 0) > 0;
+
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Row(children: [
+                                          if (dHours)
+                                            AnimatedFlipCounter(
+                                              value: pos.inHours,
+                                              curve: Curves.easeIn,
+                                              textStyle: TextStyle(color: onSecondary, letterSpacing: -.5),
+                                            ),
+                                          if (dHours) const Text(":"),
+                                          AnimatedFlipCounter(
+                                            value: pos.inMinutes % 60,
+                                            wholeDigits: dHours ? 2 : 1,
+                                            curve: Curves.easeIn,
+                                            textStyle: TextStyle(color: onSecondary, letterSpacing: -.5),
+                                          ),
+                                          Text(
+                                            ":",
+                                            style: TextStyle(color: onSecondary, letterSpacing: 1),
+                                          ),
+                                          AnimatedFlipCounter(
+                                            value: pos.inSeconds % 60,
+                                            wholeDigits: 2,
+                                            textStyle: TextStyle(color: onSecondary, letterSpacing: -.5),
+                                          ),
+                                        ]),
+                                        Text(
+                                          currentMusic.player.duration?.shortFormat() ?? "00:00",
+                                          style: TextStyle(color: onSecondary),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
                               ),
                             ],
                           ),

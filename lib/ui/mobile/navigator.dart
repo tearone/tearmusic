@@ -54,7 +54,9 @@ class _NavigationScreenState extends State<NavigationScreen> with SingleTickerPr
   Route _navigationRoute(Widget Function(BuildContext) builder) {
     return PageRouteBuilder(
       pageBuilder: (context, primaryAnimation, secondaryAnimation) {
-        context.read<NavigatorProvider>().setState(Navigator.of(context));
+        final nav = context.read<NavigatorProvider>();
+        nav.clearHistory();
+        nav.setState(Navigator.of(context));
         return FadeThroughTransition(
           fillColor: Colors.transparent,
           animation: primaryAnimation,

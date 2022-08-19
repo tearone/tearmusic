@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:tearmusic/providers/current_music_provider.dart';
+import 'package:tearmusic/providers/theme_provider.dart';
 import 'package:tearmusic/providers/will_pop_provider.dart';
 import 'package:tearmusic/ui/mobile/common/player/lyrics_view.dart';
 import 'package:tearmusic/ui/mobile/common/player/queue_view.dart';
@@ -426,7 +427,8 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                                       onTap: () {
                                         if (currentMusic.playing != null && currentMusic.playing!.album != null) {
                                           snapToMini();
-                                          AlbumView.view(currentMusic.playing!.album!, context: context);
+                                          AlbumView.view(currentMusic.playing!.album!, context: context)
+                                              .then((_) => context.read<ThemeProvider>().resetTheme());
                                         }
                                       },
                                       child: Column(

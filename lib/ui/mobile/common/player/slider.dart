@@ -48,7 +48,7 @@ class _WaveformSliderState extends State<WaveformSlider> {
 
         if (chunks.length >= chunkLen) {
           final double average = chunks.fold<double>(0, (a, b) => a + b) / chunks.length;
-          effects.add(normalizeInRange(average, min, max, 1.0, 40.0));
+          effects.add(normalizeInRange(average, min, max, 3.0, 40.0));
           chunks.clear();
         }
       }

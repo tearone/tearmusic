@@ -32,6 +32,10 @@ class NavigatorProvider {
     _state.pop(result);
   }
 
+  void clearHistory() {
+    _uriHistory.clear();
+  }
+
   void showSnackBar(SnackBar snackBar) {
     final theme = _theme.appTheme;
     _messenger.showSnackBar(SnackBar(

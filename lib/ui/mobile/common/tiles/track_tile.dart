@@ -33,7 +33,7 @@ class TrackTile extends StatelessWidget {
           onPressed: () {
             Navigator.of(context, rootNavigator: true).pop();
             Future.delayed(const Duration(seconds: 1)).then((_) {
-              ArtistView.view(track.artists.first, context: context);
+              ArtistView.view(track.artists.first, context: context).then((_) => context.read<ThemeProvider>().resetTheme());
             });
           },
         ),
@@ -43,7 +43,7 @@ class TrackTile extends StatelessWidget {
             onPressed: () {
               Navigator.of(context, rootNavigator: true).pop();
               Future.delayed(const Duration(seconds: 1)).then((_) {
-                AlbumView.view(track.album!, context: context);
+                AlbumView.view(track.album!, context: context).then((_) => context.read<ThemeProvider>().resetTheme());
               });
             },
           ),

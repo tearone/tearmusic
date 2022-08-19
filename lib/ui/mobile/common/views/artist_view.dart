@@ -117,7 +117,7 @@ class _ArtistViewState extends State<ArtistView> {
                       style: const TextStyle(fontWeight: FontWeight.w700),
                     ),
                     centerTitle: true,
-                    expandedTitleScale: 2,
+                    expandedTitleScale: 1.7,
                     background: Stack(
                       alignment: Alignment.bottomCenter,
                       children: [

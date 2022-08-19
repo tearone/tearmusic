@@ -1,1 +1,4 @@
+- design tweaks
+- current playing indicator
+- lyrics improvments
 - bugfixes

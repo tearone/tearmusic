@@ -1,6 +1,10 @@
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:like_button/like_button.dart';
+import 'package:provider/provider.dart';
+import 'package:tearmusic/providers/current_music_provider.dart';
+import 'package:tearmusic/providers/will_pop_provider.dart';
+import 'package:tearmusic/ui/mobile/common/views/artist_view.dart';
 import 'package:tearmusic/utils.dart';
 
 class TrackInfo extends StatelessWidget {
@@ -34,90 +38,105 @@ class TrackInfo extends StatelessWidget {
         padding: EdgeInsets.all(12.0 * (1 - cp)).add(EdgeInsets.symmetric(horizontal: 24.0 * cp)),
         child: Align(
           alignment: Alignment.bottomLeft,
-          child: SizedBox(
-            height: vp(a: 82.0, b: screenSize.width / 2, c: cp),
-            child: Row(
-              children: [
-                SizedBox(width: 82.0 * (1 - cp)), // Image placeholder
-                Expanded(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.only(right: 32.0),
-                          child: PageTransitionSwitcher(
-                            transitionBuilder: (child, primaryAnimation, secondaryAnimation) {
-                              return SharedAxisTransition(
-                                fillColor: Colors.transparent,
-                                animation: primaryAnimation,
-                                secondaryAnimation: secondaryAnimation,
-                                transitionType: SharedAxisTransitionType.horizontal,
-                                child: child,
-                              );
-                            },
-                            layoutBuilder: (entries) => Stack(children: entries),
-                            child: Column(
-                              key: Key(title),
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  title,
-                                  maxLines: 2,
-                                  style: TextStyle(
-                                    fontSize: vp(a: 18.0, b: 24.0, c: p),
-                                    color: Colors.white.withOpacity(.9),
-                                    fontWeight: FontWeight.w600,
-                                    height: 1,
-                                  ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12.0).add(EdgeInsets.only(bottom: vp(a: 0, b: screenSize.width / 9, c: cp))),
+            child: SizedBox(
+              height: vp(a: 58.0, b: 82, c: cp),
+              child: Row(
+                children: [
+                  SizedBox(width: 82.0 * (1 - cp)), // Image placeholder
+                  Expanded(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 42.0),
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(12.0),
+                              onTap: cp == 1
+                                  ? () {
+                                      final currentMusic = context.read<CurrentMusicProvider>();
+                                      if (currentMusic.playing != null) {
+                                        context.read<WillPopProvider>().popper!();
+                                        ArtistView.view(currentMusic.playing!.artists[0], context: context);
+                                      }
+                                    }
+                                  : null,
+                              child: PageTransitionSwitcher(
+                                transitionBuilder: (child, primaryAnimation, secondaryAnimation) {
+                                  return SharedAxisTransition(
+                                    fillColor: Colors.transparent,
+                                    animation: primaryAnimation,
+                                    secondaryAnimation: secondaryAnimation,
+                                    transitionType: SharedAxisTransitionType.horizontal,
+                                    child: child,
+                                  );
+                                },
+                                layoutBuilder: (entries) => Stack(children: entries),
+                                child: Column(
+                                  key: Key(title),
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      title,
+                                      maxLines: 2,
+                                      style: TextStyle(
+                                        fontSize: vp(a: 18.0, b: 24.0, c: p),
+                                        color: Colors.white.withOpacity(.9),
+                                        fontWeight: FontWeight.w600,
+                                        height: 1,
+                                      ),
+                                    ),
+                                    Text(
+                                      artist,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: vp(a: 15.0, b: 17.0, c: p),
+                                        color: Colors.white.withOpacity(.5),
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                Text(
-                                  artist,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontSize: vp(a: 15.0, b: 17.0, c: p),
-                                    color: Colors.white.withOpacity(.5),
-                                    fontWeight: FontWeight.w400,
-                                  ),
-                                ),
-                              ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      Opacity(
-                        opacity: opacity,
-                        child: Transform.translate(
-                          offset: Offset(-100 * (1.0 - cp), 0.0),
-                          child: LikeButton(
-                            bubblesColor: BubblesColor(
-                              dotPrimaryColor: Theme.of(context).colorScheme.primary,
-                              dotSecondaryColor: Theme.of(context).colorScheme.primaryContainer,
+                        Opacity(
+                          opacity: opacity,
+                          child: Transform.translate(
+                            offset: Offset(-100 * (1.0 - cp), 0.0),
+                            child: LikeButton(
+                              bubblesColor: BubblesColor(
+                                dotPrimaryColor: Theme.of(context).colorScheme.primary,
+                                dotSecondaryColor: Theme.of(context).colorScheme.primaryContainer,
+                              ),
+                              circleColor: CircleColor(
+                                start: Theme.of(context).colorScheme.tertiary,
+                                end: Theme.of(context).colorScheme.tertiary,
+                              ),
+                              likeBuilder: (value) => value
+                                  ? Icon(
+                                      Icons.favorite,
+                                      color: Theme.of(context).colorScheme.primary,
+                                      size: 30.0,
+                                    )
+                                  : Icon(
+                                      Icons.favorite_border_outlined,
+                                      color: Theme.of(context).colorScheme.onSecondaryContainer,
+                                      size: 30.0,
+                                    ),
                             ),
-                            circleColor: CircleColor(
-                              start: Theme.of(context).colorScheme.tertiary,
-                              end: Theme.of(context).colorScheme.tertiary,
-                            ),
-                            likeBuilder: (value) => value
-                                ? Icon(
-                                    Icons.favorite,
-                                    color: Theme.of(context).colorScheme.primary,
-                                    size: 30.0,
-                                  )
-                                : Icon(
-                                    Icons.favorite_border_outlined,
-                                    color: Theme.of(context).colorScheme.onSecondaryContainer,
-                                    size: 30.0,
-                                  ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

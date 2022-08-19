@@ -113,6 +113,31 @@ class MusicApi {
     return MusicArtist.decodeList(json);
   }
 
+  Future<ArtistDetails> artistDetails(MusicArtist artist) async {
+    final res = await http.get(
+      Uri.parse("${BaseApi.url}/music/artist?id=${Uri.encodeComponent(artist.id)}"),
+      headers: {"authorization": await base.getToken()},
+    );
+
+    _reschk(res, "artistDetails");
+
+    final json = jsonDecode(res.body);
+    final related = (json['artists'] as List).cast<Map>();
+    final tracks = (json['tracks'] as List).cast<Map>();
+    final albumsJson = (json['albums'] as List).cast<Map>();
+
+    List<MusicAlbum> albums = MusicAlbum.decodeList(albumsJson);
+    albums.sort((a, b) => b.releaseDate.compareTo(a.releaseDate));
+
+    return ArtistDetails(
+      artist: MusicArtist.decode(json['artist']),
+      tracks: MusicTrack.decodeList(tracks),
+      albums: albums.where((e) => e.artists.first == artist).toList(),
+      appearsOn: albums.where((e) => e.artists.first != artist).toList(),
+      related: MusicArtist.decodeList(related),
+    );
+  }
+
   Future<MusicLyrics> lyrics(MusicTrack track) async {
     final res = await http.get(
       Uri.parse("${BaseApi.url}/music/lyrics"

@@ -213,6 +213,10 @@ class MusicInfoProvider {
     return data;
   }
 
+  Future<ArtistDetails> artistDetails(MusicArtist artist) async {
+    return await _api.artistDetails(artist);
+  }
+
   Future<MusicLyrics> lyrics(MusicTrack track) async {
     MusicLyrics data;
     final cacheKey = "track_lyrics_$track";

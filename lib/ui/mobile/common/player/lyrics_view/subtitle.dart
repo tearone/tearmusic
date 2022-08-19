@@ -32,6 +32,7 @@ Widget Function(BuildContext, int) subtitleListBuilder(List<TimedSegment> subtit
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12.0),
           child: InkWell(
+            borderRadius: BorderRadius.circular(12.0),
             onTap: () {
               currentMusic.player.seek(subtitleLine.offset);
             },

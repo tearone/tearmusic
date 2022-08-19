@@ -17,6 +17,7 @@ import 'package:tearmusic/ui/mobile/common/player/track_image.dart';
 import 'package:tearmusic/ui/mobile/common/player/track_info.dart';
 import 'package:tearmusic/ui/common/format.dart';
 import 'package:tearmusic/ui/mobile/common/views/album_view/album_view.dart';
+import 'package:tearmusic/ui/mobile/common/views/artist_view.dart';
 import 'package:tearmusic/utils.dart';
 
 enum PlayerState { mini, expanded, queue }
@@ -77,7 +78,7 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
     );
     playPauseAnim = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 500),
     );
     scrollController = ScrollController();
   }
@@ -477,7 +478,6 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                   // ),
 
                   /// Controls
-                  //! A bug causes performance issues when pressing the icon buttons multiple times
                   Material(
                     type: MaterialType.transparency,
                     child: Transform.translate(
@@ -776,14 +776,15 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                                                 ? qp
                                                 : (1 - bp)
                                             : 0.0)),
-                                child: TrackInfo(
-                                    artist: currentMusic.playing?.artists.map((e) => e.name).join(", ") ?? "?",
-                                    title: currentMusic.playing?.name ?? "",
+                                child:  TrackInfo(
+                                    artist: currentMusic.playing?.artistsLabel ?? "?",
+                                    title: currentMusic.playing?.name ?? "?",
                                     p: bp,
                                     cp: bcp,
                                     bottomOffset: bottomOffset,
                                     maxOffset: maxOffset,
-                                    screenSize: screenSize),
+                                    screenSize: screenSize,
+                                  ),
                               ),
                             ),
                             // Opacity(

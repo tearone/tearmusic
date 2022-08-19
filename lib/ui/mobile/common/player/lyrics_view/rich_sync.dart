@@ -21,6 +21,7 @@ Widget Function(BuildContext, int) richSyncListBuilder(List<LyricsLine> richSync
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12.0),
             child: InkWell(
+              borderRadius: BorderRadius.circular(12.0),
               onTap: () {
                 currentMusic.player.seek(richSyncLine.start);
               },

@@ -41,12 +41,14 @@ class MusicArtist extends Model {
 }
 
 class ArtistDetails {
+  final MusicArtist artist;
   final List<MusicTrack> tracks;
   final List<MusicAlbum> albums;
   final List<MusicArtist> related;
   final List<MusicAlbum> appearsOn;
 
   ArtistDetails({
+    required this.artist,
     required this.tracks,
     required this.albums,
     required this.related,

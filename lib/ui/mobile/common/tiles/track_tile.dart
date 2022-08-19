@@ -104,7 +104,7 @@ class TrackTile extends StatelessWidget {
                     child: Container(
                       decoration: BoxDecoration(boxShadow: [
                         BoxShadow(
-                          color: Theme.of(context).colorScheme.secondary.withOpacity(.3),
+                          color: Theme.of(context).colorScheme.secondary.withOpacity(.2),
                           blurRadius: 6.0,
                         ),
                       ]),

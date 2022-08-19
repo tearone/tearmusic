@@ -176,7 +176,18 @@ class _NavigationScreenState extends State<NavigationScreen> with SingleTickerPr
               ),
 
               /// Miniplayer
-              if (context.read<CurrentMusicProvider>().playing != null) Player(animation: animation),
+              Selector<CurrentMusicProvider, bool>(
+                selector: (_, p) => p.playing != null,
+                builder: (context, value, child) {
+                  if (!value) return const SizedBox();
+                  return AnimatedOpacity(
+                    duration: const Duration(milliseconds: 500),
+                    opacity: value ? 1 : 0,
+                    child: child,
+                  );
+                },
+                child: Player(animation: animation),
+              ),
             ],
           ),
         ),

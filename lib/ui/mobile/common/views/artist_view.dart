@@ -16,6 +16,7 @@ import 'package:tearmusic/ui/mobile/common/tiles/artist_album_tile.dart';
 import 'package:tearmusic/ui/mobile/common/tiles/artist_artist_tile.dart';
 import 'package:tearmusic/ui/mobile/common/tiles/artist_track_tile.dart';
 import 'package:tearmusic/ui/mobile/common/cached_image.dart';
+import 'package:tearmusic/ui/mobile/common/tm_back_button.dart';
 import 'package:tearmusic/ui/mobile/common/views/album_view/latest_release.dart';
 
 class ArtistView extends StatefulWidget {
@@ -101,7 +102,7 @@ class _ArtistViewState extends State<ArtistView> {
                   snap: false,
                   floating: false,
                   backgroundColor: theme.scaffoldBackgroundColor,
-                  leading: const BackButton(),
+                  leading: const TMBackButton(),
                   actions: [
                     IconButton(
                       onPressed: () {},

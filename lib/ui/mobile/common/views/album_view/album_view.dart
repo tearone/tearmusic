@@ -14,6 +14,7 @@ import 'package:tearmusic/providers/theme_provider.dart';
 import 'package:tearmusic/ui/common/image_color.dart';
 import 'package:tearmusic/ui/mobile/common/tiles/album_track_tile.dart';
 import 'package:tearmusic/ui/mobile/common/cached_image.dart';
+import 'package:tearmusic/ui/mobile/common/tm_back_button.dart';
 
 class AlbumView extends StatefulWidget {
   const AlbumView(this.album, {Key? key}) : super(key: key);
@@ -108,7 +109,7 @@ class _AlbumViewState extends State<AlbumView> {
                         ),
                       ),
                       backgroundColor: theme.scaffoldBackgroundColor,
-                      leading: const BackButton(),
+                      leading: const TMBackButton(),
                       actions: [
                         IconButton(
                           onPressed: () {},

@@ -63,9 +63,9 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
     _tabController = TabController(length: tabs.length, vsync: this);
     _pageController = PageController();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _searchInputFocus.requestFocus();
-    });
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   _searchInputFocus.requestFocus();
+    // });
   }
 
   @override

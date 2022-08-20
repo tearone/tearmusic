@@ -13,6 +13,7 @@ import 'package:tearmusic/providers/navigator_provider.dart';
 import 'package:tearmusic/providers/theme_provider.dart';
 import 'package:tearmusic/ui/common/image_color.dart';
 import 'package:tearmusic/ui/mobile/common/cached_image.dart';
+import 'package:tearmusic/ui/mobile/common/tm_back_button.dart';
 import 'package:tearmusic/ui/mobile/common/views/playlist_track_tile.dart';
 import 'package:tearmusic/ui/common/format.dart';
 
@@ -110,7 +111,7 @@ class _PlaylistViewState extends State<PlaylistView> {
                         ),
                       ),
                       backgroundColor: theme.scaffoldBackgroundColor,
-                      leading: const BackButton(),
+                      leading: const TMBackButton(),
                       actions: [
                         IconButton(
                           onPressed: () {},

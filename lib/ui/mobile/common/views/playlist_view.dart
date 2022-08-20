@@ -7,10 +7,12 @@ import 'package:intl/intl.dart';
 import 'package:like_button/like_button.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
+import 'package:tearmusic/models/library.dart';
 import 'package:tearmusic/models/music/playlist.dart';
 import 'package:tearmusic/providers/music_info_provider.dart';
 import 'package:tearmusic/providers/navigator_provider.dart';
 import 'package:tearmusic/providers/theme_provider.dart';
+import 'package:tearmusic/providers/user_provider.dart';
 import 'package:tearmusic/ui/common/image_color.dart';
 import 'package:tearmusic/ui/mobile/common/cached_image.dart';
 import 'package:tearmusic/ui/mobile/common/views/playlist_track_tile.dart';
@@ -237,27 +239,41 @@ class _PlaylistViewState extends State<PlaylistView> {
                                         size: 26.0,
                                       ),
                                     ),
-                                    LikeButton(
-                                      bubblesColor: BubblesColor(
-                                        dotPrimaryColor: theme.colorScheme.primary,
-                                        dotSecondaryColor: theme.colorScheme.primaryContainer,
-                                      ),
-                                      circleColor: CircleColor(
-                                        start: theme.colorScheme.tertiary,
-                                        end: theme.colorScheme.tertiary,
-                                      ),
-                                      likeBuilder: (value) => value
-                                          ? Icon(
-                                              Icons.favorite,
-                                              color: theme.colorScheme.primary,
-                                              size: 26.0,
-                                            )
-                                          : Icon(
-                                              Icons.favorite_border_outlined,
-                                              color: theme.colorScheme.onSecondaryContainer,
-                                              size: 26.0,
+                                    FutureBuilder(
+                                        future: context.read<UserProvider>().getLibrary(),
+                                        builder: (context, snapshot) {
+                                          return LikeButton(
+                                            bubblesColor: BubblesColor(
+                                              dotPrimaryColor: theme.colorScheme.primary,
+                                              dotSecondaryColor: theme.colorScheme.primaryContainer,
                                             ),
-                                    ),
+                                            circleColor: CircleColor(
+                                              start: theme.colorScheme.tertiary,
+                                              end: theme.colorScheme.tertiary,
+                                            ),
+                                            isLiked: snapshot.hasData ? snapshot.data!.liked_playlists.contains(widget.playlist.id) : false,
+                                            onTap: (isLiked) async {
+                                              if (!isLiked) {
+                                                context.read<UserProvider>().putLibrary(widget.playlist, LibraryType.liked_playlists);
+                                              } else {
+                                                context.read<UserProvider>().deleteLibrary(widget.playlist, LibraryType.liked_playlists);
+                                              }
+
+                                              return !isLiked;
+                                            },
+                                            likeBuilder: (value) => value
+                                                ? Icon(
+                                                    Icons.favorite,
+                                                    color: theme.colorScheme.primary,
+                                                    size: 26.0,
+                                                  )
+                                                : Icon(
+                                                    Icons.favorite_border_outlined,
+                                                    color: theme.colorScheme.onSecondaryContainer,
+                                                    size: 26.0,
+                                                  ),
+                                          );
+                                        }),
                                   ],
                                 ),
                               ],

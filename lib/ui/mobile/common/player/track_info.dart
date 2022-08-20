@@ -2,8 +2,10 @@ import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:like_button/like_button.dart';
 import 'package:provider/provider.dart';
+import 'package:tearmusic/models/library.dart';
 import 'package:tearmusic/providers/current_music_provider.dart';
 import 'package:tearmusic/providers/theme_provider.dart';
+import 'package:tearmusic/providers/user_provider.dart';
 import 'package:tearmusic/providers/will_pop_provider.dart';
 import 'package:tearmusic/ui/mobile/common/views/artist_view.dart';
 import 'package:tearmusic/utils.dart';
@@ -111,26 +113,48 @@ class TrackInfo extends StatelessWidget {
                           opacity: opacity,
                           child: Transform.translate(
                             offset: Offset(-100 * (1.0 - cp), 0.0),
-                            child: LikeButton(
-                              bubblesColor: BubblesColor(
-                                dotPrimaryColor: Theme.of(context).colorScheme.primary,
-                                dotSecondaryColor: Theme.of(context).colorScheme.primaryContainer,
-                              ),
-                              circleColor: CircleColor(
-                                start: Theme.of(context).colorScheme.tertiary,
-                                end: Theme.of(context).colorScheme.tertiary,
-                              ),
-                              likeBuilder: (value) => value
-                                  ? Icon(
-                                      Icons.favorite,
-                                      color: Theme.of(context).colorScheme.primary,
-                                      size: 30.0,
-                                    )
-                                  : Icon(
-                                      Icons.favorite_border_outlined,
-                                      color: Theme.of(context).colorScheme.onSecondaryContainer,
-                                      size: 30.0,
-                                    ),
+                            child: FutureBuilder(
+                              future: context.read<UserProvider>().getLibrary(),
+                              builder: (context, snapshot) {
+                                final currentMusic = context.read<CurrentMusicProvider>();
+
+                                return LikeButton(
+                                  bubblesColor: BubblesColor(
+                                    dotPrimaryColor: Theme.of(context).colorScheme.primary,
+                                    dotSecondaryColor: Theme.of(context).colorScheme.primaryContainer,
+                                  ),
+                                  circleColor: CircleColor(
+                                    start: Theme.of(context).colorScheme.tertiary,
+                                    end: Theme.of(context).colorScheme.tertiary,
+                                  ),
+                                  isLiked:
+                                      snapshot.hasData && currentMusic.playing != null ? snapshot.data!.liked_tracks.contains(currentMusic.playing!.id) : false,
+                                  onTap: (isLiked) async {
+                                    if (currentMusic.playing != null) {
+                                      if (!isLiked) {
+                                        context.read<UserProvider>().putLibrary(currentMusic.playing!, LibraryType.liked_tracks);
+                                      } else {
+                                        context.read<UserProvider>().deleteLibrary(currentMusic.playing!, LibraryType.liked_tracks);
+                                      }
+                                    } else {
+                                      return false;
+                                    }
+
+                                    return !isLiked;
+                                  },
+                                  likeBuilder: (value) => value
+                                      ? Icon(
+                                          Icons.favorite,
+                                          color: Theme.of(context).colorScheme.primary,
+                                          size: 30.0,
+                                        )
+                                      : Icon(
+                                          Icons.favorite_border_outlined,
+                                          color: Theme.of(context).colorScheme.onSecondaryContainer,
+                                          size: 30.0,
+                                        ),
+                                );
+                              },
                             ),
                           ),
                         ),

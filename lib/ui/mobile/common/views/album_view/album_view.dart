@@ -6,11 +6,13 @@ import 'package:flutter/material.dart';
 import 'package:like_button/like_button.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
+import 'package:tearmusic/models/library.dart';
 import 'package:tearmusic/models/music/album.dart';
 import 'package:tearmusic/models/music/track.dart';
 import 'package:tearmusic/providers/music_info_provider.dart';
 import 'package:tearmusic/providers/navigator_provider.dart';
 import 'package:tearmusic/providers/theme_provider.dart';
+import 'package:tearmusic/providers/user_provider.dart';
 import 'package:tearmusic/ui/common/image_color.dart';
 import 'package:tearmusic/ui/mobile/common/tiles/album_track_tile.dart';
 import 'package:tearmusic/ui/mobile/common/cached_image.dart';
@@ -202,27 +204,41 @@ class _AlbumViewState extends State<AlbumView> {
                                         size: 26.0,
                                       ),
                                     ),
-                                    LikeButton(
-                                      bubblesColor: BubblesColor(
-                                        dotPrimaryColor: theme.colorScheme.primary,
-                                        dotSecondaryColor: theme.colorScheme.primaryContainer,
-                                      ),
-                                      circleColor: CircleColor(
-                                        start: theme.colorScheme.tertiary,
-                                        end: theme.colorScheme.tertiary,
-                                      ),
-                                      likeBuilder: (value) => value
-                                          ? Icon(
-                                              Icons.favorite,
-                                              color: theme.colorScheme.primary,
-                                              size: 26.0,
-                                            )
-                                          : Icon(
-                                              Icons.favorite_border_outlined,
-                                              color: theme.colorScheme.onSecondaryContainer,
-                                              size: 26.0,
+                                    FutureBuilder(
+                                        future: context.read<UserProvider>().getLibrary(),
+                                        builder: (context, snapshot) {
+                                          return LikeButton(
+                                            bubblesColor: BubblesColor(
+                                              dotPrimaryColor: theme.colorScheme.primary,
+                                              dotSecondaryColor: theme.colorScheme.primaryContainer,
                                             ),
-                                    ),
+                                            circleColor: CircleColor(
+                                              start: theme.colorScheme.tertiary,
+                                              end: theme.colorScheme.tertiary,
+                                            ),
+                                            isLiked: snapshot.hasData ? snapshot.data!.liked_albums.contains(widget.album.id) : false,
+                                            onTap: (isLiked) async {
+                                              if (!isLiked) {
+                                                context.read<UserProvider>().putLibrary(widget.album, LibraryType.liked_albums);
+                                              } else {
+                                                context.read<UserProvider>().deleteLibrary(widget.album, LibraryType.liked_albums);
+                                              }
+
+                                              return !isLiked;
+                                            },
+                                            likeBuilder: (value) => value
+                                                ? Icon(
+                                                    Icons.favorite,
+                                                    color: theme.colorScheme.primary,
+                                                    size: 26.0,
+                                                  )
+                                                : Icon(
+                                                    Icons.favorite_border_outlined,
+                                                    color: theme.colorScheme.onSecondaryContainer,
+                                                    size: 26.0,
+                                                  ),
+                                          );
+                                        }),
                                   ],
                                 ),
                               ],

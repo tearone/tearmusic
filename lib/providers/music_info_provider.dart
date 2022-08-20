@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:tearmusic/api/base_api.dart';
 import 'package:tearmusic/api/music_api.dart';
+import 'package:tearmusic/models/manual_match.dart';
 import 'package:tearmusic/models/model.dart';
 import 'package:tearmusic/models/music/album.dart';
 import 'package:tearmusic/models/music/artist.dart';
@@ -236,7 +237,7 @@ class MusicInfoProvider {
   }
 
   Future<Playback> playback(MusicTrack track, {String? videoId}) async {
-    return await _api.playback(track, userId: userId, videoId: videoId);
+    return await _api.playback(track);
   }
 
   Future<PlaybackHead> playbackHead(MusicTrack track) async {
@@ -245,5 +246,13 @@ class MusicInfoProvider {
 
   Future<void> purgeCache(MusicTrack track) async {
     await _api.purgeCache(track);
+  }
+
+  Future<List<ManualMatch>> manualMatches(MusicTrack track) async {
+    return await _api.manualMatches(track);
+  }
+
+  Future<void> matchManual(MusicTrack track, String videoId) async {
+    await _api.matchManual(track, videoId);
   }
 }

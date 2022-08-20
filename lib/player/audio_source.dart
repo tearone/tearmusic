@@ -71,7 +71,7 @@ class TearMusicAudioSource extends StreamAudioSource {
 
   Future<bool> body() async {
     try {
-      final pb = await _api.playback(track, videoId: playbackHead?.videoId);
+      final pb = await _api.playback(track);
       final res = await http.head(Uri.parse(pb.streamUrl), headers: {"range": "bytes=-"});
       sourceLength = int.tryParse(res.headers['content-range']?.split("/").last ?? "") ?? bytes.length;
       if (!playback.isCompleted) playback.complete(pb);

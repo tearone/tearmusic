@@ -3,13 +3,11 @@ import 'package:tearmusic/models/segmented.dart';
 
 class PlaybackHead {
   final Uint8List prefetch;
-  final String videoId;
   final List<Segmented> silence;
   final List<TempoSegment> tempo;
 
   PlaybackHead({
     required this.prefetch,
-    required this.videoId,
     required this.silence,
     required this.tempo,
   });
@@ -18,7 +16,6 @@ class PlaybackHead {
     final json = (data as Map);
     return PlaybackHead(
       prefetch: json['buffer'].buffer.asUint8List(),
-      videoId: json['videoId'],
       silence: Segmented.decodeList((json['silence'] as List).cast<Map>()),
       tempo: TempoSegment.decodeList((json['tempo'] as List).cast<Map>()),
     );

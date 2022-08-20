@@ -13,6 +13,7 @@ import 'package:tearmusic/ui/common/format.dart';
 import 'package:tearmusic/ui/mobile/common/tiles/track_tile_preview.dart';
 import 'package:tearmusic/ui/mobile/common/views/album_view/album_view.dart';
 import 'package:tearmusic/ui/mobile/common/views/artist_view.dart';
+import 'package:tearmusic/ui/mobile/common/views/manual_match_view.dart';
 
 class TrackTile extends StatelessWidget {
   const TrackTile(this.track, {Key? key, this.leadingTrackNumber = false, this.trailingDuration = false}) : super(key: key);
@@ -55,6 +56,12 @@ class TrackTile extends StatelessWidget {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               context.read<NavigatorProvider>().showSnackBar(const SnackBar(content: Text("Track cache deleted")));
             });
+          },
+        ),
+        CupertinoContextMenuAction(
+          child: const Text("Manual Match"),
+          onPressed: () {
+            ManualMatchView.view(track, context: context);
           },
         ),
       ],

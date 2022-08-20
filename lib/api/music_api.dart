@@ -6,6 +6,7 @@ import 'package:cbor/simple.dart';
 import 'package:tearmusic/api/base_api.dart';
 import 'package:http/http.dart' as http;
 import 'package:tearmusic/exceptionts.dart';
+import 'package:tearmusic/models/manual_match.dart';
 import 'package:tearmusic/models/music/album.dart';
 import 'package:tearmusic/models/music/artist.dart';
 import 'package:tearmusic/models/music/lyrics.dart';
@@ -186,17 +187,13 @@ class MusicApi {
     return PlaybackHead.decode(data);
   }
 
-  Future<Playback> playback(MusicTrack track, {required String userId, String? videoId, bool sub = true}) async {
+  Future<Playback> playback(MusicTrack track) async {
     String url = "${BaseApi.url}/music/playback";
     url += "?id=${Uri.encodeComponent(track.id)}";
-    if (videoId != null) {
-      url += "&video_id=${Uri.encodeComponent(videoId)}";
-    } else {
-      url += "&artists=${Uri.encodeComponent(jsonEncode(track.artists.map((e) => e.name).toList()))}";
-      url += "&track=${Uri.encodeComponent(track.name)}";
-      url += "&duration=${track.duration.inSeconds}";
-      url += (track.album != null ? "&album=${Uri.encodeComponent(track.album!.name)}" : "");
-    }
+    url += "&artists=${Uri.encodeComponent(jsonEncode(track.artists.map((e) => e.name).toList()))}";
+    url += "&track=${Uri.encodeComponent(track.name)}";
+    url += "&duration=${track.duration.inSeconds}";
+    url += (track.album != null ? "&album=${Uri.encodeComponent(track.album!.name)}" : "");
 
     final res = await http.post(
       Uri.parse(url),
@@ -217,5 +214,26 @@ class MusicApi {
     );
 
     _reschk(res, "purgeCache");
+  }
+
+  Future<List<ManualMatch>> manualMatches(MusicTrack track) async {
+    final res = await http.get(
+      Uri.parse("${BaseApi.url}/music/manual-matches?id=${Uri.encodeComponent(track.id)}"),
+      headers: {"authorization": await base.getToken()},
+    );
+
+    _reschk(res, "manualMatches");
+
+    final json = (jsonDecode(res.body)['matches'] as List).cast<Map>();
+    return ManualMatch.decodeList(json);
+  }
+
+  Future<void> matchManual(MusicTrack track, String videoId) async {
+    final res = await http.post(
+      Uri.parse("${BaseApi.url}/music/manual-matches?id=${Uri.encodeComponent(track.id)}&video_id=${Uri.encodeComponent(videoId)}"),
+      headers: {"authorization": await base.getToken()},
+    );
+
+    _reschk(res, "matchManual");
   }
 }

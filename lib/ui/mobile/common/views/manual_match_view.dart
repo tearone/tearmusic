@@ -100,12 +100,13 @@ class _ManualMatchViewState extends State<ManualMatchView> {
             // Background color
             backgroundColor: Theme.of(context).colorScheme.primary,
           ).copyWith(elevation: ButtonStyleButton.allOrNull(0.0)),
-          onPressed: () {
+          onPressed: () async {
             if (selected != null) {
-              context
-                  .read<MusicInfoProvider>()
-                  .matchManual(widget.track, selected!)
-                  .then((value) => Navigator.of(context, rootNavigator: true).pop());
+              final api = context.read<MusicInfoProvider>();
+              await api.matchManual(widget.track, selected!);
+              await api.purgeCache(widget.track);
+              // ignore: use_build_context_synchronously
+              Navigator.of(context, rootNavigator: true).pop();
             }
           },
           child: const Text("Submit"),

@@ -1,4 +1,5 @@
-- design tweaks
-- current playing indicator
-- lyrics improvments
+- manual matching
+- animated progress duration
+- search suggestions
+- animated wallpaper
 - bugfixes

@@ -10,12 +10,14 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:tearmusic/models/search.dart';
 import 'package:tearmusic/providers/music_info_provider.dart';
+import 'package:tearmusic/providers/navigator_provider.dart';
 import 'package:tearmusic/ui/mobile/common/filter_bar.dart';
 import 'package:tearmusic/ui/mobile/common/tiles/search_album_tile.dart';
 import 'package:tearmusic/ui/mobile/common/tiles/search_artist_tile.dart';
 import 'package:tearmusic/ui/mobile/common/tiles/search_playlist_tile.dart';
 import 'package:tearmusic/ui/mobile/common/tiles/search_track_tile.dart';
 import 'package:tearmusic/ui/mobile/common/wallpaper.dart';
+import 'package:tearmusic/ui/mobile/navigator.dart';
 import 'package:tearmusic/ui/mobile/pages/search/top_result_container.dart';
 
 enum SearchResult { prepare, empty, loading, done }
@@ -62,10 +64,6 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
     listOrder = List.generate(tabs.length, (i) => "$i");
     _tabController = TabController(length: tabs.length, vsync: this);
     _pageController = PageController();
-
-    // WidgetsBinding.instance.addPostFrameCallback((_) {
-    //   _searchInputFocus.requestFocus();
-    // });
   }
 
   @override
@@ -178,6 +176,16 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
+    final currentRoute = context.watch<NavigatorProvider>().currentRoute;
+
+    if (currentRoute == MobileRoute.search) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _searchInputFocus.requestFocus();
+      });
+    } else {
+      _searchInputFocus.unfocus();
+    }
+
     final noResultsWidget = Padding(
       padding: const EdgeInsets.only(bottom: 200.0),
       child: Center(

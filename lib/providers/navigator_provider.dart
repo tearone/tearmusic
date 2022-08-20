@@ -11,13 +11,13 @@ class NavigatorPageState {
   }) : _state = state;
 }
 
-class NavigatorProvider {
+class NavigatorProvider extends ChangeNotifier {
   late ScaffoldMessengerState _messenger;
   final ThemeProvider _theme;
 
-  late MobileRoute _currentRoute;
+  late MobileRoute currentRoute;
   final Map<MobileRoute, NavigatorPageState> _pages = {};
-  NavigatorPageState get _currentPage => _pages[_currentRoute]!;
+  NavigatorPageState get _currentPage => _pages[currentRoute]!;
 
   List<String> get _uriHistory => _currentPage._uriHistory;
   NavigatorState get _state => _currentPage._state;
@@ -37,7 +37,8 @@ class NavigatorProvider {
   }
 
   void restoreState(MobileRoute route) {
-    _currentRoute = route;
+    currentRoute = route;
+    notifyListeners();
   }
 
   Future<T?> push<T>(Route<T> route, {String? uri}) {

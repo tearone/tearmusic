@@ -52,24 +52,6 @@ class _NavigationScreenState extends State<NavigationScreen> with SingleTickerPr
     context.read<ThemeProvider>().restoreState(_selected);
   }
 
-  // Route _navigationRoute(Widget Function(BuildContext) builder) {
-  //   return PageRouteBuilder(
-  //     pageBuilder: (context, primaryAnimation, secondaryAnimation) {
-  //       final nav = context.read<NavigatorProvider>();
-  //       nav.clearHistory();
-  //       nav.setState(Navigator.of(context));
-  //       return FadeThroughTransition(
-  //         fillColor: Colors.transparent,
-  //         animation: primaryAnimation,
-  //         secondaryAnimation: secondaryAnimation,
-  //         child: builder(context),
-  //       );
-  //     },
-  //     transitionDuration: const Duration(milliseconds: 500),
-  //     reverseTransitionDuration: const Duration(milliseconds: 500),
-  //   );
-  // }
-
   @override
   Widget build(BuildContext context) {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);

@@ -37,7 +37,7 @@ void main() async {
     ChangeNotifierProvider(create: (_) => themeProvider),
     ChangeNotifierProvider(create: (_) => currentMusicProvider),
     Provider(create: (_) => WillPopProvider()),
-    Provider(create: (_) => NavigatorProvider(theme: themeProvider)),
+    ChangeNotifierProvider(create: (_) => NavigatorProvider(theme: themeProvider)),
   ];
 
   runApp(App(providers: providers));

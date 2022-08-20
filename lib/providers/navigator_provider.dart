@@ -1,11 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:tearmusic/providers/theme_provider.dart';
+import 'package:tearmusic/ui/mobile/navigator.dart';
 
-class NavigatorProvider {
+class NavigatorPageState {
   final List<String> _uriHistory = [];
-  late NavigatorState _state;
+  NavigatorState _state;
+
+  NavigatorPageState({
+    required NavigatorState state,
+  }) : _state = state;
+}
+
+class NavigatorProvider extends ChangeNotifier {
   late ScaffoldMessengerState _messenger;
   final ThemeProvider _theme;
+
+  late MobileRoute currentRoute;
+  final Map<MobileRoute, NavigatorPageState> _pages = {};
+  NavigatorPageState get _currentPage => _pages[currentRoute]!;
+
+  List<String> get _uriHistory => _currentPage._uriHistory;
+  NavigatorState get _state => _currentPage._state;
 
   NavigatorProvider({required ThemeProvider theme}) : _theme = theme;
 
@@ -13,11 +28,18 @@ class NavigatorProvider {
     _messenger = value;
   }
 
-  void setState(NavigatorState value) {
-    _state = value;
+  void setState(MobileRoute route, NavigatorState value) {
+    if (!_pages.keys.contains(route)) {
+      _pages[route] = NavigatorPageState(state: value);
+    } else {
+      _pages[route]!._state = value;
+    }
   }
 
-  // NavigatorState get navigator => _state;
+  void restoreState(MobileRoute route) {
+    currentRoute = route;
+    notifyListeners();
+  }
 
   Future<T?> push<T>(Route<T> route, {String? uri}) {
     if (uri != null) {

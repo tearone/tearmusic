@@ -1,4 +1,3 @@
-import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -14,7 +13,7 @@ import 'package:tearmusic/ui/mobile/pages/library/library_page.dart';
 import 'package:tearmusic/ui/mobile/pages/search/search_page.dart';
 import 'package:tearmusic/ui/mobile/screens/login_screen.dart';
 
-enum MobileRoutes { home, search, library }
+enum MobileRoute { home, search, library }
 
 class NavigationScreen extends StatefulWidget {
   const NavigationScreen({Key? key}) : super(key: key);
@@ -24,9 +23,15 @@ class NavigationScreen extends StatefulWidget {
 }
 
 class _NavigationScreenState extends State<NavigationScreen> with SingleTickerProviderStateMixin {
-  final _navigatorState = GlobalKey<NavigatorState>();
-  MobileRoutes _selected = MobileRoutes.home;
+  MobileRoute _selected = MobileRoute.home;
   late AnimationController animation;
+
+  late Widget homePage;
+  late Widget searchPage;
+  late Widget libraryPage;
+  final _homeNavigatorState = GlobalKey<NavigatorState>();
+  final _searchNavigatorState = GlobalKey<NavigatorState>();
+  final _libraryNavigatorState = GlobalKey<NavigatorState>();
 
   @override
   void initState() {
@@ -38,36 +43,13 @@ class _NavigationScreenState extends State<NavigationScreen> with SingleTickerPr
       lowerBound: -0.1,
       value: 0.0,
     );
-  }
 
-  Route _handleRoute(RouteSettings route) {
-    if (route.name == MobileRoutes.home.name) {
-      return _navigationRoute((context) => const HomePage());
-    } else if (route.name == MobileRoutes.search.name) {
-      return _navigationRoute((context) => const SearchPage());
-    } else if (route.name == MobileRoutes.library.name) {
-      return _navigationRoute((context) => const LibraryPage());
-    } else {
-      return _navigationRoute((context) => const HomePage());
-    }
-  }
+    homePage = const HomePage();
+    searchPage = const SearchPage();
+    libraryPage = const LibraryPage();
 
-  Route _navigationRoute(Widget Function(BuildContext) builder) {
-    return PageRouteBuilder(
-      pageBuilder: (context, primaryAnimation, secondaryAnimation) {
-        final nav = context.read<NavigatorProvider>();
-        nav.clearHistory();
-        nav.setState(Navigator.of(context));
-        return FadeThroughTransition(
-          fillColor: Colors.transparent,
-          animation: primaryAnimation,
-          secondaryAnimation: secondaryAnimation,
-          child: builder(context),
-        );
-      },
-      transitionDuration: const Duration(milliseconds: 500),
-      reverseTransitionDuration: const Duration(milliseconds: 500),
-    );
+    context.read<NavigatorProvider>().restoreState(_selected);
+    context.read<ThemeProvider>().restoreState(_selected);
   }
 
   @override
@@ -97,7 +79,14 @@ class _NavigationScreenState extends State<NavigationScreen> with SingleTickerPr
       builder: (context, value, child) {
         return WillPopScope(
           onWillPop: () async {
-            if ((value.popper != null ? value.popper!() : true) && (_navigatorState.currentState?.canPop() ?? false)) {
+            final popperResult = (value.popper != null ? value.popper!() : true);
+            final state = [
+              _homeNavigatorState,
+              _searchNavigatorState,
+              _libraryNavigatorState,
+            ][_selected.index];
+            final navResult = (state.currentState?.canPop() ?? false);
+            if (popperResult && navResult) {
               context.read<NavigatorProvider>().pop();
             }
             return false;
@@ -111,10 +100,46 @@ class _NavigationScreenState extends State<NavigationScreen> with SingleTickerPr
           child: Stack(
             alignment: Alignment.bottomCenter,
             children: [
-              Navigator(
-                key: _navigatorState,
-                initialRoute: MobileRoutes.home.name,
-                onGenerateRoute: (route) => _handleRoute(route),
+              IndexedStack(
+                index: _selected.index,
+                children: [
+                  Navigator(
+                    key: _homeNavigatorState,
+                    onGenerateRoute: (_) {
+                      return PageRouteBuilder(
+                        pageBuilder: (context, animation, secondaryAnimation) {
+                          context.read<NavigatorProvider>().setState(MobileRoute.home, Navigator.of(context));
+                          context.read<ThemeProvider>().setState(MobileRoute.home);
+                          return homePage;
+                        },
+                      );
+                    },
+                  ),
+                  Navigator(
+                    key: _searchNavigatorState,
+                    onGenerateRoute: (_) {
+                      return PageRouteBuilder(
+                        pageBuilder: (context, animation, secondaryAnimation) {
+                          context.read<NavigatorProvider>().setState(MobileRoute.search, Navigator.of(context));
+                          context.read<ThemeProvider>().setState(MobileRoute.search);
+                          return searchPage;
+                        },
+                      );
+                    },
+                  ),
+                  Navigator(
+                    key: _libraryNavigatorState,
+                    onGenerateRoute: (_) {
+                      return PageRouteBuilder(
+                        pageBuilder: (context, animation, secondaryAnimation) {
+                          context.read<NavigatorProvider>().setState(MobileRoute.library, Navigator.of(context));
+                          context.read<ThemeProvider>().setState(MobileRoute.library);
+                          return libraryPage;
+                        },
+                      );
+                    },
+                  ),
+                ],
               ),
 
               AnimatedTheme(
@@ -134,9 +159,10 @@ class _NavigationScreenState extends State<NavigationScreen> with SingleTickerPr
                       selectedIndex: _selected.index,
                       onDestinationSelected: (value) {
                         if (value == _selected.index) return;
-                        setState(() => _selected = MobileRoutes.values[value]);
-                        _navigatorState.currentState?.pushNamedAndRemoveUntil(MobileRoutes.values[value].name, (route) => false);
-                        context.read<ThemeProvider>().resetTheme();
+                        setState(() => _selected = MobileRoute.values[value]);
+                        // _navigatorState.currentState?.pushNamedAndRemoveUntil(MobileRoutes.values[value].name, (route) => false);
+                        context.read<NavigatorProvider>().restoreState(_selected);
+                        context.read<ThemeProvider>().restoreState(_selected);
                       },
                       destinations: const [
                         NavigationDestination(

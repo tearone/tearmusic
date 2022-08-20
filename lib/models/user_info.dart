@@ -11,7 +11,7 @@ class UserInfo extends Model {
     required this.avatar,
   }) : super(id: id, json: json, key: username, type: "user");
 
-  factory UserInfo.fromJson(Map json) {
+  factory UserInfo.decode(Map json) {
     return UserInfo(
       json: json,
       id: json["discord_id"],

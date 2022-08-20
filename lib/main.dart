@@ -25,7 +25,7 @@ void main() async {
   final baseApi = BaseApi();
   final musicInfoProvider = MusicInfoProvider(base: baseApi);
   final userProvider = UserProvider(base: baseApi, musicInfo: musicInfoProvider);
-  final currentMusicProvider = CurrentMusicProvider(api: musicInfoProvider);
+  final currentMusicProvider = CurrentMusicProvider(musicApi: musicInfoProvider, userApi: userProvider);
   final themeProvider = ThemeProvider();
 
   await userProvider.init();

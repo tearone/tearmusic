@@ -2,18 +2,21 @@ import 'dart:developer';
 
 import 'package:flutter/widgets.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:tearmusic/models/library.dart';
 import 'package:tearmusic/models/music/playlist.dart';
 import 'package:tearmusic/models/music/track.dart';
 import 'package:tearmusic/player/audio_source.dart';
 import 'package:tearmusic/providers/music_info_provider.dart';
+import 'package:tearmusic/providers/user_provider.dart';
 
 enum AudioLoadingState { ready, loading, error }
 enum PlayingFrom { none, album, playlist }
 
 class CurrentMusicProvider extends ChangeNotifier {
-  CurrentMusicProvider({required MusicInfoProvider api}) : _api = api;
+  CurrentMusicProvider({required MusicInfoProvider musicApi, required UserProvider userApi}) : _musicApi = musicApi, _userApi = userApi;
 
-  final MusicInfoProvider _api;
+  final UserProvider _userApi;
+  final MusicInfoProvider _musicApi;
   final player = AudioPlayer();
   AudioLoadingState audioLoading = AudioLoadingState.ready;
   PlayingFrom playingFrom = PlayingFrom.none;
@@ -31,7 +34,7 @@ class CurrentMusicProvider extends ChangeNotifier {
     audioLoading = AudioLoadingState.loading;
     notifyListeners();
 
-    tma = TearMusicAudioSource(track, api: _api);
+    tma = TearMusicAudioSource(track, api: _musicApi);
     final result = await tma!.head();
 
     if (result) {
@@ -53,6 +56,8 @@ class CurrentMusicProvider extends ChangeNotifier {
     }
 
     player.play();
+
+    _userApi.putLibrary(playing!, LibraryType.track_history);
 
     if (!tma!.playback.isCompleted) await tma!.body();
   }

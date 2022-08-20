@@ -123,14 +123,14 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
       staticSuggestions(input);
       if (searchDebounce.isActive) searchDebounce.cancel();
       searchDebounce = Timer(searchTimeout, () {
-        onSubmitHandler(suggestionResults[0].item, finalize: false);
+        if (result == SearchResult.prepare) onSubmitHandler(suggestionResults[0].item, finalize: false);
       });
     });
   }
 
   void onSubmitHandler(String input, {bool finalize = true}) {
     if (input == lastSearchTerm) {
-      if (finalize) finalizeSearch();
+      if (finalize && results != null) finalizeSearch();
       return;
     }
     lastSearchTerm = input;
@@ -148,8 +148,11 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
     context.read<MusicInfoProvider>().search(input).then((value) {
       if (lastSearchTerm != input) return;
       results = value;
-      setState(() {});
-      if (finalize) finalizeSearch();
+      if (finalize) {
+        finalizeSearch();
+      } else {
+        setState(() {});
+      }
     });
   }
 
@@ -174,17 +177,23 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
     _searchInputFocus.unfocus();
   }
 
+  MobileRoute? lastRoute;
+
   @override
   Widget build(BuildContext context) {
     final currentRoute = context.watch<NavigatorProvider>().currentRoute;
 
     if (currentRoute == MobileRoute.search) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _searchInputFocus.requestFocus();
-      });
+      if (lastRoute != currentRoute) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _searchInputFocus.requestFocus();
+        });
+      }
     } else {
       _searchInputFocus.unfocus();
     }
+
+    lastRoute = currentRoute;
 
     final noResultsWidget = Padding(
       padding: const EdgeInsets.only(bottom: 200.0),

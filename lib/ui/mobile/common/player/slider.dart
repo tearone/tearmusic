@@ -115,7 +115,7 @@ class _WaveformSliderState extends State<WaveformSlider> {
               onTapUp: (details) {
                 progress = details.localPosition.dx / constraints.maxWidth;
                 setProgress();
-                currentMusic.player.seek(Duration(milliseconds: ((currentMusic.player.duration?.inMilliseconds ?? 0) * progress).round()));
+                currentMusic.seek(Duration(milliseconds: ((currentMusic.player.duration?.inMilliseconds ?? 0) * progress).round()));
                 sliding = false;
               },
               onHorizontalDragStart: (details) {
@@ -126,7 +126,7 @@ class _WaveformSliderState extends State<WaveformSlider> {
                 setProgress();
               },
               onHorizontalDragEnd: (details) {
-                currentMusic.player.seek(Duration(milliseconds: ((currentMusic.player.duration?.inMilliseconds ?? 0) * progress).round()));
+                currentMusic.seek(Duration(milliseconds: ((currentMusic.player.duration?.inMilliseconds ?? 0) * progress).round()));
                 sliding = false;
               },
               child: Container(

@@ -612,10 +612,10 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                                                   heroTag: currentMusic.playing,
                                                   onPressed: () {
                                                     if (currentMusic.player.playing) {
-                                                      currentMusic.player.pause();
+                                                      currentMusic.pause();
                                                       playPauseAnim.reverse();
                                                     } else {
-                                                      currentMusic.player.play();
+                                                      currentMusic.play();
                                                       playPauseAnim.forward();
                                                     }
                                                   },

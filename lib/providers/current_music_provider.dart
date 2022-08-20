@@ -82,17 +82,14 @@ class CurrentMusicProvider extends BaseAudioHandler with ChangeNotifier {
   PlaybackState _transformEvent(PlaybackEvent event) {
     return PlaybackState(
       controls: [
-        MediaControl.rewind,
         if (player.playing) MediaControl.pause else MediaControl.play,
-        MediaControl.stop,
-        MediaControl.fastForward,
       ],
       systemActions: const {
         MediaAction.seek,
         MediaAction.seekForward,
         MediaAction.seekBackward,
       },
-      androidCompactActionIndices: const [0, 1, 3],
+      androidCompactActionIndices: const [0],
       processingState: const {
         ProcessingState.idle: AudioProcessingState.idle,
         ProcessingState.loading: AudioProcessingState.loading,
@@ -151,5 +148,20 @@ class CurrentMusicProvider extends BaseAudioHandler with ChangeNotifier {
     _userApi.putLibrary(playing!, LibraryType.track_history);
 
     if (!tma!.playback.isCompleted) await tma!.body();
+  }
+
+  @override
+  Future<void> play() async {
+    player.play();
+  }
+
+  @override
+  Future<void> pause() async {
+    player.pause();
+  }
+
+  @override
+  Future<void> seek(Duration position) async {
+    player.seek(position);
   }
 }

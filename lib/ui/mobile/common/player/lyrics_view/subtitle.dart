@@ -34,7 +34,7 @@ Widget Function(BuildContext, int) subtitleListBuilder(List<TimedSegment> subtit
           child: InkWell(
             borderRadius: BorderRadius.circular(12.0),
             onTap: () {
-              currentMusic.player.seek(subtitleLine.offset);
+              currentMusic.seek(subtitleLine.offset);
             },
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 500),

@@ -23,7 +23,7 @@ Widget Function(BuildContext, int) richSyncListBuilder(List<LyricsLine> richSync
             child: InkWell(
               borderRadius: BorderRadius.circular(12.0),
               onTap: () {
-                currentMusic.player.seek(richSyncLine.start);
+                currentMusic.seek(richSyncLine.start);
               },
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 500),

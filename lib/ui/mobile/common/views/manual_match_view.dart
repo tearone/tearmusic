@@ -26,7 +26,7 @@ class _ManualMatchViewState extends State<ManualMatchView> {
   @override
   void initState() {
     super.initState();
-    context.read<CurrentMusicProvider>().player.pause();
+    context.read<CurrentMusicProvider>().pause();
   }
 
   Future<List<ManualMatch>> getMatches() async {

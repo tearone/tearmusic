@@ -27,8 +27,14 @@ class _WallpaperState extends State<Wallpaper> with TickerProviderStateMixin {
 
     return MultiProvider(
       providers: [
-        StreamProvider(create: (_) => currentMusic.player.positionStream.distinct(), initialData: currentMusic.player.position),
-        StreamProvider(create: (_) => currentMusic.player.playingStream.distinct(), initialData: currentMusic.player.playing),
+        StreamProvider(
+          create: (_) => currentMusic.player.positionStream.distinct(),
+          initialData: currentMusic.player.position,
+        ),
+        StreamProvider(
+          create: (_) => currentMusic.player.playingStream.distinct(),
+          initialData: currentMusic.player.playing,
+        ),
       ],
       builder: (context, child) => Consumer2<Duration, bool>(
         builder: (context, pos, playing, child) {

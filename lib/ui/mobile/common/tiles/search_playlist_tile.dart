@@ -19,7 +19,11 @@ class SearchPlaylistTile extends StatelessWidget {
         height: 42,
         child: playlist.images != null ? CachedImage(playlist.images!) : null,
       ),
-      title: Text(playlist.name),
+      title: Text(
+        playlist.name,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+      ),
       subtitle: Text("${playlist.owner} • ${playlist.trackCount} songs"),
       onTap: () {
         FocusScope.of(context).requestFocus(FocusNode());

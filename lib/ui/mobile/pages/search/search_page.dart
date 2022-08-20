@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
+import 'package:fuzzy/bitap/data/match_index.dart';
 import 'package:fuzzy/data/result.dart';
 import 'package:fuzzy/fuzzy.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
@@ -48,11 +49,11 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
   List<Result<String>> suggestionResults = [];
   SearchResult result = SearchResult.prepare;
 
-  String lastTerm = "";
+  String lastSuggestionTerm = '';
+  String lastSearchTerm = '';
+
   Timer searchDebounce = Timer(Duration.zero, () {});
-  Timer suggestionDebounce = Timer(Duration.zero, () {});
-  static const Duration serdd = Duration(milliseconds: 500); // search debounce timeout
-  static const Duration sugdd = Duration(milliseconds: 300); // suggestion debounce timeout
+  static const searchTimeout = Duration(milliseconds: 300);
 
   @override
   void initState() {
@@ -75,69 +76,104 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
     super.dispose();
   }
 
-  void onHandlerChanged(value, {bool force = false}) {
-    if (value == "") {
-      suggestions = [];
-      setState(() => result = SearchResult.prepare);
-      lastTerm = "";
+  void staticSuggestions(String input) {
+    if (suggestions.isEmpty) {
+      setState(() {
+        suggestionResults = [
+          Result(
+            item: input,
+            matches: [
+              ResultDetails(
+                arrayIndex: 0,
+                value: input,
+                score: 0,
+                matchedIndices: [MatchIndex(0, input.length - 1)],
+              ),
+            ],
+          ),
+        ];
+      });
+    } else {
+      final fuzzy = Fuzzy(suggestions.map((e) => e.raw).toList());
+      setState(() {
+        suggestionResults = fuzzy.search(input);
+      });
+    }
+  }
+
+  void onChangeHandler(String input) {
+    if (input == lastSuggestionTerm) return;
+    lastSuggestionTerm = input;
+
+    if (input == '') {
+      setState(() {
+        suggestionResults = [];
+        suggestions = [];
+      });
       return;
     }
-    if (lastTerm == value) return;
-    lastTerm = value;
 
-    if (!force) {
-      if (suggestions.isNotEmpty) {
-        final fuzzy = Fuzzy(suggestions.map((e) => e.raw).toList());
-        setState(() {
-          suggestionResults = fuzzy.search(value);
-        });
-      }
+    results = null;
+    lastSearchTerm = '';
+    setState(() => result = SearchResult.prepare);
 
-      suggest(value);
+    staticSuggestions(input);
+
+    context.read<MusicInfoProvider>().searchSuggest(input).then((value) {
+      if (input != lastSuggestionTerm) return;
+      suggestions = value;
+      staticSuggestions(input);
+      if (searchDebounce.isActive) searchDebounce.cancel();
+      searchDebounce = Timer(searchTimeout, () {
+        onSubmitHandler(suggestionResults[0].item, finalize: false);
+      });
+    });
+  }
+
+  void onSubmitHandler(String input, {bool finalize = true}) {
+    if (input == lastSearchTerm) {
+      if (finalize) finalizeSearch();
+      return;
+    }
+    lastSearchTerm = input;
+
+    if (input == '') {
+      results = null;
+      suggestionResults = [];
+      suggestions = [];
+      setState(() => result = SearchResult.prepare);
+      return;
+    }
+
+    if (finalize) setState(() => result = SearchResult.loading);
+
+    context.read<MusicInfoProvider>().search(input).then((value) {
+      if (lastSearchTerm != input) return;
+      results = value;
+      setState(() {});
+      if (finalize) finalizeSearch();
+    });
+  }
+
+  void finalizeSearch() {
+    if (results?.isEmpty ?? true) {
+      setState(() => result = SearchResult.empty);
     } else {
-      setState(() {
-        results = null;
-        result = SearchResult.loading;
-      });
-
-      searchResults(value).then((_) {
-        setState(() {
-          if (results?.isEmpty ?? true) {
-            result = SearchResult.empty;
-          } else {
-            result = SearchResult.done;
-          }
-        });
-      });
+      setState(() => result = SearchResult.done);
     }
   }
 
-  Future<void> suggest(String value) async {
-    final res = await context.read<MusicInfoProvider>().searchSuggest(value);
-    if (lastTerm != value) return;
-    setState(() {
-      if (res.isEmpty) {
-        suggestions = [];
-      } else {
-        suggestions = res;
-        final fuzzy = Fuzzy(suggestions.map((e) => e.raw).toList());
-        suggestionResults = fuzzy.search(value);
-        result = SearchResult.prepare;
-
-        suggestionDebounce = Timer(sugdd, () {
-          lastTerm = suggestionResults[0].item;
-          searchResults(suggestionResults[0].item);
-        });
-      }
-    });
+  void onClearHandler() {
+    _searchInputFocus.requestFocus();
+    suggestionResults = [];
+    suggestions = [];
+    setState(() => _searchInputController.text = "");
   }
 
-  Future<void> searchResults(String value) async {
-    final res = await context.read<MusicInfoProvider>().search(value);
-    if (lastTerm != value) return;
-    setState(() {
-      results = res;
-    });
+  void onSuggestionHandler(String input) {
+    _searchInputController.text = input;
+    onSubmitHandler(input);
+    _searchInputFocus.unfocus();
   }
 
   @override
@@ -192,8 +228,8 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                           focusNode: _searchInputFocus,
                           autocorrect: false,
                           autofocus: false,
-                          onChanged: onHandlerChanged,
-                          onSubmitted: (value) => onHandlerChanged(value, force: true),
+                          onChanged: onChangeHandler,
+                          onSubmitted: onSubmitHandler,
                           controller: _searchInputController,
                           textInputAction: TextInputAction.search,
                           style: const TextStyle(fontWeight: FontWeight.w500),
@@ -208,15 +244,7 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                       ),
                       IconButton(
                         icon: const Icon(Icons.close),
-                        onPressed: () {
-                          _searchInputController.text = "";
-                          if (searchDebounce.isActive) searchDebounce.cancel();
-                          setState(() {
-                            suggestions = [];
-                            if (results == null) result = SearchResult.prepare;
-                          });
-                          _searchInputFocus.requestFocus();
-                        },
+                        onPressed: onClearHandler,
                       ),
                     ],
                   ),
@@ -265,7 +293,7 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                   child: () {
                     switch (result) {
                       case SearchResult.prepare:
-                        if (suggestions.isNotEmpty) {
+                        if (suggestionResults.isNotEmpty) {
                           return Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 12.0),
                             child: Row(
@@ -314,22 +342,7 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                                       return Padding(
                                         padding: const EdgeInsets.symmetric(horizontal: 4.0),
                                         child: InkWell(
-                                          onTap: () {
-                                            _searchInputFocus.unfocus();
-
-                                            if (index == 0 && results != null && lastTerm == suggestionResults[0].item) {
-                                              setState(() {
-                                                _searchInputController.text = suggestionResults[0].item;
-                                                result = SearchResult.done;
-                                              });
-                                            } else {
-                                              setState(() {
-                                                _searchInputController.text = suggestionResults[index].item;
-                                                result = SearchResult.loading;
-                                              });
-                                              onHandlerChanged(suggestionResults[index].item, force: true);
-                                            }
-                                          },
+                                          onTap: () => onSuggestionHandler(suggestionResults[index].item),
                                           borderRadius: BorderRadius.circular(8.0),
                                           child: Container(
                                             padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
@@ -355,7 +368,7 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                                                 ),
                                                 AnimatedOpacity(
                                                   duration: const Duration(milliseconds: 300),
-                                                  opacity: index == 0 && results != null && lastTerm == suggestionResults[0].item ? 1 : 0,
+                                                  opacity: index == 0 && results != null && lastSearchTerm == suggestionResults[index].item ? 1 : 0,
                                                   child: const Icon(Icons.arrow_forward),
                                                 ),
                                               ],

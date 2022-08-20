@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -22,7 +24,7 @@ class NavigationScreen extends StatefulWidget {
   State<NavigationScreen> createState() => _NavigationScreenState();
 }
 
-class _NavigationScreenState extends State<NavigationScreen> with SingleTickerProviderStateMixin {
+class _NavigationScreenState extends State<NavigationScreen> with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   MobileRoute _selected = MobileRoute.home;
   late AnimationController animation;
 
@@ -48,12 +50,30 @@ class _NavigationScreenState extends State<NavigationScreen> with SingleTickerPr
     searchPage = const SearchPage();
     libraryPage = const LibraryPage();
 
-    context.read<NavigatorProvider>().restoreState(_selected);
+    context.read<NavigatorProvider>().restoreState(_selected, notify: false);
     context.read<ThemeProvider>().restoreState(_selected);
+
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
-  Widget build(BuildContext context) {
+  void dispose() {
+    animation.dispose();
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      log("App resumed");
+      setSystemChrome();
+    } else if (state == AppLifecycleState.paused) {
+      log("App paused");
+    }
+  }
+
+  void setSystemChrome() {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
@@ -66,7 +86,11 @@ class _NavigationScreenState extends State<NavigationScreen> with SingleTickerPr
       systemNavigationBarIconBrightness: Brightness.light,
       systemStatusBarContrastEnforced: false,
     ));
+  }
 
+  @override
+  Widget build(BuildContext context) {
+    setSystemChrome();
     final loggedIn = context.select<UserProvider, bool>((user) => user.loggedIn);
 
     if (!loggedIn) {

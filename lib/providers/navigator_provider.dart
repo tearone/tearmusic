@@ -36,9 +36,9 @@ class NavigatorProvider extends ChangeNotifier {
     }
   }
 
-  void restoreState(MobileRoute route) {
+  void restoreState(MobileRoute route, {bool notify = false}) {
     currentRoute = route;
-    notifyListeners();
+    if (notify) notifyListeners();
   }
 
   Future<T?> push<T>(Route<T> route, {String? uri}) {

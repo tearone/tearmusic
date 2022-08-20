@@ -16,6 +16,19 @@ enum AudioLoadingState { ready, loading, error }
 enum PlayingFrom { none, album, playlist }
 
 class CurrentMusicProvider extends BaseAudioHandler with ChangeNotifier {
+  final UserProvider _userApi;
+  final MusicInfoProvider _musicApi;
+
+  final player = AudioPlayer(handleInterruptions: false);
+
+  AudioLoadingState audioLoading = AudioLoadingState.ready;
+  PlayingFrom playingFrom = PlayingFrom.none;
+  MusicTrack? playing;
+  TearMusicAudioSource? tma;
+  MusicPlaylist? playlist;
+
+  double get progress => player.duration != null ? player.position.inMilliseconds / player.duration!.inMilliseconds : 0;
+
   CurrentMusicProvider({required MusicInfoProvider musicApi, required UserProvider userApi})
       : _musicApi = musicApi,
         _userApi = userApi;
@@ -57,26 +70,58 @@ class CurrentMusicProvider extends BaseAudioHandler with ChangeNotifier {
       log('Devices added: ${event.devicesAdded}');
       log('Devices removed: ${event.devicesRemoved}');
     });
+
+    player.playbackEventStream.map(_transformEvent).pipe(playbackState);
   }
 
-  final UserProvider _userApi;
-  final MusicInfoProvider _musicApi;
-
-  final player = AudioPlayer(handleInterruptions: false);
-
-  AudioLoadingState audioLoading = AudioLoadingState.ready;
-  PlayingFrom playingFrom = PlayingFrom.none;
-  MusicTrack? playing;
-  TearMusicAudioSource? tma;
-  MusicPlaylist? playlist;
-
-  double get progress => player.duration != null ? player.position.inMilliseconds / player.duration!.inMilliseconds : 0;
+  /// Transform a just_audio event into an audio_service state.
+  ///
+  /// This method is used from the constructor. Every event received from the
+  /// just_audio player will be transformed into an audio_service state so that
+  /// it can be broadcast to audio_service clients.
+  PlaybackState _transformEvent(PlaybackEvent event) {
+    return PlaybackState(
+      controls: [
+        MediaControl.rewind,
+        if (player.playing) MediaControl.pause else MediaControl.play,
+        MediaControl.stop,
+        MediaControl.fastForward,
+      ],
+      systemActions: const {
+        MediaAction.seek,
+        MediaAction.seekForward,
+        MediaAction.seekBackward,
+      },
+      androidCompactActionIndices: const [0, 1, 3],
+      processingState: const {
+        ProcessingState.idle: AudioProcessingState.idle,
+        ProcessingState.loading: AudioProcessingState.loading,
+        ProcessingState.buffering: AudioProcessingState.buffering,
+        ProcessingState.ready: AudioProcessingState.ready,
+        ProcessingState.completed: AudioProcessingState.completed,
+      }[player.processingState]!,
+      playing: player.playing,
+      updatePosition: player.position,
+      bufferedPosition: player.bufferedPosition,
+      speed: player.speed,
+      queueIndex: event.currentIndex,
+    );
+  }
 
   // ! POC only
   Future<void> playTrack(MusicTrack track) async {
     player.stop();
 
     playing = track;
+    final imageUrl = track.album?.images?.forSize(const Size(64, 64));
+    mediaItem.add(MediaItem(
+      id: track.id,
+      title: track.name,
+      album: track.album?.name,
+      artUri: imageUrl != null ? Uri.parse(imageUrl) : null,
+      artist: track.artistsLabel,
+      duration: track.duration,
+    ));
     audioLoading = AudioLoadingState.loading;
     notifyListeners();
 

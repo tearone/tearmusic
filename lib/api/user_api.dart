@@ -5,7 +5,6 @@ import 'package:tearmusic/api/base_api.dart';
 import 'package:http/http.dart' as http;
 import 'package:tearmusic/exceptionts.dart';
 import 'package:tearmusic/models/library.dart';
-import 'package:tearmusic/models/music/track.dart';
 import 'package:tearmusic/models/user_info.dart';
 
 class UserApi {

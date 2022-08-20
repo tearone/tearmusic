@@ -1,3 +1,4 @@
+import 'package:audio_service/audio_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -20,6 +21,25 @@ void main() async {
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  await AudioService.init(
+    builder: () => BaseAudioHandler(),
+    config: AudioServiceConfig(
+      androidNotificationIcon: "mipmap/ic_splash",
+      androidNotificationChannelId: "one.tear.tearmusic.channel.audio",
+      androidNotificationChannelName: "Music playback",
+      androidNotificationChannelDescription: "Music playback",
+      androidNotificationClickStartsActivity: true,
+      androidNotificationOngoing: false,
+      androidResumeOnClick: true,
+      androidShowNotificationBadge: false,
+      androidStopForegroundOnPause: false,
+      fastForwardInterval: const Duration(seconds: 10),
+      rewindInterval: const Duration(seconds: 10),
+      preloadArtwork: true,
+      notificationColor: Colors.blue.shade900,
+    ),
   );
 
   final baseApi = BaseApi();

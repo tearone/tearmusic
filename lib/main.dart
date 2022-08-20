@@ -17,14 +17,24 @@ import 'package:tearmusic/ui/mobile/app.dart';
 void main() async {
   if (kIsWeb) return;
 
+  // Initialize Hive
   await Hive.initFlutter();
 
+  // Initialize Firebase
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
+  // Create Providers
+  final baseApi = BaseApi();
+  final musicInfoProvider = MusicInfoProvider(base: baseApi);
+  final userProvider = UserProvider(base: baseApi, musicInfo: musicInfoProvider);
+  final currentMusicProvider = CurrentMusicProvider(musicApi: musicInfoProvider, userApi: userProvider);
+  final themeProvider = ThemeProvider();
+
+  // Initialize background audio
   await AudioService.init(
-    builder: () => BaseAudioHandler(),
+    builder: () => currentMusicProvider,
     config: AudioServiceConfig(
       androidNotificationIcon: "mipmap/ic_splash",
       androidNotificationChannelId: "one.tear.tearmusic.channel.audio",
@@ -42,14 +52,10 @@ void main() async {
     ),
   );
 
-  final baseApi = BaseApi();
-  final musicInfoProvider = MusicInfoProvider(base: baseApi);
-  final userProvider = UserProvider(base: baseApi, musicInfo: musicInfoProvider);
-  final currentMusicProvider = CurrentMusicProvider(musicApi: musicInfoProvider, userApi: userProvider);
-  final themeProvider = ThemeProvider();
-
+  // Initialize providers
   await userProvider.init();
   await musicInfoProvider.init();
+  await currentMusicProvider.init();
 
   final providers = [
     ChangeNotifierProvider(create: (_) => userProvider),
@@ -60,5 +66,6 @@ void main() async {
     ChangeNotifierProvider(create: (_) => NavigatorProvider(theme: themeProvider)),
   ];
 
+  // Run app
   runApp(App(providers: providers));
 }

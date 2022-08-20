@@ -1,5 +1,7 @@
 import 'dart:developer';
 
+import 'package:audio_service/audio_service.dart';
+import 'package:audio_session/audio_session.dart';
 import 'package:flutter/widgets.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:tearmusic/models/library.dart';
@@ -10,14 +12,58 @@ import 'package:tearmusic/providers/music_info_provider.dart';
 import 'package:tearmusic/providers/user_provider.dart';
 
 enum AudioLoadingState { ready, loading, error }
+
 enum PlayingFrom { none, album, playlist }
 
-class CurrentMusicProvider extends ChangeNotifier {
-  CurrentMusicProvider({required MusicInfoProvider musicApi, required UserProvider userApi}) : _musicApi = musicApi, _userApi = userApi;
+class CurrentMusicProvider extends BaseAudioHandler with ChangeNotifier {
+  CurrentMusicProvider({required MusicInfoProvider musicApi, required UserProvider userApi})
+      : _musicApi = musicApi,
+        _userApi = userApi;
+
+  Future<void> init() async {
+    final session = await AudioSession.instance;
+    await session.configure(const AudioSessionConfiguration.music());
+
+    session.interruptionEventStream.listen((event) {
+      if (event.begin) {
+        switch (event.type) {
+          case AudioInterruptionType.duck:
+            // Another app started playing audio and we should duck.
+            break;
+          case AudioInterruptionType.pause:
+          case AudioInterruptionType.unknown:
+            // Another app started playing audio and we should pause.
+            break;
+        }
+      } else {
+        switch (event.type) {
+          case AudioInterruptionType.duck:
+            // The interruption ended and we should unduck.
+            break;
+          case AudioInterruptionType.pause:
+          // The interruption ended and we should resume.
+          case AudioInterruptionType.unknown:
+            // The interruption ended but we should not resume.
+            break;
+        }
+      }
+    });
+
+    session.becomingNoisyEventStream.listen((_) {
+      // The user unplugged the headphones, so we should pause or lower the volume.
+    });
+
+    session.devicesChangedEventStream.listen((event) {
+      log('Devices added: ${event.devicesAdded}');
+      log('Devices removed: ${event.devicesRemoved}');
+    });
+  }
 
   final UserProvider _userApi;
   final MusicInfoProvider _musicApi;
-  final player = AudioPlayer();
+
+  final player = AudioPlayer(handleInterruptions: false);
+
   AudioLoadingState audioLoading = AudioLoadingState.ready;
   PlayingFrom playingFrom = PlayingFrom.none;
   MusicTrack? playing;

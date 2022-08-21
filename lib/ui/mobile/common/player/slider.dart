@@ -35,7 +35,7 @@ class _WaveformSliderState extends State<WaveformSlider> {
     waveform = [];
     actives = List.generate(tickerCount, (i) => tickerCount * progress >= i);
 
-    currentMusic.tma!.playback.future.then((value) {
+    currentMusic.tma?.playback.future.then((value) {
       final List<double> effects = [];
       final List<double> chunks = [];
       final chunkLen = value.waveform.length / tickerCount;

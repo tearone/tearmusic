@@ -5,11 +5,13 @@ class PlaybackHead {
   final Uint8List prefetch;
   final List<Segmented> silence;
   final List<TempoSegment> tempo;
+  final int sourceLength;
 
   PlaybackHead({
     required this.prefetch,
     required this.silence,
     required this.tempo,
+    required this.sourceLength,
   });
 
   factory PlaybackHead.decode(Object? data) {
@@ -18,6 +20,7 @@ class PlaybackHead {
       prefetch: json['buffer'].buffer.asUint8List(),
       silence: Segmented.decodeList((json['silence'] as List).cast<Map>()),
       tempo: TempoSegment.decodeList((json['tempo'] as List).cast<Map>()),
+      sourceLength: json['sourceLength'],
     );
   }
 }

@@ -342,7 +342,7 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                 bottomLeft: Radius.circular(24.0 * (1 - p * 10 + 9).clamp(0, 1)),
                 bottomRight: Radius.circular(24.0 * (1 - p * 10 + 9).clamp(0, 1)),
               );
-              final double bottomOffset = (-96 * icp + p.clamp(-1, 0) * -200);
+              final double bottomOffset = (-80 * icp + p.clamp(-1, 0) * -200) - (bottomInset * icp);
               final double opacity = (bcp * 5 - 4).clamp(0, 1);
               final double fastOpacity = (bcp * 10 - 9).clamp(0, 1);
               double panelHeight = maxOffset / 1.6;

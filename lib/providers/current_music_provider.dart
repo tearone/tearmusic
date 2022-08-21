@@ -8,6 +8,7 @@ import 'package:tearmusic/models/library.dart';
 import 'package:tearmusic/models/music/playlist.dart';
 import 'package:tearmusic/models/music/track.dart';
 import 'package:tearmusic/player/audio_source.dart';
+import 'package:tearmusic/player/media_control.dart';
 import 'package:tearmusic/providers/music_info_provider.dart';
 import 'package:tearmusic/providers/user_provider.dart';
 
@@ -26,6 +27,7 @@ class CurrentMusicProvider extends BaseAudioHandler with ChangeNotifier {
   MusicTrack? playing;
   TearMusicAudioSource? tma;
   MusicPlaylist? playlist;
+  bool liked = false;
 
   double get progress => player.duration != null ? player.position.inMilliseconds / player.duration!.inMilliseconds : 0;
 
@@ -82,14 +84,17 @@ class CurrentMusicProvider extends BaseAudioHandler with ChangeNotifier {
   PlaybackState _transformEvent(PlaybackEvent event) {
     return PlaybackState(
       controls: [
-        if (player.playing) MediaControl.pause else MediaControl.play,
+        TMMediaControl.skipBack,
+        if (player.playing) TMMediaControl.pause else TMMediaControl.play,
+        TMMediaControl.skipForward,
+        if (liked) TMMediaControl.unheart else TMMediaControl.heart,
       ],
       systemActions: const {
         MediaAction.seek,
         MediaAction.seekForward,
         MediaAction.seekBackward,
       },
-      androidCompactActionIndices: const [0],
+      androidCompactActionIndices: const [0, 1, 2],
       processingState: const {
         ProcessingState.idle: AudioProcessingState.idle,
         ProcessingState.loading: AudioProcessingState.loading,
@@ -101,7 +106,6 @@ class CurrentMusicProvider extends BaseAudioHandler with ChangeNotifier {
       updatePosition: player.position,
       bufferedPosition: player.bufferedPosition,
       speed: player.speed,
-      queueIndex: event.currentIndex,
     );
   }
 
@@ -110,7 +114,8 @@ class CurrentMusicProvider extends BaseAudioHandler with ChangeNotifier {
     player.stop();
 
     playing = track;
-    final imageUrl = track.album?.images?.forSize(const Size(64, 64));
+    liked = (await _userApi.getLibrary()).liked_tracks.contains(track.id);
+    final imageUrl = track.album?.images?.forSize(const Size(200, 200));
     mediaItem.add(MediaItem(
       id: track.id,
       title: track.name,
@@ -118,6 +123,7 @@ class CurrentMusicProvider extends BaseAudioHandler with ChangeNotifier {
       artUri: imageUrl != null ? Uri.parse(imageUrl) : null,
       artist: track.artistsLabel,
       duration: track.duration,
+      rating: Rating.newHeartRating(liked),
     ));
     audioLoading = AudioLoadingState.loading;
     notifyListeners();
@@ -164,4 +170,24 @@ class CurrentMusicProvider extends BaseAudioHandler with ChangeNotifier {
   Future<void> seek(Duration position) async {
     player.seek(position);
   }
+
+  @override
+  Future<void> setRating(Rating rating, [Map<String, dynamic>? extras]) async {
+    liked = rating.hasHeart();
+    mediaItem.add(mediaItem.value!.copyWith(rating: Rating.newHeartRating(liked)));
+    if (playing != null) {
+      if (rating.hasHeart()) {
+        await _userApi.putLibrary(playing!, LibraryType.liked_tracks);
+      } else {
+        await _userApi.deleteLibrary(playing!, LibraryType.liked_tracks);
+      }
+    }
+    player.setSpeed(1.0); // trigger playback event and update notification
+  }
+
+  @override
+  Future<void> setRepeatMode(AudioServiceRepeatMode repeatMode) async {}
+
+  @override
+  Future<void> setShuffleMode(AudioServiceShuffleMode shuffleMode) async {}
 }

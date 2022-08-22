@@ -1,6 +1,5 @@
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:tearmusic/models/music/album.dart';
 import 'package:tearmusic/providers/music_info_provider.dart';
@@ -8,6 +7,7 @@ import 'package:tearmusic/providers/user_provider.dart';
 import 'package:tearmusic/ui/mobile/common/profile_button.dart';
 import 'package:tearmusic/ui/mobile/common/tiles/search_album_tile.dart';
 import 'package:tearmusic/ui/mobile/common/wallpaper.dart';
+import 'package:tearmusic/ui/mobile/pages/library/track_loading_tile.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -71,14 +71,9 @@ class _HomePageState extends State<HomePage> {
                         );
                       },
                       child: !snapshot.hasData
-                          ? Center(
-                              child: Padding(
-                                padding: const EdgeInsets.only(bottom: 200.0),
-                                child: LoadingAnimationWidget.staggeredDotsWave(
-                                  color: Theme.of(context).colorScheme.secondary.withOpacity(.2),
-                                  size: 64.0,
-                                ),
-                              ),
+                          ? const Align(
+                              alignment: Alignment.topCenter,
+                              child: TrackLoadingTile(itemCount: 8),
                             )
                           : ListView.builder(
                               itemCount: snapshot.data!.length + 1,

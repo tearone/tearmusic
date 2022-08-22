@@ -6,7 +6,6 @@ import 'package:tearmusic/ui/mobile/common/settings/settings_alert_dialog.dart';
 import 'package:tearmusic/ui/mobile/common/settings/settings_container.dart';
 import 'package:tearmusic/ui/mobile/common/settings/settings_stats.dart';
 import 'package:tearmusic/ui/mobile/common/settings/settings_switch.dart';
-import 'package:tearmusic/ui/mobile/common/wallpaper.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);

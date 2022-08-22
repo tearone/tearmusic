@@ -19,6 +19,7 @@ class TrackLoadingTile extends StatelessWidget {
           padding: EdgeInsets.zero,
           shrinkWrap: true,
           itemCount: itemCount,
+          physics: const NeverScrollableScrollPhysics(),
           itemBuilder: (_, __) => Padding(
             padding: const EdgeInsets.only(top: 12.0, bottom: 12.0),
             child: Row(
@@ -37,7 +38,7 @@ class TrackLoadingTile extends StatelessWidget {
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
+                  children: [
                     Container(
                       width: Random().nextInt(125) + 100,
                       height: 18.0,

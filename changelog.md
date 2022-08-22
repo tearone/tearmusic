@@ -1,5 +1,2 @@
-- manual matching
-- animated progress duration
-- search suggestions
-- animated wallpaper
+- library
 - bugfixes

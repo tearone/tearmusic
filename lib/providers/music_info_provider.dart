@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:tearmusic/api/base_api.dart';
 import 'package:tearmusic/api/music_api.dart';
+import 'package:tearmusic/models/batch.dart';
+import 'package:tearmusic/models/library.dart';
 import 'package:tearmusic/models/manual_match.dart';
 import 'package:tearmusic/models/model.dart';
 import 'package:tearmusic/models/music/album.dart';
@@ -254,5 +256,33 @@ class MusicInfoProvider {
 
   Future<void> matchManual(MusicTrack track, String videoId) async {
     await _api.matchManual(track, videoId);
+  }
+
+  Future<BatchLibrary> libraryBatch(LibraryType type, {int limit = 10, int offset = 0}) async {
+    BatchLibrary data = await _api.libraryBatch(type, limit: limit, offset: offset);
+
+    if (type == LibraryType.liked_tracks) {
+      for (final e in data.tracks) {
+        _store.put("tracks_$e", jsonEncode(e.encode()));
+      }
+    } else if (type == LibraryType.track_history) {
+      for (final e in data.track_history) {
+        _store.put("tracks_$e", jsonEncode(e.encode()));
+      }
+    } else if (type == LibraryType.liked_albums) {
+      for (final e in data.albums) {
+        _store.put("albums_$e", jsonEncode(e.encode()));
+      }
+    } else if (type == LibraryType.liked_artists) {
+      for (final e in data.artists) {
+        _store.put("artists_$e", jsonEncode(e.encode()));
+      }
+    } else if (type == LibraryType.liked_playlists) {
+      for (final e in data.playlists) {
+        _store.put("playlists_$e", jsonEncode(e.encode()));
+      }
+    }
+
+    return data;
   }
 }

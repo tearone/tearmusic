@@ -1,8 +1,8 @@
 import 'package:animations/animations.dart';
+import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:like_button/like_button.dart';
 import 'package:provider/provider.dart';
-import 'package:tearmusic/models/library.dart';
 import 'package:tearmusic/providers/current_music_provider.dart';
 import 'package:tearmusic/providers/theme_provider.dart';
 import 'package:tearmusic/providers/user_provider.dart';
@@ -127,19 +127,11 @@ class TrackInfo extends StatelessWidget {
                                     start: Theme.of(context).colorScheme.tertiary,
                                     end: Theme.of(context).colorScheme.tertiary,
                                   ),
-                                  isLiked:
-                                      snapshot.hasData && currentMusic.playing != null ? snapshot.data!.liked_tracks.contains(currentMusic.playing!.id) : false,
+                                  isLiked: snapshot.hasData && currentMusic.playing != null
+                                      ? snapshot.data!.liked_tracks.contains(currentMusic.playing!.id)
+                                      : false,
                                   onTap: (isLiked) async {
-                                    if (currentMusic.playing != null) {
-                                      if (!isLiked) {
-                                        context.read<UserProvider>().putLibrary(currentMusic.playing!, LibraryType.liked_tracks);
-                                      } else {
-                                        context.read<UserProvider>().deleteLibrary(currentMusic.playing!, LibraryType.liked_tracks);
-                                      }
-                                    } else {
-                                      return false;
-                                    }
-
+                                    context.read<CurrentMusicProvider>().setRating(Rating.newHeartRating(!isLiked));
                                     return !isLiked;
                                   },
                                   likeBuilder: (value) => value

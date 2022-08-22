@@ -12,10 +12,13 @@ import 'package:http/http.dart' as http;
 class TearMusicAudioSource extends StreamAudioSource {
   final MusicTrack track;
   List<int> bytes = [];
+
   final cached = Completer<bool>();
   final playback = Completer<Playback>();
-  int sourceLength = 0;
   PlaybackHead? playbackHead;
+  int _sourceLength = 0;
+  set sourceLength(value) => _sourceLength = value;
+  int get sourceLength => playbackHead != null ? playbackHead!.sourceLength : _sourceLength;
   final MusicInfoProvider _api;
 
   TearMusicAudioSource(this.track, {required MusicInfoProvider api}) : _api = api;
@@ -46,13 +49,15 @@ class TearMusicAudioSource extends StreamAudioSource {
       );
     }
 
-    end ??= bytes.length;
+    end ??= sourceLength;
+
+    final partial = bytes.sublist(start, end.clamp(0, bytes.length));
 
     return StreamAudioResponse(
-      sourceLength: bytes.length,
+      sourceLength: sourceLength,
       contentLength: end - start,
       offset: start,
-      stream: Stream.value(bytes.sublist(start, end)),
+      stream: Stream.value(partial),
       contentType: 'audio/mp4',
     );
   }
@@ -72,8 +77,10 @@ class TearMusicAudioSource extends StreamAudioSource {
   Future<bool> body() async {
     try {
       final pb = await _api.playback(track);
-      final res = await http.head(Uri.parse(pb.streamUrl), headers: {"range": "bytes=-"});
-      sourceLength = int.tryParse(res.headers['content-range']?.split("/").last ?? "") ?? bytes.length;
+      if (sourceLength == 0) {
+        final res = await http.head(Uri.parse(pb.streamUrl), headers: {"range": "bytes=-"});
+        sourceLength = int.tryParse(res.headers['content-range']?.split("/").last ?? "") ?? bytes.length;
+      }
       if (!playback.isCompleted) playback.complete(pb);
       if (!cached.isCompleted) cached.complete(true);
       return true;

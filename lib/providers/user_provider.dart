@@ -20,7 +20,7 @@ class UserProvider extends ChangeNotifier {
     _avatar = _store.get("avatar");
     _id = _store.get("id");
     final stLibrary = _store.get("library");
-    if(stLibrary != null) _library = UserLibrary.decode(jsonDecode(stLibrary));
+    if (stLibrary != null) library = UserLibrary.decode(jsonDecode(stLibrary));
 
     String? accessToken = _store.get("access_token");
     String? refreshToken = _store.get("refresh_token");
@@ -44,7 +44,7 @@ class UserProvider extends ChangeNotifier {
   String? _id;
   String? _username;
   String? _avatar;
-  UserLibrary? _library;
+  UserLibrary? library;
   String get username => _username ?? "";
   String get avatar => _avatar ?? "";
 
@@ -80,12 +80,12 @@ class UserProvider extends ChangeNotifier {
   Future<void> _getUser() async {
     try {
       final user = await _api.getInfo();
-      final library = await _api.getLibrary();
+      final lib = await _api.getLibrary();
 
       _username = user.username;
       _avatar = user.avatar;
       _id = user.id;
-      _library = library;
+      library = lib;
       notifyListeners();
 
       _musicInfoProvider.userId = _id ?? "";
@@ -93,7 +93,7 @@ class UserProvider extends ChangeNotifier {
       _store.put("username", _username);
       _store.put("avatar", _avatar);
       _store.put("id", _id);
-      _store.put("library", jsonEncode(_library!.encode()));
+      _store.put("library", jsonEncode(library!.encode()));
     } on AuthException {
       loggedIn = false;
       notifyListeners();
@@ -101,48 +101,49 @@ class UserProvider extends ChangeNotifier {
   }
 
   Future<UserLibrary> getLibrary() async {
-    if (_library == null) {
-      final library = await _api.getLibrary();
-      _library = library;
-      _store.put("library", jsonEncode(_library!.encode()));
+    if (library == null) {
+      library = await _api.getLibrary();
+      _store.put("library", jsonEncode(library!.encode()));
     }
 
-    return _library!;
+    return library!;
   }
 
-  Future<void> putLibrary(Model model, LibraryType type) async {
+  Future<void> putLibrary(Model model, LibraryType type, {from_id, from_type}) async {
     await getLibrary();
 
     final id = model.id;
 
     switch (type) {
       case LibraryType.liked_tracks:
-        if (_library!.liked_tracks.contains(id)) return;
-        _library!.liked_tracks.add(id);
+        if (library!.liked_tracks.contains(id)) return;
+        library!.liked_tracks = [...library!.liked_tracks, id];
         break;
       case LibraryType.liked_artists:
-        if (_library!.liked_artists.contains(id)) return;
-        _library!.liked_artists.add(id);
+        if (library!.liked_artists.contains(id)) return;
+        library!.liked_artists = [...library!.liked_artists, id];
         break;
       case LibraryType.liked_albums:
-        if (_library!.liked_albums.contains(id)) return;
-        _library!.liked_albums.add(id);
+        if (library!.liked_albums.contains(id)) return;
+        library!.liked_albums = [...library!.liked_albums, id];
         break;
       case LibraryType.liked_playlists:
-        if (_library!.liked_playlists.contains(id)) return;
-        _library!.liked_playlists.add(id);
+        if (library!.liked_playlists.contains(id)) return;
+        library!.liked_playlists = [...library!.liked_playlists, id];
         break;
       case LibraryType.track_history:
-        _library!.track_history = _library!.track_history
-            .where((item) => item != id)
+        library!.track_history = library!.track_history
+            .where((item) => item.track_id != id)
             .toList()
-            .sublist((_library!.track_history.length - 49).clamp(0, 49), _library!.track_history.length - 1)
-          ..add(id);
+            .sublist((library!.track_history.length - 49).clamp(0, 49), library!.track_history.isEmpty ? 0 : library!.track_history.length - 1)
+          ..add(UserTrackHistory(date: DateTime.now().millisecondsSinceEpoch, track_id: id, from_id: from_id, from_type: from_type));
         break;
     }
 
     await _api.putLibrary(id, type);
-    _store.put("library", jsonEncode(_library!.encode()));
+    _store.put("library", jsonEncode(library!.encode()));
+
+    notifyListeners();
   }
 
   Future<void> deleteLibrary(Model model, LibraryType type) async {
@@ -152,26 +153,28 @@ class UserProvider extends ChangeNotifier {
 
     switch (type) {
       case LibraryType.liked_tracks:
-        if (!_library!.liked_tracks.contains(id)) return;
-        _library!.liked_tracks.remove(id);
+        if (!library!.liked_tracks.contains(id)) return;
+        library!.liked_tracks = library!.liked_tracks.where((l) => l != id).toList();
         break;
       case LibraryType.liked_artists:
-        if (!_library!.liked_artists.contains(id)) return;
-        _library!.liked_artists.remove(id);
+        if (!library!.liked_artists.contains(id)) return;
+        library!.liked_artists = library!.liked_artists.where((l) => l != id).toList();
         break;
       case LibraryType.liked_albums:
-        if (!_library!.liked_albums.contains(id)) return;
-        _library!.liked_albums.remove(id);
+        if (!library!.liked_albums.contains(id)) return;
+        library!.liked_albums = library!.liked_albums.where((l) => l != id).toList();
         break;
       case LibraryType.liked_playlists:
-        if (!_library!.liked_playlists.contains(id)) return;
-        _library!.liked_playlists.remove(id);
+        if (!library!.liked_playlists.contains(id)) return;
+        library!.liked_playlists = library!.liked_playlists.where((l) => l != id).toList();
         break;
       case LibraryType.track_history:
         break;
     }
 
     await _api.deleteLibrary(id, type);
-    _store.put("library", jsonEncode(_library!.encode()));
+    _store.put("library", jsonEncode(library!.encode()));
+
+    notifyListeners();
   }
 }

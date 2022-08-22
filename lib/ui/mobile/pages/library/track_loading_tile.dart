@@ -16,6 +16,7 @@ class TrackLoadingTile extends StatelessWidget {
         baseColor: Colors.white.withOpacity(.05),
         highlightColor: Colors.white.withOpacity(.25),
         child: ListView.builder(
+          padding: EdgeInsets.zero,
           shrinkWrap: true,
           itemCount: itemCount,
           itemBuilder: (_, __) => Padding(

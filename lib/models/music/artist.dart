@@ -30,7 +30,7 @@ class MusicArtist extends Model {
     );
   }
 
-  Map encode() => json;
+  Map encode() => json ?? {};
 
   static List<MusicArtist> decodeList(List<Map> encoded) => encoded
       .where((e) => e["id"] != null && e["images"] != null && e["images"].isNotEmpty)

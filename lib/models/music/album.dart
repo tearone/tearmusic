@@ -61,7 +61,7 @@ class MusicAlbum extends Model {
     );
   }
 
-  Map encode() => json;
+  Map encode() => json ?? {};
 
   static List<MusicAlbum> decodeList(List<Map> encoded) => encoded.where((e) => e["id"] != null).map((e) => MusicAlbum.decode(e)).toList().cast<MusicAlbum>();
   static List<Map> encodeList(List<MusicAlbum> models) => models.map((e) => e.encode()).toList().cast<Map>();

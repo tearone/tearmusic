@@ -32,7 +32,7 @@ class MusicPlaylist extends Model {
     );
   }
 
-  Map encode() => json;
+  Map encode() => json ?? {};
 
   static List<MusicPlaylist> decodeList(List<Map> encoded) =>
       encoded.where((e) => e["id"] != null).map((e) => MusicPlaylist.decode(e)).toList().cast<MusicPlaylist>();
@@ -60,5 +60,5 @@ class PlaylistDetails extends Model {
     );
   }
 
-  Map encode() => json;
+  Map encode() => json ?? {};
 }

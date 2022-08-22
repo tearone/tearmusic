@@ -22,173 +22,161 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final username = context.select<UserProvider, String>((user) => user.username);
 
     return Scaffold(
-      body: Wallpaper(
-        child: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Padding(
-                padding: EdgeInsets.all(24.0),
-                child: Text(
-                  "Settings",
-                  style: TextStyle(
-                    fontSize: 18.0,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 180.0),
-                      child: Column(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 6.0),
-                            child: Card(
-                              elevation: 3.0,
-                              child: Column(
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar.large(
+            pinned: true,
+            snap: false,
+            floating: false,
+            title: const Text("Settings"),
+          ),
+          SliverToBoxAdapter(
+            child: SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 200.0).add(const EdgeInsets.symmetric(horizontal: 12.0)),
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 6.0),
+                      child: Card(
+                        elevation: 3.0,
+                        child: Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(left: 16.0, right: 8.0, top: 16.0, bottom: 8.0),
+                              child: Row(
                                 children: [
-                                  Padding(
-                                    padding: const EdgeInsets.only(left: 16.0, right: 8.0, top: 16.0, bottom: 8.0),
-                                    child: Row(
-                                      children: [
-                                        ClipOval(
-                                          child: SizedBox(
-                                            width: 52.0,
-                                            height: 52.0,
-                                            child: avatar != "" ? Image.network(avatar) : null,
-                                          ),
-                                        ),
-                                        Expanded(
-                                          child: Padding(
-                                            padding: const EdgeInsets.symmetric(horizontal: 14.0),
-                                            child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  username,
-                                                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 22.0),
-                                                ),
-                                                const Text(
-                                                  "View your profile",
-                                                  style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14.0, color: Colors.grey),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                        IconButton(
-                                          onPressed: () {},
-                                          icon: const Icon(Icons.chevron_right),
-                                        )
-                                      ],
+                                  ClipOval(
+                                    child: SizedBox(
+                                      width: 52.0,
+                                      height: 52.0,
+                                      child: avatar != "" ? Image.network(avatar) : null,
                                     ),
                                   ),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 2.0),
-                                    child: Row(
-                                      children: const [
-                                        SettingsStatsItem(name: "Minute spent", value: "214"),
-                                        SettingsStatsItem(name: "Likes received", value: "16"),
-                                        SettingsStatsItem(name: "Followers", value: "7"),
-                                      ],
+                                  Expanded(
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 14.0),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            username,
+                                            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 22.0),
+                                          ),
+                                          const Text(
+                                            "View your profile",
+                                            style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14.0, color: Colors.grey),
+                                          ),
+                                        ],
+                                      ),
                                     ),
+                                  ),
+                                  IconButton(
+                                    onPressed: () {},
+                                    icon: const Icon(Icons.chevron_right),
                                   )
                                 ],
                               ),
                             ),
-                          ),
-                          SettingsContainer(
-                            name: "Playback",
-                            items: [
-                              SettingsSwitchTile(
-                                name: "Gapless",
-                                desc: "Remove gap between songs",
-                                value: true,
-                                onChanged: (v) {},
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 2.0),
+                              child: Row(
+                                children: const [
+                                  SettingsStatsItem(name: "Minute spent", value: "214"),
+                                  SettingsStatsItem(name: "Likes received", value: "16"),
+                                  SettingsStatsItem(name: "Followers", value: "7"),
+                                ],
                               ),
-                              SettingsSwitchTile(
-                                name: "Allow Explicit Content",
-                                desc: "Explicit content is labeled with 'E'",
-                                value: false,
-                                onChanged: (v) {},
-                              ),
-                              SettingsSwitchTile(
-                                name: "Show unplayable songs",
-                                desc: "Show songs that are unplayable",
-                                value: false,
-                                onChanged: (v) {},
-                              ),
-                              SettingsSwitchTile(
-                                name: "Trim silence",
-                                desc: "Remove silence from start and end",
-                                value: false,
-                                onChanged: (v) {},
-                              ),
-                            ],
-                          ),
-                          SettingsContainer(
-                            name: "Social",
-                            items: [
-                              SettingsSwitchTile(
-                                name: "Private session",
-                                desc: "Start a private session to listen privately",
-                                value: true,
-                                onChanged: (v) {},
-                              ),
-                              SettingsSwitchTile(
-                                name: "Listening Activity",
-                                desc: "Show what I was listening",
-                                value: true,
-                                onChanged: (v) {},
-                              ),
-                              SettingsSwitchTile(
-                                name: "Recently played artists",
-                                desc: "Show my recently played artists on my profile",
-                                value: true,
-                                onChanged: (v) {},
-                              ),
-                            ],
-                          ),
-                          SettingsContainer(
-                            name: "Audio Quality",
-                            items: [
-                              SettingsSwitchTile(
-                                name: "Wifi streaming",
-                                desc: "Stream on wifi",
-                                value: true,
-                                onChanged: (v) {},
-                              ),
-                            ],
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
-                            child: TextButton.icon(
-                              icon: const Icon(Ionicons.log_out_outline),
-                              label: const Text("Logout", style: TextStyle(fontWeight: FontWeight.w600)),
-                              style: ButtonStyle(
-                                padding: MaterialStateProperty.all(const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0)),
-                                backgroundColor: MaterialStateProperty.all(const Color.fromARGB(255, 242, 88, 88).withOpacity(.25)),
-                                foregroundColor: MaterialStateProperty.all(const Color.fromARGB(255, 242, 88, 88)),
-                              ),
-                              onPressed: () {
-                                SettingsAlertDialog().showCustomDialog(context);
-                              },
-                            ),
-                          ),
-                        ],
+                            )
+                          ],
+                        ),
                       ),
                     ),
-                  ),
+                    SettingsContainer(
+                      name: "Playback",
+                      items: [
+                        SettingsSwitchTile(
+                          name: "Gapless",
+                          desc: "Remove gap between songs",
+                          value: true,
+                          onChanged: (v) {},
+                        ),
+                        SettingsSwitchTile(
+                          name: "Allow Explicit Content",
+                          desc: "Explicit content is labeled with 'E'",
+                          value: false,
+                          onChanged: (v) {},
+                        ),
+                        SettingsSwitchTile(
+                          name: "Show unplayable songs",
+                          desc: "Show songs that are unplayable",
+                          value: false,
+                          onChanged: (v) {},
+                        ),
+                        SettingsSwitchTile(
+                          name: "Trim silence",
+                          desc: "Remove silence from start and end",
+                          value: false,
+                          onChanged: (v) {},
+                        ),
+                      ],
+                    ),
+                    SettingsContainer(
+                      name: "Social",
+                      items: [
+                        SettingsSwitchTile(
+                          name: "Private session",
+                          desc: "Start a private session to listen privately",
+                          value: true,
+                          onChanged: (v) {},
+                        ),
+                        SettingsSwitchTile(
+                          name: "Listening Activity",
+                          desc: "Show what I was listening",
+                          value: true,
+                          onChanged: (v) {},
+                        ),
+                        SettingsSwitchTile(
+                          name: "Recently played artists",
+                          desc: "Show my recently played artists on my profile",
+                          value: true,
+                          onChanged: (v) {},
+                        ),
+                      ],
+                    ),
+                    SettingsContainer(
+                      name: "Audio Quality",
+                      items: [
+                        SettingsSwitchTile(
+                          name: "Wifi streaming",
+                          desc: "Stream on wifi",
+                          value: true,
+                          onChanged: (v) {},
+                        ),
+                      ],
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+                      child: TextButton.icon(
+                        icon: const Icon(Ionicons.log_out_outline),
+                        label: const Text("Logout", style: TextStyle(fontWeight: FontWeight.w600)),
+                        style: ButtonStyle(
+                          padding: MaterialStateProperty.all(const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0)),
+                          backgroundColor: MaterialStateProperty.all(const Color.fromARGB(255, 242, 88, 88).withOpacity(.25)),
+                          foregroundColor: MaterialStateProperty.all(const Color.fromARGB(255, 242, 88, 88)),
+                        ),
+                        onPressed: () {
+                          SettingsAlertDialog().showCustomDialog(context);
+                        },
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:animations/animations.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tearmusic/providers/user_provider.dart';
@@ -12,18 +13,9 @@ class ProfileButton extends StatelessWidget {
     final avatar = context.select<UserProvider, String>((user) => user.avatar);
 
     onTap() {
-      Navigator.of(context).push(
-        PageRouteBuilder(
-          pageBuilder: (context, primaryAnimation, secondaryAnimation) {
-            return FadeThroughTransition(
-              fillColor: Colors.transparent,
-              animation: primaryAnimation,
-              secondaryAnimation: secondaryAnimation,
-              child: const SettingsScreen(),
-            );
-          },
-          transitionDuration: const Duration(milliseconds: 500),
-          reverseTransitionDuration: const Duration(milliseconds: 500),
+      Navigator.of(context, rootNavigator: true).push(
+        CupertinoPageRoute(
+          builder: (context) => const SettingsScreen(),
         ),
       );
     }

@@ -14,6 +14,7 @@ class AlbumLoadingTile extends StatelessWidget {
         baseColor: Colors.white.withOpacity(.05),
         highlightColor: Colors.white.withOpacity(.25),
         child: ListView.builder(
+          padding: EdgeInsets.zero,
           scrollDirection: Axis.horizontal,
           physics: const NeverScrollableScrollPhysics(),
           shrinkWrap: true,

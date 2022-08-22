@@ -36,7 +36,7 @@ class MusicTrack extends Model {
     );
   }
 
-  Map encode() => json;
+  Map encode() => json ?? {};
 
   static List<MusicTrack> decodeList(List<Map> encoded, {MusicAlbum? album}) =>
       encoded.where((e) => e["id"] != null).map((e) => MusicTrack.decode(e, album: album)).toList().cast<MusicTrack>();

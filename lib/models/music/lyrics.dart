@@ -48,7 +48,7 @@ class MusicLyrics extends Model {
     );
   }
 
-  Map encode() => json;
+  Map encode() => json ?? {};
 }
 
 class TimedSegment {

@@ -49,5 +49,5 @@ class InternalImage extends Model {
     );
   }
 
-  Map encode() => json;
+  Map encode() => json ?? {};
 }

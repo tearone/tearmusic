@@ -39,18 +39,17 @@ class BatchLibrary {
       };
 }
 
-class BatchTrackHistory {
+class BatchTrackHistory extends Model {
   MusicTrack track;
   Model? from;
-  String type;
   int date;
 
   BatchTrackHistory({
     required this.track,
     this.from,
-    required this.type,
+    required String type,
     required this.date,
-  });
+  }) : super(id: track.id, type: type);
 
   factory BatchTrackHistory.decode(Map json) {
     return BatchTrackHistory(

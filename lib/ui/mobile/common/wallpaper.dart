@@ -73,7 +73,7 @@ class _WallpaperState extends State<Wallpaper> with TickerProviderStateMixin {
                       center: const Alignment(0.95, -0.95),
                       radius: 1.0,
                       colors: [
-                        Theme.of(context).colorScheme.onSecondary.withOpacity(.4),
+                        Theme.of(context).colorScheme.onSecondary.withOpacity(.3),
                         Theme.of(context).colorScheme.onSecondary.withOpacity(.2),
                       ],
                     ),

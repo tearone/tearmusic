@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:flutter/widgets.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -19,8 +20,12 @@ class UserProvider extends ChangeNotifier {
     _username = _store.get("username");
     _avatar = _store.get("avatar");
     _id = _store.get("id");
-    final stLibrary = _store.get("library");
-    if (stLibrary != null) library = UserLibrary.decode(jsonDecode(stLibrary));
+    try {
+      final stLibrary = _store.get("library");
+      if (stLibrary != null) library = UserLibrary.decode(jsonDecode(stLibrary));
+    } catch (e) {
+      log("Library decode error: $e");
+    }
 
     String? accessToken = _store.get("access_token");
     String? refreshToken = _store.get("refresh_token");

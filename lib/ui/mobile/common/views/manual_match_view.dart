@@ -103,8 +103,8 @@ class _ManualMatchViewState extends State<ManualMatchView> {
           onPressed: () async {
             if (selected != null) {
               final api = context.read<MusicInfoProvider>();
-              await api.matchManual(widget.track, selected!);
               await api.purgeCache(widget.track);
+              await api.matchManual(widget.track, selected!);
               // ignore: use_build_context_synchronously
               Navigator.of(context, rootNavigator: true).pop();
             }

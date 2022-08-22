@@ -58,10 +58,11 @@ class _LibraryPageState extends State<LibraryPage> {
     final value = _scrollController.position.pixels > 0;
     if (viewScrolled != value) {
       viewScrolled = value;
-      setState(() => value ? viewScrolledTitle = value : viewScrolledShadow = value);
+      if (value) viewScrolledTitle = value;
+      viewScrolledShadow = value;
+      setState(() {});
       if (viewScrolledAgent.isActive) viewScrolledAgent.cancel();
-      viewScrolledAgent = Timer(
-          const Duration(milliseconds: 100), () => mounted ? setState(() => value ? viewScrolledShadow = value : viewScrolledTitle = value) : null);
+      viewScrolledAgent = Timer(const Duration(milliseconds: 100), () => mounted ? setState(() => viewScrolledTitle = value) : null);
     }
   }
 
@@ -76,12 +77,13 @@ class _LibraryPageState extends State<LibraryPage> {
             snap: false,
             floating: false,
             centerTitle: false,
-            elevation: 2.0,
             backgroundColor: viewScrolledTitle
                 ? ElevationOverlay.applySurfaceTint(Theme.of(context).colorScheme.surface, Theme.of(context).colorScheme.surfaceTint, 2.0)
                 : Colors.transparent,
             surfaceTintColor: Colors.transparent,
             shadowColor: viewScrolledShadow ? Colors.black : Colors.transparent,
+            forceElevated: viewScrolledTitle,
+            elevation: 0,
             title: const Text(
               "Your Library",
               style: TextStyle(fontWeight: FontWeight.w500),

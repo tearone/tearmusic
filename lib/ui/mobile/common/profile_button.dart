@@ -11,28 +11,38 @@ class ProfileButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final avatar = context.select<UserProvider, String>((user) => user.avatar);
 
-    return GestureDetector(
-      onTap: () {
-        Navigator.of(context).push(
-          PageRouteBuilder(
-            pageBuilder: (context, primaryAnimation, secondaryAnimation) {
-              return FadeThroughTransition(
-                fillColor: Colors.transparent,
-                animation: primaryAnimation,
-                secondaryAnimation: secondaryAnimation,
-                child: const SettingsScreen(),
-              );
-            },
-            transitionDuration: const Duration(milliseconds: 500),
-            reverseTransitionDuration: const Duration(milliseconds: 500),
-          ),
-        );
-      },
-      child: ClipOval(
-        child: SizedBox(
-          width: 36.0,
-          height: 36.0,
-          child: avatar != "" ? Image.network(avatar) : null,
+    onTap() {
+      Navigator.of(context).push(
+        PageRouteBuilder(
+          pageBuilder: (context, primaryAnimation, secondaryAnimation) {
+            return FadeThroughTransition(
+              fillColor: Colors.transparent,
+              animation: primaryAnimation,
+              secondaryAnimation: secondaryAnimation,
+              child: const SettingsScreen(),
+            );
+          },
+          transitionDuration: const Duration(milliseconds: 500),
+          reverseTransitionDuration: const Duration(milliseconds: 500),
+        ),
+      );
+    }
+
+    return ClipOval(
+      child: SizedBox(
+        width: 36.0,
+        height: 36.0,
+        child: Stack(
+          children: [
+            if (avatar != "") Image.network(avatar),
+            Material(
+              type: MaterialType.transparency,
+              child: InkWell(
+                onTap: onTap,
+                customBorder: const CircleBorder(),
+              ),
+            ),
+          ],
         ),
       ),
     );

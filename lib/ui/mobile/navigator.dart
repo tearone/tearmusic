@@ -88,6 +88,8 @@ class _NavigationScreenState extends State<NavigationScreen> with SingleTickerPr
     ));
   }
 
+  double? bottom;
+
   @override
   Widget build(BuildContext context) {
     setSystemChrome();
@@ -98,6 +100,8 @@ class _NavigationScreenState extends State<NavigationScreen> with SingleTickerPr
     }
 
     context.read<NavigatorProvider>().setScaffoldState(ScaffoldMessenger.of(context));
+
+    bottom ??= MediaQuery.of(context).padding.bottom;
 
     return Consumer<WillPopProvider>(
       builder: (context, value, child) {
@@ -176,16 +180,15 @@ class _NavigationScreenState extends State<NavigationScreen> with SingleTickerPr
                       child: child,
                     );
                   },
-                  child: MediaQuery.removePadding(
-                    context: context,
-                    removeTop: true,
+                  child: MediaQuery(
+                    data: MediaQueryData(padding: EdgeInsets.only(bottom: bottom ?? 0)),
                     child: NavigationBar(
                       selectedIndex: _selected.index,
                       onDestinationSelected: (value) {
                         if (value == _selected.index) return;
                         setState(() => _selected = MobileRoute.values[value]);
                         // _navigatorState.currentState?.pushNamedAndRemoveUntil(MobileRoutes.values[value].name, (route) => false);
-                        context.read<NavigatorProvider>().restoreState(_selected);
+                        context.read<NavigatorProvider>().restoreState(_selected, notify: true);
                         context.read<ThemeProvider>().restoreState(_selected);
                       },
                       destinations: const [

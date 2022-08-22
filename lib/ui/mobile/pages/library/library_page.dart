@@ -11,6 +11,7 @@ import 'package:tearmusic/models/music/track.dart';
 import 'package:tearmusic/providers/music_info_provider.dart';
 import 'package:tearmusic/providers/theme_provider.dart';
 import 'package:tearmusic/providers/user_provider.dart';
+import 'package:tearmusic/ui/mobile/common/profile_button.dart';
 import 'package:tearmusic/ui/mobile/common/tiles/artist_album_tile.dart';
 import 'package:tearmusic/ui/mobile/common/tiles/artist_artist_tile.dart';
 import 'package:tearmusic/ui/mobile/common/tiles/search_playlist_tile.dart';
@@ -24,7 +25,6 @@ import 'package:tearmusic/ui/mobile/pages/library/track_loading_tile.dart';
 import 'package:tearmusic/ui/mobile/screens/library/liked_playlists.dart';
 import 'package:tearmusic/ui/mobile/screens/library/liked_songs.dart';
 import 'package:tearmusic/ui/mobile/screens/library/recently_played.dart';
-import 'package:tearmusic/ui/mobile/screens/settings_screen.dart';
 
 class LibraryPage extends StatefulWidget {
   const LibraryPage({Key? key}) : super(key: key);
@@ -57,25 +57,7 @@ class _LibraryPageState extends State<LibraryPage> {
                       ),
                     ),
                   ),
-                  InkWell(
-                    child: const Icon(Icons.settings),
-                    onTap: () {
-                      Navigator.of(context).push(
-                        PageRouteBuilder(
-                          pageBuilder: (context, primaryAnimation, secondaryAnimation) {
-                            return FadeThroughTransition(
-                              fillColor: Theme.of(context).colorScheme.background,
-                              animation: primaryAnimation,
-                              secondaryAnimation: secondaryAnimation,
-                              child: const SettingsScreen(),
-                            );
-                          },
-                          transitionDuration: const Duration(milliseconds: 500),
-                          reverseTransitionDuration: const Duration(milliseconds: 500),
-                        ),
-                      );
-                    },
-                  ),
+                  const ProfileButton(),
                 ],
               ),
             ),

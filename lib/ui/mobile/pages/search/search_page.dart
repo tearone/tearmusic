@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:math';
+import 'dart:math' as math;
 
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
@@ -64,6 +64,18 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
     listOrder = List.generate(tabs.length, (i) => "$i");
     _tabController = TabController(length: tabs.length, vsync: this);
     _pageController = PageController();
+
+    context.read<NavigatorProvider>().addListener(pageChangeListener);
+  }
+
+  void pageChangeListener() {
+    if (context.read<NavigatorProvider>().currentRoute == MobileRoute.search) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _searchInputFocus.requestFocus();
+      });
+    } else {
+      _searchInputFocus.unfocus();
+    }
   }
 
   @override
@@ -177,24 +189,8 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
     _searchInputFocus.unfocus();
   }
 
-  MobileRoute? lastRoute;
-
   @override
   Widget build(BuildContext context) {
-    final currentRoute = context.watch<NavigatorProvider>().currentRoute;
-
-    if (currentRoute == MobileRoute.search) {
-      if (lastRoute != currentRoute) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          _searchInputFocus.requestFocus();
-        });
-      }
-    } else {
-      _searchInputFocus.unfocus();
-    }
-
-    lastRoute = currentRoute;
-
     final noResultsWidget = Padding(
       padding: const EdgeInsets.only(bottom: 200.0),
       child: Center(
@@ -405,7 +401,7 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                           padding: const EdgeInsets.only(bottom: 200.0),
                           child: Center(
                             child: Transform.rotate(
-                              angle: pi / 14.0,
+                              angle: math.pi / 14.0,
                               child: Icon(
                                 Icons.music_note,
                                 size: 82.0,
@@ -470,7 +466,7 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                                           return TopResultContainer(
                                             kind: "Songs",
                                             results: results!.tracks
-                                                .sublist(0, min(results!.tracks.length, topShowCount))
+                                                .sublist(0, math.min(results!.tracks.length, topShowCount))
                                                 .map((e) => SearchTrackTile(e))
                                                 .toList(),
                                             index: 1,
@@ -482,7 +478,7 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                                           return TopResultContainer(
                                             kind: "Albums",
                                             results: results!.albums
-                                                .sublist(0, min(results!.albums.length, topShowCount))
+                                                .sublist(0, math.min(results!.albums.length, topShowCount))
                                                 .map((e) => SearchAlbumTile(e))
                                                 .toList(),
                                             index: 2,
@@ -494,7 +490,7 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                                           return TopResultContainer(
                                             kind: "Playlists",
                                             results: results!.playlists
-                                                .sublist(0, min(results!.playlists.length, topShowCount))
+                                                .sublist(0, math.min(results!.playlists.length, topShowCount))
                                                 .map((e) => SearchPlaylistTile(e))
                                                 .toList(),
                                             index: 3,
@@ -506,7 +502,7 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                                           return TopResultContainer(
                                             kind: "Artists",
                                             results: results!.artists
-                                                .sublist(0, min(results!.artists.length, topShowCount))
+                                                .sublist(0, math.min(results!.artists.length, topShowCount))
                                                 .map((e) => SearchArtistTile(e))
                                                 .toList(),
                                             index: 4,

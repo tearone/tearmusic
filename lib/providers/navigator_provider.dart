@@ -15,7 +15,7 @@ class NavigatorProvider extends ChangeNotifier {
   late ScaffoldMessengerState _messenger;
   final ThemeProvider _theme;
 
-  late MobileRoute currentRoute;
+  MobileRoute? currentRoute;
   final Map<MobileRoute, NavigatorPageState> _pages = {};
   NavigatorPageState get _currentPage => _pages[currentRoute]!;
 

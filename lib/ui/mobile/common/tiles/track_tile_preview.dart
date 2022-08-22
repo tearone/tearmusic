@@ -31,6 +31,9 @@ class TrackTilePreview extends StatelessWidget {
               ),
               Text(
                 track.name,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 24.0,
                   fontWeight: FontWeight.w600,
@@ -39,6 +42,9 @@ class TrackTilePreview extends StatelessWidget {
               ),
               Text(
                 track.artistsLabel,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 18.0,
                   fontWeight: FontWeight.w500,

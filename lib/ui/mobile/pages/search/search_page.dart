@@ -142,7 +142,12 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
 
   void onSubmitHandler(String input, {bool finalize = true}) {
     if (input == lastSearchTerm) {
-      if (finalize && results != null) finalizeSearch();
+      if (results == null) {
+        setState(() => result = SearchResult.loading);
+      } else if (finalize) {
+        finalizeSearch();
+      }
+
       return;
     }
     lastSearchTerm = input;

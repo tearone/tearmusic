@@ -109,7 +109,7 @@ class UserProvider extends ChangeNotifier {
     return library!;
   }
 
-  Future<void> putLibrary(Model model, LibraryType type, {from_id, from_type}) async {
+  Future<void> putLibrary(Model model, LibraryType type, {String? fromId, String? fromType}) async {
     await getLibrary();
 
     final id = model.id;
@@ -136,7 +136,7 @@ class UserProvider extends ChangeNotifier {
             .where((item) => item.track_id != id)
             .toList()
             .sublist((library!.track_history.length - 49).clamp(0, 49), library!.track_history.isEmpty ? 0 : library!.track_history.length - 1)
-          ..add(UserTrackHistory(date: DateTime.now().millisecondsSinceEpoch, track_id: id, from_id: from_id, from_type: from_type));
+          ..add(UserTrackHistory(date: DateTime.now().millisecondsSinceEpoch, track_id: id, from_id: fromId, from_type: fromType));
         break;
     }
 

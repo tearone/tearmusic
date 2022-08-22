@@ -27,7 +27,7 @@ class ArtistLoadingTile extends StatelessWidget {
                     Container(
                       width: 100.0,
                       height: 100.0,
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                         color: Colors.white,
                         shape: BoxShape.circle,
                       ),

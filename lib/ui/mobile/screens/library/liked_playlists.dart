@@ -1,19 +1,13 @@
 import 'package:automatic_animated_list/automatic_animated_list.dart';
 import 'package:flutter/material.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
-import 'package:tearmusic/models/batch.dart';
 import 'package:tearmusic/models/library.dart';
 import 'package:tearmusic/models/music/playlist.dart';
-import 'package:tearmusic/models/music/track.dart';
 import 'package:tearmusic/providers/music_info_provider.dart';
 import 'package:tearmusic/providers/user_provider.dart';
 import 'package:tearmusic/ui/mobile/common/tiles/search_playlist_tile.dart';
-import 'package:tearmusic/ui/mobile/common/tiles/track_tile.dart';
-import 'package:tearmusic/ui/mobile/common/views/playlist_track_tile.dart';
 import 'package:tearmusic/ui/mobile/common/wallpaper.dart';
 import 'package:tearmusic/ui/mobile/pages/library/playlist_loading_tile.dart';
-import 'package:tearmusic/ui/mobile/pages/library/track_loading_tile.dart';
 
 class LikedPlaylistsScreen extends StatefulWidget {
   const LikedPlaylistsScreen({Key? key}) : super(key: key);
@@ -63,7 +57,7 @@ class _LikedPlaylistsScreenState extends State<LikedPlaylistsScreen> {
                         future: context.read<MusicInfoProvider>().libraryBatch(LibraryType.liked_playlists, limit: 50),
                         builder: ((context, snapshot) {
                           if (!snapshot.hasData) {
-                            return PlaylistLoadingTile(itemCount: 8,);
+                            return const PlaylistLoadingTile(itemCount: 8);
                           }
 
                           return AutomaticAnimatedList(

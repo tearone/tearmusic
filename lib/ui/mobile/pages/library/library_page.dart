@@ -134,7 +134,7 @@ class _LibraryPageState extends State<LibraryPage> {
                           future: context.read<MusicInfoProvider>().libraryBatch(LibraryType.track_history, limit: 3),
                           builder: ((context, snapshot) {
                             if (!snapshot.hasData) {
-                              return TrackLoadingTile();
+                              return const TrackLoadingTile();
                             }
 
                             return AutomaticAnimatedList(
@@ -220,7 +220,7 @@ class _LibraryPageState extends State<LibraryPage> {
                           future: context.read<MusicInfoProvider>().libraryBatch(LibraryType.liked_playlists, limit: 3),
                           builder: ((context, snapshot) {
                             if (!snapshot.hasData) {
-                              return PlaylistLoadingTile();
+                              return const PlaylistLoadingTile();
                             }
 
                             return AutomaticAnimatedList(
@@ -311,7 +311,7 @@ class _LibraryPageState extends State<LibraryPage> {
                           future: context.read<MusicInfoProvider>().libraryBatch(LibraryType.liked_tracks, limit: 3),
                           builder: ((context, snapshot) {
                             if (!snapshot.hasData) {
-                              return TrackLoadingTile();
+                              return const TrackLoadingTile();
                             }
 
                             return AutomaticAnimatedList(

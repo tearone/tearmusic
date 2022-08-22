@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
 class PlaylistLoadingTile extends StatelessWidget {
-  PlaylistLoadingTile({Key? key, this.itemCount = 3}) : super(key: key);
+  const PlaylistLoadingTile({Key? key, this.itemCount = 3}) : super(key: key);
 
-  int itemCount;
+  final int itemCount;
 
   @override
   Widget build(BuildContext context) {

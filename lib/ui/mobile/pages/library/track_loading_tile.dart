@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
 class TrackLoadingTile extends StatelessWidget {
-  TrackLoadingTile({Key? key, this.itemCount = 3}) : super(key: key);
+  const TrackLoadingTile({Key? key, this.itemCount = 3}) : super(key: key);
 
-  int itemCount;
+  final int itemCount;
 
   @override
   Widget build(BuildContext context) {

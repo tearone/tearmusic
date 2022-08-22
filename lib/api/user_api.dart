@@ -48,14 +48,14 @@ class UserApi {
     return UserLibrary.decode(jsonDecode(res.body));
   }
 
-  Future<void> putLibrary(String id, LibraryType type, {String? from, String? from_type}) async {
+  Future<void> putLibrary(String id, LibraryType type, {String? from, String? fromType}) async {
     final res = await http.put(Uri.parse("${BaseApi.url}/user/music-library"),
         headers: {"authorization": await base.getToken(), "content-type": "application/json"},
         body: jsonEncode({
           "id": id,
           "type": type.name,
           "from": from,
-          "from_type": from_type,
+          "from_type": fromType,
         }));
 
     _reschk(res, "putLibrary");

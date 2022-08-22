@@ -1,9 +1,6 @@
-
 import 'package:automatic_animated_list/automatic_animated_list.dart';
 import 'package:flutter/material.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
-import 'package:tearmusic/models/batch.dart';
 import 'package:tearmusic/models/library.dart';
 import 'package:tearmusic/models/music/track.dart';
 import 'package:tearmusic/providers/music_info_provider.dart';
@@ -60,7 +57,7 @@ class _LikedSongsScreenState extends State<LikedSongsScreen> {
                         future: context.read<MusicInfoProvider>().libraryBatch(LibraryType.liked_tracks, limit: 50),
                         builder: ((context, snapshot) {
                           if (!snapshot.hasData) {
-                            return TrackLoadingTile(itemCount: 8,);
+                            return const TrackLoadingTile(itemCount: 8);
                           }
 
                           return AutomaticAnimatedList(

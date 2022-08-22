@@ -8,6 +8,7 @@ import 'package:fuzzy/data/result.dart';
 import 'package:fuzzy/fuzzy.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:tearmusic/models/search.dart';
 import 'package:tearmusic/providers/music_info_provider.dart';
 import 'package:tearmusic/providers/navigator_provider.dart';
@@ -36,6 +37,8 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
   final _searchInputFocus = FocusNode();
   late TabController _tabController;
   late PageController _pageController;
+
+  List<int> srw = [];
 
   final List<Widget> tabs = const [
     Tab(text: "Top"),
@@ -66,10 +69,12 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
     _pageController = PageController();
 
     context.read<NavigatorProvider>().addListener(pageChangeListener);
+    srw = List.generate(7, (_) => math.Random().nextInt(120) + 75);
   }
 
   void pageChangeListener() {
     if (context.read<NavigatorProvider>().currentRoute == MobileRoute.search) {
+      srw = List.generate(7, (_) => math.Random().nextInt(120) + 75);
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _searchInputFocus.requestFocus();
       });
@@ -317,84 +322,113 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                             child: Row(
                               children: [
                                 Expanded(
-                                  child: ListView.builder(
-                                    itemCount: suggestionResults.length,
-                                    itemBuilder: (context, index) {
-                                      List<InlineSpan> renderSuggestion(Result<String> result) {
-                                        if (result.matches.isEmpty) return [];
+                                  child: Column(
+                                    children: [
+                                      ListView.builder(
+                                        shrinkWrap: true,
+                                        itemCount: suggestionResults.length,
+                                        itemBuilder: (context, index) {
+                                          List<InlineSpan> renderSuggestion(Result<String> result) {
+                                            if (result.matches.isEmpty) return [];
 
-                                        List<InlineSpan> parts = [];
-                                        final match = result.matches.first;
-                                        final matches = result.matches.first.matchedIndices;
+                                            List<InlineSpan> parts = [];
+                                            final match = result.matches.first;
+                                            final matches = result.matches.first.matchedIndices;
 
-                                        final secStyle = TextStyle(
-                                          fontWeight: FontWeight.w500,
-                                          color: Theme.of(context).colorScheme.secondary,
-                                        );
+                                            final secStyle = TextStyle(
+                                              fontWeight: FontWeight.w500,
+                                              color: Theme.of(context).colorScheme.secondary,
+                                            );
 
-                                        final primStyle = TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: Theme.of(context).colorScheme.primary,
-                                        );
+                                            final primStyle = TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color: Theme.of(context).colorScheme.primary,
+                                            );
 
-                                        for (int i = 0; i < matches.length; i++) {
-                                          if (i == 0) {
-                                            parts.add(TextSpan(
-                                              text: match.value.substring(i == 0 ? 0 : matches[i - 1].end + 1, matches[i].start),
-                                              style: secStyle,
-                                            ));
+                                            for (int i = 0; i < matches.length; i++) {
+                                              if (i == 0) {
+                                                parts.add(TextSpan(
+                                                  text: match.value.substring(i == 0 ? 0 : matches[i - 1].end + 1, matches[i].start),
+                                                  style: secStyle,
+                                                ));
+                                              }
+                                              parts.add(TextSpan(
+                                                text: match.value.substring(matches[i].start, matches[i].end + 1),
+                                                style: primStyle,
+                                              ));
+                                              parts.add(TextSpan(
+                                                text: match.value
+                                                    .substring(matches[i].end + 1, (i == matches.length - 1) ? null : matches[i + 1].start),
+                                                style: secStyle,
+                                              ));
+                                            }
+
+                                            return parts;
                                           }
-                                          parts.add(TextSpan(
-                                            text: match.value.substring(matches[i].start, matches[i].end + 1),
-                                            style: primStyle,
-                                          ));
-                                          parts.add(TextSpan(
-                                            text: match.value.substring(matches[i].end + 1, (i == matches.length - 1) ? null : matches[i + 1].start),
-                                            style: secStyle,
-                                          ));
-                                        }
 
-                                        return parts;
-                                      }
-
-                                      return Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                                        child: InkWell(
-                                          onTap: () => onSuggestionHandler(suggestionResults[index].item),
-                                          borderRadius: BorderRadius.circular(8.0),
-                                          child: Container(
-                                            padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
-                                            width: double.infinity,
-                                            child: Row(
-                                              children: [
-                                                Padding(
-                                                  padding: const EdgeInsets.only(right: 12.0),
-                                                  child: Icon(
-                                                    Icons.music_note,
-                                                    color: Theme.of(context).colorScheme.onSecondaryContainer,
-                                                  ),
-                                                ),
-                                                Expanded(
-                                                  child: Text.rich(
-                                                    TextSpan(children: renderSuggestion(suggestionResults[index])),
-                                                    overflow: TextOverflow.ellipsis,
-                                                    style: TextStyle(
-                                                      fontSize: 16.0,
-                                                      fontFamily: Theme.of(context).textTheme.bodyText2!.fontFamily,
+                                          return Padding(
+                                            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                                            child: InkWell(
+                                              onTap: () => onSuggestionHandler(suggestionResults[index].item),
+                                              borderRadius: BorderRadius.circular(8.0),
+                                              child: Container(
+                                                padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
+                                                width: double.infinity,
+                                                child: Row(
+                                                  children: [
+                                                    Padding(
+                                                      padding: const EdgeInsets.only(right: 12.0),
+                                                      child: Icon(
+                                                        Icons.music_note,
+                                                        color: Theme.of(context).colorScheme.onSecondaryContainer,
+                                                      ),
                                                     ),
+                                                    Expanded(
+                                                      child: Text.rich(
+                                                        TextSpan(children: renderSuggestion(suggestionResults[index])),
+                                                        overflow: TextOverflow.ellipsis,
+                                                        style: TextStyle(
+                                                          fontSize: 16.0,
+                                                          fontFamily: Theme.of(context).textTheme.bodyText2!.fontFamily,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    AnimatedOpacity(
+                                                      duration: const Duration(milliseconds: 300),
+                                                      opacity:
+                                                          index == 0 && results != null && lastSearchTerm == suggestionResults[index].item ? 1 : 0,
+                                                      child: const Icon(Icons.arrow_forward),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                      if (suggestions.isEmpty && suggestionResults.length == 1 && results == null)
+                                        Shimmer.fromColors(
+                                          baseColor: Colors.white.withOpacity(.05),
+                                          highlightColor: Colors.white.withOpacity(.25),
+                                          child: Column(
+                                            children: List.generate(
+                                              srw.length,
+                                              (i) => Align(
+                                                alignment: Alignment.topLeft,
+                                                child: Container(
+                                                  width: srw[i].toDouble(),
+                                                  height: 32,
+                                                  margin: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                                                  decoration: BoxDecoration(
+                                                    borderRadius: BorderRadius.circular(12.0),
+                                                    color: Colors.black,
                                                   ),
                                                 ),
-                                                AnimatedOpacity(
-                                                  duration: const Duration(milliseconds: 300),
-                                                  opacity: index == 0 && results != null && lastSearchTerm == suggestionResults[index].item ? 1 : 0,
-                                                  child: const Icon(Icons.arrow_forward),
-                                                ),
-                                              ],
+                                              ),
                                             ),
                                           ),
                                         ),
-                                      );
-                                    },
+                                    ],
                                   ),
                                 ),
                               ],

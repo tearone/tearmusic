@@ -1,2 +1,5 @@
-- library
+- new loading effect
+- design tweaks
+- valhalla
+- ququq
 - bugfixes

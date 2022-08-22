@@ -86,7 +86,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 ),
                               ),
                               Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 4.0),
+                                padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 2.0),
                                 child: Row(
                                   children: const [
                                     SettingsStatsItem(name: "Minute spent", value: "214"),

@@ -6,6 +6,8 @@ import 'package:cbor/simple.dart';
 import 'package:tearmusic/api/base_api.dart';
 import 'package:http/http.dart' as http;
 import 'package:tearmusic/exceptionts.dart';
+import 'package:tearmusic/models/batch.dart';
+import 'package:tearmusic/models/library.dart';
 import 'package:tearmusic/models/manual_match.dart';
 import 'package:tearmusic/models/music/album.dart';
 import 'package:tearmusic/models/music/artist.dart';
@@ -235,5 +237,16 @@ class MusicApi {
     );
 
     _reschk(res, "matchManual");
+  }
+
+  Future<BatchLibrary> libraryBatch(LibraryType type, {int limit = 10, int offset = 0}) async {
+    final res = await http.get(
+      Uri.parse("${BaseApi.url}/music/batch-library?limit=$limit&offset=$offset&type=${Uri.encodeComponent(type.name)}"),
+      headers: {"authorization": await base.getToken()},
+    );
+
+    _reschk(res, "libraryBatch");
+
+    return BatchLibrary.decode(jsonDecode(res.body));
   }
 }

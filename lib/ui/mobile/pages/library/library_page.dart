@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:animations/animations.dart';
 import 'package:automatic_animated_list/automatic_animated_list.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';

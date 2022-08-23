@@ -232,7 +232,7 @@ class _LibraryPageState extends State<LibraryPage> {
                               ));
                             },
                             child: const Text("Show All"),
-                          )
+                          ),
                         ],
                       ),
                     ),

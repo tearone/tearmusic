@@ -5,6 +5,7 @@ import 'package:tearmusic/api/base_api.dart';
 import 'package:http/http.dart' as http;
 import 'package:tearmusic/exceptionts.dart';
 import 'package:tearmusic/models/library.dart';
+import 'package:tearmusic/models/player_info.dart';
 import 'package:tearmusic/models/user_info.dart';
 
 class UserApi {
@@ -66,5 +67,42 @@ class UserApi {
         headers: {"authorization": await base.getToken(), "content-type": "application/json"}, body: jsonEncode({"id": id, "type": type.name}));
 
     _reschk(res, "deleteLibrary");
+  }
+
+  // QUEUE STUFF
+
+  Future<PlayerInfo> getPlayerInfo() async {
+    final res = await http.get(
+      Uri.parse("${BaseApi.url}/user/player-info"),
+      headers: {"authorization": await base.getToken()},
+    );
+
+    _reschk(res, "getPlayerInfo");
+
+    return PlayerInfo.decode(jsonDecode(res.body));
+  }
+
+  Future<bool> isPlayerSynced(PlayerInfo playerInfo) async {
+    final res = await http.head(
+      Uri.parse("${BaseApi.url}/user/player-info?version=${playerInfo.version}"),
+      headers: {"authorization": await base.getToken()},
+    );
+
+    _reschk(res, "isPlayerSynced");
+
+    return res.statusCode == 202;
+  }
+
+  Future<bool> syncPlayerOperations(PlayerInfo playerInfo) async {
+    final res = await http.post(
+      Uri.parse("${BaseApi.url}/user/player-info?${playerInfo.version}"),
+      headers: {"authorization": await base.getToken()},
+      body: {"operations": playerInfo.operations},
+    );
+
+    _reschk(res, "syncPlayerOperations");
+
+    // return success or not
+    return res.statusCode == 200;
   }
 }

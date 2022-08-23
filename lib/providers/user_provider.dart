@@ -8,6 +8,7 @@ import 'package:tearmusic/api/user_api.dart';
 import 'package:tearmusic/exceptionts.dart';
 import 'package:tearmusic/models/library.dart';
 import 'package:tearmusic/models/model.dart';
+import 'package:tearmusic/models/player_info.dart';
 import 'package:tearmusic/providers/music_info_provider.dart';
 
 class UserProvider extends ChangeNotifier {
@@ -20,11 +21,19 @@ class UserProvider extends ChangeNotifier {
     _username = _store.get("username");
     _avatar = _store.get("avatar");
     _id = _store.get("id");
+
     try {
       final stLibrary = _store.get("library");
       if (stLibrary != null) library = UserLibrary.decode(jsonDecode(stLibrary));
     } catch (e) {
       log("Library decode error: $e");
+    }
+
+    try {
+      final stPlayerInfo = _store.get("player_info");
+      if (stPlayerInfo != null) playerInfo = PlayerInfo.decode(jsonDecode(stPlayerInfo));
+    } catch (e) {
+      log("Player Info decode error: $e");
     }
 
     String? accessToken = _store.get("access_token");
@@ -50,6 +59,7 @@ class UserProvider extends ChangeNotifier {
   String? _username;
   String? _avatar;
   UserLibrary? library;
+  PlayerInfo playerInfo = PlayerInfo(version: 0);
   String get username => _username ?? "";
   String get avatar => _avatar ?? "";
 
@@ -61,6 +71,7 @@ class UserProvider extends ChangeNotifier {
     _store.delete("access_token");
     _store.delete("refresh_token");
     _store.delete("library");
+    _store.delete("player_info");
 
     final cacheBox = await Hive.openBox("cached_images");
     cacheBox.clear();
@@ -86,11 +97,13 @@ class UserProvider extends ChangeNotifier {
     try {
       final user = await _api.getInfo();
       final lib = await _api.getLibrary();
+      final pinfo = await _api.getPlayerInfo();
 
       _username = user.username;
       _avatar = user.avatar;
       _id = user.id;
       library = lib;
+      playerInfo = pinfo;
       notifyListeners();
 
       _musicInfoProvider.userId = _id ?? "";
@@ -99,6 +112,7 @@ class UserProvider extends ChangeNotifier {
       _store.put("avatar", _avatar);
       _store.put("id", _id);
       _store.put("library", jsonEncode(library!.encode()));
+      _store.put("player_info", jsonEncode(playerInfo.encode()));
     } on AuthException {
       loggedIn = false;
       notifyListeners();
@@ -182,4 +196,89 @@ class UserProvider extends ChangeNotifier {
 
     notifyListeners();
   }
+
+  // QUEUE STUFF
+
+  void _stackPlayerOperation(Map body, {int? newVersion}) {
+    playerInfo.operations.add(body);
+    if (newVersion != null) playerInfo.version = newVersion;
+  }
+
+  void postAdd(String id, {PlayerInfoPostType whereTo = PlayerInfoPostType.normal, fromPrimary = false, int? newVersion}) {
+    switch (whereTo) {
+      case PlayerInfoPostType.primary:
+        playerInfo.primaryQueue.add(id);
+        break;
+      case PlayerInfoPostType.normal:
+        playerInfo.queueHistory.add(QueueHistory(id: id, fromPrimary: fromPrimary));
+        break;
+      case PlayerInfoPostType.history:
+        playerInfo.normalQueue.add(id);
+        break;
+    }
+
+    final body = {"id": id, "where_to": whereTo.name, "from_primary": fromPrimary};
+    _stackPlayerOperation(body, newVersion: newVersion);
+  }
+
+  void postRemove(int index, {PlayerInfoPostType removeFrom = PlayerInfoPostType.normal, int? newVersion}) {
+    switch (removeFrom) {
+      case PlayerInfoPostType.primary:
+        if (checkCorrectIndex(0, index, playerInfo.primaryQueue)) playerInfo.primaryQueue.removeAt(index);
+        break;
+      case PlayerInfoPostType.normal:
+        if (checkCorrectIndex(0, index, playerInfo.normalQueue)) playerInfo.normalQueue.removeAt(index);
+        break;
+      case PlayerInfoPostType.history:
+        if (checkCorrectIndex(0, index, playerInfo.queueHistory)) playerInfo.queueHistory.removeAt(index);
+        break;
+    }
+    final body = {"index": index, "remove_from": removeFrom.name};
+    _stackPlayerOperation(body, newVersion: newVersion);
+  }
+
+  void postReorder(int fromIndex, int toIndex,
+      {PlayerInfoReorderMoveType moveFrom = PlayerInfoReorderMoveType.normal,
+      PlayerInfoReorderMoveType moveTo = PlayerInfoReorderMoveType.normal,
+      int? newVersion}) {
+    String moveId;
+
+    if (moveFrom == PlayerInfoReorderMoveType.primary) {
+      if (checkCorrectIndex(0, fromIndex, playerInfo.primaryQueue)) return;
+
+      moveId = playerInfo.primaryQueue[fromIndex];
+      playerInfo.primaryQueue.removeAt(fromIndex);
+    } else {
+      if (checkCorrectIndex(0, fromIndex, playerInfo.normalQueue)) return;
+
+      moveId = playerInfo.normalQueue[fromIndex];
+      playerInfo.normalQueue.removeAt(fromIndex);
+    }
+
+    if (moveTo == PlayerInfoReorderMoveType.primary) {
+      if (checkCorrectIndex(1, toIndex, playerInfo.primaryQueue)) return;
+
+      playerInfo.primaryQueue.insert(toIndex, moveId);
+    } else {
+      if (checkCorrectIndex(1, toIndex, playerInfo.normalQueue)) return;
+
+      playerInfo.normalQueue.insert(toIndex, moveId);
+    }
+
+    final body = {"from_index": fromIndex, "to_index": toIndex, "move_from": moveFrom, "move_to": moveTo};
+    _stackPlayerOperation(body, newVersion: newVersion);
+  }
+
+  void postOverwrite({int? newVersion}) {
+    final body = {
+      "new_normal_queue": playerInfo.normalQueue,
+      "new_primary_queue": playerInfo.primaryQueue,
+      "new_queue_history": playerInfo.queueHistory
+    };
+    _stackPlayerOperation(body, newVersion: newVersion);
+  }
+}
+
+bool checkCorrectIndex(int type, int index, List list) {
+  return (index < 0 || (type == 0 ? index >= list.length : index > list.length));
 }

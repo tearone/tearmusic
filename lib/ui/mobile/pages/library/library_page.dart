@@ -211,20 +211,26 @@ class _LibraryPageState extends State<LibraryPage> {
                           ),
                           TextButton(
                             onPressed: () {
-                              Navigator.of(context).push(
-                                PageRouteBuilder(
-                                  pageBuilder: (context, primaryAnimation, secondaryAnimation) {
-                                    return FadeThroughTransition(
-                                      fillColor: Theme.of(context).colorScheme.background,
-                                      animation: primaryAnimation,
-                                      secondaryAnimation: secondaryAnimation,
-                                      // child: const LikedSongsScreen(),
-                                    );
+                              Navigator.of(context).push(CupertinoPageRoute(
+                                builder: (context) => ContentListView<MusicTrack>(
+                                  builder: (builder) => Selector<UserProvider, List<String>>(
+                                    selector: (_, p) => p.library?.liked_tracks ?? [],
+                                    builder: builder,
+                                  ),
+                                  itemBuilder: (context, item) => TrackTile(item),
+                                  retriever: () async {
+                                    final items = await context.read<MusicInfoProvider>().libraryBatch(LibraryType.liked_tracks, limit: 50);
+                                    return items.tracks;
                                   },
-                                  transitionDuration: const Duration(milliseconds: 500),
-                                  reverseTransitionDuration: const Duration(milliseconds: 500),
+                                  loadingWidget: const TrackLoadingTile(itemCount: 8),
+                                  title: const Text(
+                                    "Liked Songs",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
                                 ),
-                              );
+                              ));
                             },
                             child: const Text("Show All"),
                           )

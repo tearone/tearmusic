@@ -8,6 +8,7 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:tearmusic/models/music/album.dart';
 import 'package:tearmusic/models/music/artist.dart';
+import 'package:tearmusic/models/music/track.dart';
 import 'package:tearmusic/providers/music_info_provider.dart';
 import 'package:tearmusic/providers/navigator_provider.dart';
 import 'package:tearmusic/providers/theme_provider.dart';
@@ -18,6 +19,8 @@ import 'package:tearmusic/ui/mobile/common/tiles/artist_track_tile.dart';
 import 'package:tearmusic/ui/mobile/common/cached_image.dart';
 import 'package:tearmusic/ui/mobile/common/tm_back_button.dart';
 import 'package:tearmusic/ui/mobile/common/views/album_view/latest_release.dart';
+import 'package:tearmusic/ui/mobile/common/views/content_list_view.dart';
+import 'package:tearmusic/ui/mobile/pages/library/track_loading_tile.dart';
 
 class ArtistView extends StatefulWidget {
   const ArtistView(this.artist, {Key? key}) : super(key: key);
@@ -181,11 +184,38 @@ class _ArtistViewState extends State<ArtistView> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Padding(
-                              padding: EdgeInsets.only(top: 12.0, bottom: 4.0, left: 16.0, right: 8.0),
-                              child: Text(
-                                "Top Songs",
-                                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16.0),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 4.0, left: 16.0, right: 8.0),
+                              child: Row(
+                                children: [
+                                  const Expanded(
+                                    child: Text(
+                                      "Top Songs",
+                                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16.0),
+                                    ),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).push(CupertinoPageRoute(
+                                        builder: (context) => Theme(
+                                          data: theme,
+                                          child: ContentListView<MusicTrack>(
+                                            itemBuilder: (context, item) => ArtistTrackTile(item),
+                                            retriever: () async => details.tracks,
+                                            loadingWidget: const TrackLoadingTile(itemCount: 8),
+                                            title: Text(
+                                              "Top Songs by ${widget.artist.name}",
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ));
+                                    },
+                                    child: const Text("Show All"),
+                                  ),
+                                ],
                               ),
                             ),
                             ...details.tracks.sublist(0, math.min(details.tracks.length, 5)).map((e) => ArtistTrackTile(e)),

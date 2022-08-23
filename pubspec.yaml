@@ -3,7 +3,7 @@ description: Music Player Frontend
 
 publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
-version: 1.0.0+8
+version: 1.0.0+9
 
 environment:
   sdk: ">=2.18.0-271.4.beta <3.0.0"
@@ -44,6 +44,7 @@ dependencies:
   animated_background: ^2.0.0
   automatic_animated_list: ^1.1.0
   shimmer: ^2.0.0
+  wakelock: ^0.6.2
 
 dev_dependencies:
   flutter_test:

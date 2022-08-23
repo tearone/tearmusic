@@ -14,6 +14,7 @@ import 'package:tearmusic/ui/mobile/common/player/lyrics_view/full_text.dart';
 import 'package:tearmusic/ui/mobile/common/player/lyrics_view/subtitle.dart';
 import 'package:tearmusic/ui/mobile/common/player/lyrics_view/rich_sync.dart';
 import 'package:tearmusic/ui/mobile/common/wallpaper.dart';
+import 'package:wakelock/wakelock.dart';
 
 class LyricsView extends StatefulWidget {
   const LyricsView(this.track, {Key? key}) : super(key: key);
@@ -98,10 +99,13 @@ class _LyricsViewState extends State<LyricsView> with SingleTickerProviderStateM
 
     final currentMusic = context.read<CurrentMusicProvider>();
     progressSub = currentMusic.player.positionStream.distinct().listen(progressListener);
+
+    Wakelock.enable();
   }
 
   @override
   void dispose() {
+    Wakelock.disable();
     progressSub.cancel();
     _controller.removeListener(scrollListener);
     _controller.dispose();

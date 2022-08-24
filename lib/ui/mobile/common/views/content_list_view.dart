@@ -1,4 +1,5 @@
 import 'package:automatic_animated_list/automatic_animated_list.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:tearmusic/models/model.dart';
 import 'package:tearmusic/ui/mobile/common/wallpaper.dart';
@@ -78,26 +79,28 @@ class _ContentListViewState<T extends Model> extends State<ContentListView<T>> {
     return Scaffold(
       body: Wallpaper(
         gradient: false,
-        child: CustomScrollView(
-          slivers: [
-            SliverAppBar(
-              floating: false,
-              pinned: true,
-              snap: false,
-              title: widget.title,
-            ),
-            SliverToBoxAdapter(
-              child: widget.builder != null ? widget.builder!(itemBuilder) : itemBuilder(context, null, null),
-            ),
-            const SliverToBoxAdapter(
-              child: SafeArea(
-                top: false,
-                child: SizedBox(
-                  height: 200,
+        child: CupertinoScrollbar(
+          child: CustomScrollView(
+            slivers: [
+              SliverAppBar(
+                floating: false,
+                pinned: true,
+                snap: false,
+                title: widget.title,
+              ),
+              SliverToBoxAdapter(
+                child: widget.builder != null ? widget.builder!(itemBuilder) : itemBuilder(context, null, null),
+              ),
+              const SliverToBoxAdapter(
+                child: SafeArea(
+                  top: false,
+                  child: SizedBox(
+                    height: 200,
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

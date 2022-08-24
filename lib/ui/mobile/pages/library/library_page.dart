@@ -68,455 +68,375 @@ class _LibraryPageState extends State<LibraryPage> {
   @override
   Widget build(BuildContext context) {
     return Wallpaper(
-      child: CustomScrollView(
+      child: CupertinoScrollbar(
         controller: _scrollController,
-        slivers: [
-          SliverAppBar(
-            pinned: true,
-            snap: false,
-            floating: false,
-            centerTitle: false,
-            backgroundColor: viewScrolledTitle
-                ? ElevationOverlay.applySurfaceTint(Theme.of(context).colorScheme.surface, Theme.of(context).colorScheme.surfaceTint, 2.0)
-                : Colors.transparent,
-            surfaceTintColor: Colors.transparent,
-            shadowColor: viewScrolledShadow ? Colors.black : Colors.transparent,
-            forceElevated: viewScrolledTitle,
-            elevation: 0,
-            title: const Text(
-              "Your Library",
-              style: TextStyle(fontWeight: FontWeight.w500),
-            ),
-            actions: const [
-              Center(
-                child: Padding(
-                  padding: EdgeInsets.only(right: 32.0),
-                  child: ProfileButton(),
-                ),
+        child: CustomScrollView(
+          controller: _scrollController,
+          slivers: [
+            SliverAppBar(
+              pinned: true,
+              snap: false,
+              floating: false,
+              centerTitle: false,
+              backgroundColor: viewScrolledTitle
+                  ? ElevationOverlay.applySurfaceTint(Theme.of(context).colorScheme.surface, Theme.of(context).colorScheme.surfaceTint, 2.0)
+                  : Colors.transparent,
+              surfaceTintColor: Colors.transparent,
+              shadowColor: viewScrolledShadow ? Colors.black : Colors.transparent,
+              forceElevated: viewScrolledTitle,
+              elevation: 0,
+              title: const Text(
+                "Your Library",
+                style: TextStyle(fontWeight: FontWeight.w500),
               ),
-            ],
-          ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-              child: Card(
-                elevation: 2.0,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 16.0, right: 8.0),
-                      child: Row(
-                        children: [
-                          const Expanded(
-                            child: Text(
-                              "Recently played",
-                              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16.0),
-                            ),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).push(CupertinoPageRoute(
-                                builder: (context) => ContentListView<BatchTrackHistory>(
-                                  builder: (builder) => Selector<UserProvider, List<UserTrackHistory>>(
-                                    selector: (_, p) => p.library?.track_history ?? [],
-                                    builder: builder,
-                                  ),
-                                  itemBuilder: (context, item) => TrackTile(item.track),
-                                  retriever: () async {
-                                    final items = await context.read<MusicInfoProvider>().libraryBatch(LibraryType.track_history, limit: 50);
-                                    return items.track_history;
-                                  },
-                                  loadingWidget: const TrackLoadingTile(itemCount: 8),
-                                  title: const Text(
-                                    "Recently Played",
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ),
-                              ));
-                            },
-                            child: const Text("Show All"),
-                          )
-                        ],
-                      ),
-                    ),
-                    Selector<UserProvider, List<UserTrackHistory>>(
-                      selector: (_, user) => user.library?.track_history ?? [],
-                      builder: ((context, value, child) {
-                        if (value.isEmpty) {
-                          return const Padding(
-                            padding: EdgeInsets.only(top: 6.0, bottom: 24.0),
-                            child: Center(
-                              child: Text("Start listening to view recently played"),
-                            ),
-                          );
-                        }
-
-                        return FutureBuilder(
-                          future: context.read<MusicInfoProvider>().libraryBatch(LibraryType.track_history, limit: 3),
-                          builder: ((context, snapshot) {
-                            if (!snapshot.hasData) {
-                              return const TrackLoadingTile();
-                            }
-
-                            return AutomaticAnimatedList(
-                              physics: const NeverScrollableScrollPhysics(),
-                              shrinkWrap: true,
-                              items: snapshot.data!.track_history,
-                              keyingFunction: (item) => Key(item.track.id),
-                              itemBuilder: (BuildContext context, BatchTrackHistory item, Animation<double> animation) {
-                                return FadeTransition(
-                                  key: Key(item.track.id),
-                                  opacity: animation,
-                                  child: SizeTransition(
-                                    sizeFactor: CurvedAnimation(
-                                      parent: animation,
-                                      curve: Curves.easeOut,
-                                      reverseCurve: Curves.easeIn,
-                                    ),
-                                    child: TrackTile(item.track),
-                                  ),
-                                );
-                              },
-                            );
-                          }),
-                        );
-                      }),
-                    ),
-                  ],
+              actions: const [
+                Center(
+                  child: Padding(
+                    padding: EdgeInsets.only(right: 32.0),
+                    child: ProfileButton(),
+                  ),
                 ),
-              ),
+              ],
             ),
-          ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-              child: Card(
-                elevation: 2.0,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 16.0, right: 8.0),
-                      child: Row(
-                        children: [
-                          const Expanded(
-                            child: Text(
-                              "Liked Songs",
-                              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16.0),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                child: Card(
+                  elevation: 2.0,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 16.0, right: 8.0),
+                        child: Row(
+                          children: [
+                            const Expanded(
+                              child: Text(
+                                "Recently played",
+                                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16.0),
+                              ),
                             ),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).push(CupertinoPageRoute(
-                                builder: (context) => ContentListView<MusicTrack>(
-                                  builder: (builder) => Selector<UserProvider, List<String>>(
-                                    selector: (_, p) => p.library?.liked_tracks ?? [],
-                                    builder: builder,
-                                  ),
-                                  itemBuilder: (context, item) => TrackTile(item),
-                                  retriever: () async {
-                                    final items = await context.read<MusicInfoProvider>().libraryBatch(LibraryType.liked_tracks, limit: 50);
-                                    return items.tracks;
-                                  },
-                                  loadingWidget: const TrackLoadingTile(itemCount: 8),
-                                  title: const Text(
-                                    "Liked Songs",
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w500,
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).push(CupertinoPageRoute(
+                                  builder: (context) => ContentListView<BatchTrackHistory>(
+                                    builder: (builder) => Selector<UserProvider, List<UserTrackHistory>>(
+                                      selector: (_, p) => p.library?.track_history ?? [],
+                                      builder: builder,
                                     ),
-                                  ),
-                                ),
-                              ));
-                            },
-                            child: const Text("Show All"),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Selector<UserProvider, List<String>>(
-                      selector: (_, user) => user.library?.liked_tracks ?? [],
-                      builder: ((context, value, child) {
-                        if (value.isEmpty) {
-                          return const Padding(
-                            padding: EdgeInsets.only(top: 6.0, bottom: 24.0),
-                            child: Center(
-                              child: Text("You have no liked songs"),
-                            ),
-                          );
-                        }
-
-                        return FutureBuilder(
-                          future: context.read<MusicInfoProvider>().libraryBatch(LibraryType.liked_tracks, limit: 3),
-                          builder: ((context, snapshot) {
-                            if (!snapshot.hasData) {
-                              return const TrackLoadingTile();
-                            }
-
-                            return AutomaticAnimatedList(
-                              physics: const NeverScrollableScrollPhysics(),
-                              shrinkWrap: true,
-                              items: snapshot.data!.tracks,
-                              keyingFunction: (item) => Key(item.id),
-                              itemBuilder: (BuildContext context, MusicTrack item, Animation<double> animation) {
-                                return FadeTransition(
-                                  key: Key(item.id),
-                                  opacity: animation,
-                                  child: SizeTransition(
-                                    sizeFactor: CurvedAnimation(
-                                      parent: animation,
-                                      curve: Curves.easeOut,
-                                      reverseCurve: Curves.easeIn,
-                                    ),
-                                    child: TrackTile(item),
-                                  ),
-                                );
-                              },
-                            );
-                          }),
-                        );
-                      }),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-              child: Card(
-                elevation: 2.0,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 16.0, right: 8.0),
-                      child: Row(
-                        children: [
-                          const Expanded(
-                            child: Text(
-                              "Liked Playlists",
-                              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16.0),
-                            ),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).push(CupertinoPageRoute(
-                                builder: (context) => ContentListView<MusicPlaylist>(
-                                  itemBuilder: (context, item) => SearchPlaylistTile(item),
-                                  retriever: () async {
-                                    final items = await context.read<MusicInfoProvider>().libraryBatch(LibraryType.liked_playlists, limit: 50);
-                                    return items.playlists;
-                                  },
-                                  loadingWidget: const PlaylistLoadingTile(itemCount: 8),
-                                  title: const Text(
-                                    "Liked Playlists",
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ),
-                              ));
-                            },
-                            child: const Text("Show All"),
-                          )
-                        ],
-                      ),
-                    ),
-                    Selector<UserProvider, List<String>>(
-                      selector: (_, user) => user.library?.liked_playlists ?? [],
-                      builder: ((context, value, child) {
-                        if (value.isEmpty) {
-                          return const Padding(
-                            padding: EdgeInsets.only(top: 6.0, bottom: 24.0),
-                            child: Center(
-                              child: Text("You have no liked playlists"),
-                            ),
-                          );
-                        }
-
-                        return FutureBuilder(
-                          future: context.read<MusicInfoProvider>().libraryBatch(LibraryType.liked_playlists, limit: 3),
-                          builder: ((context, snapshot) {
-                            if (!snapshot.hasData) {
-                              return const PlaylistLoadingTile();
-                            }
-
-                            return AutomaticAnimatedList(
-                              physics: const NeverScrollableScrollPhysics(),
-                              shrinkWrap: true,
-                              items: snapshot.data!.playlists,
-                              keyingFunction: (item) => Key(item.id),
-                              itemBuilder: (BuildContext context, MusicPlaylist item, Animation<double> animation) {
-                                return FadeTransition(
-                                  key: Key(item.id),
-                                  opacity: animation,
-                                  child: SizeTransition(
-                                    sizeFactor: CurvedAnimation(
-                                      parent: animation,
-                                      curve: Curves.easeOut,
-                                      reverseCurve: Curves.easeIn,
-                                    ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(right: 12.0),
-                                      child: SearchPlaylistTile(
-                                        item,
+                                    itemBuilder: (context, item) => TrackTile(item.track),
+                                    retriever: () async {
+                                      final items = await context.read<MusicInfoProvider>().libraryBatch(LibraryType.track_history, limit: 50);
+                                      return items.track_history;
+                                    },
+                                    loadingWidget: const TrackLoadingTile(itemCount: 8),
+                                    title: const Text(
+                                      "Recently Played",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w500,
                                       ),
                                     ),
                                   ),
-                                );
+                                ));
                               },
+                              child: const Text("Show All"),
+                            )
+                          ],
+                        ),
+                      ),
+                      Selector<UserProvider, List<UserTrackHistory>>(
+                        selector: (_, user) => user.library?.track_history ?? [],
+                        builder: ((context, value, child) {
+                          if (value.isEmpty) {
+                            return const Padding(
+                              padding: EdgeInsets.only(top: 6.0, bottom: 24.0),
+                              child: Center(
+                                child: Text("Start listening to view recently played"),
+                              ),
                             );
-                          }),
-                        );
-                      }),
-                    ),
-                  ],
+                          }
+
+                          return FutureBuilder(
+                            future: context.read<MusicInfoProvider>().libraryBatch(LibraryType.track_history, limit: 3),
+                            builder: ((context, snapshot) {
+                              if (!snapshot.hasData) {
+                                return const TrackLoadingTile();
+                              }
+
+                              return AutomaticAnimatedList(
+                                physics: const NeverScrollableScrollPhysics(),
+                                shrinkWrap: true,
+                                items: snapshot.data!.track_history,
+                                keyingFunction: (item) => Key(item.track.id),
+                                itemBuilder: (BuildContext context, BatchTrackHistory item, Animation<double> animation) {
+                                  return FadeTransition(
+                                    key: Key(item.track.id),
+                                    opacity: animation,
+                                    child: SizeTransition(
+                                      sizeFactor: CurvedAnimation(
+                                        parent: animation,
+                                        curve: Curves.easeOut,
+                                        reverseCurve: Curves.easeIn,
+                                      ),
+                                      child: TrackTile(item.track),
+                                    ),
+                                  );
+                                },
+                              );
+                            }),
+                          );
+                        }),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.only(top: 12.0, bottom: 12.0, left: 28.0, right: 8.0),
-                    child: Text(
-                      "Liked Artists",
-                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16.0),
-                    ),
-                  ),
-                  Selector<UserProvider, List<String>>(
-                    selector: (_, user) => user.library?.liked_artists ?? [],
-                    builder: ((context, value, child) {
-                      if (value.isEmpty) {
-                        return const Padding(
-                          padding: EdgeInsets.only(top: 6.0, bottom: 24.0),
-                          child: Center(
-                            child: Text("You have no liked artist"),
-                          ),
-                        );
-                      }
-
-                      return FutureBuilder(
-                        future: context.read<MusicInfoProvider>().libraryBatch(LibraryType.liked_artists, limit: 3),
-                        builder: ((context, snapshot) {
-                          if (!snapshot.hasData) {
-                            return const SizedBox(height: 150, child: ArtistLoadingTile());
-                          }
-
-                          return SizedBox(
-                            height: 150,
-                            child: AutomaticAnimatedList(
-                              scrollDirection: Axis.horizontal,
-                              items: snapshot.data!.artists,
-                              keyingFunction: (item) => Key(item.id),
-                              itemBuilder: (BuildContext context, MusicArtist item, Animation<double> animation) {
-                                List<Widget> resRow = [];
-
-                                resRow.add(Padding(
-                                  padding: const EdgeInsets.only(right: 12.0),
-                                  child: ArtistArtistTile(
-                                    item,
-                                    then: () => context.read<ThemeProvider>().resetTheme(),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                child: Card(
+                  elevation: 2.0,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 16.0, right: 8.0),
+                        child: Row(
+                          children: [
+                            const Expanded(
+                              child: Text(
+                                "Liked Songs",
+                                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16.0),
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).push(CupertinoPageRoute(
+                                  builder: (context) => ContentListView<MusicTrack>(
+                                    builder: (builder) => Selector<UserProvider, List<String>>(
+                                      selector: (_, p) => p.library?.liked_tracks ?? [],
+                                      builder: builder,
+                                    ),
+                                    itemBuilder: (context, item) => TrackTile(item),
+                                    retriever: () async {
+                                      final items = await context.read<MusicInfoProvider>().libraryBatch(LibraryType.liked_tracks, limit: 50);
+                                      return items.tracks;
+                                    },
+                                    loadingWidget: const TrackLoadingTile(itemCount: 8),
+                                    title: const Text(
+                                      "Liked Songs",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
                                   ),
                                 ));
-
-                                if (snapshot.data!.artists.first == item) {
-                                  resRow = [const SizedBox(width: 24), ...resRow];
-                                } else if (snapshot.data!.artists.last == item) {
-                                  resRow = [...resRow, const SizedBox(width: 24)];
-                                }
-
-                                return FadeTransition(
-                                  key: Key(item.id),
-                                  opacity: animation,
-                                  child: SizeTransition(
-                                    sizeFactor: CurvedAnimation(
-                                      parent: animation,
-                                      curve: Curves.easeOut,
-                                      reverseCurve: Curves.easeIn,
-                                    ),
-                                    child: Row(
-                                      children: resRow,
-                                    ),
-                                  ),
-                                );
                               },
+                              child: const Text("Show All"),
                             ),
+                          ],
+                        ),
+                      ),
+                      Selector<UserProvider, List<String>>(
+                        selector: (_, user) => user.library?.liked_tracks ?? [],
+                        builder: ((context, value, child) {
+                          if (value.isEmpty) {
+                            return const Padding(
+                              padding: EdgeInsets.only(top: 6.0, bottom: 24.0),
+                              child: Center(
+                                child: Text("You have no liked songs"),
+                              ),
+                            );
+                          }
+
+                          return FutureBuilder(
+                            future: context.read<MusicInfoProvider>().libraryBatch(LibraryType.liked_tracks, limit: 3),
+                            builder: ((context, snapshot) {
+                              if (!snapshot.hasData) {
+                                return const TrackLoadingTile();
+                              }
+
+                              return AutomaticAnimatedList(
+                                physics: const NeverScrollableScrollPhysics(),
+                                shrinkWrap: true,
+                                items: snapshot.data!.tracks,
+                                keyingFunction: (item) => Key(item.id),
+                                itemBuilder: (BuildContext context, MusicTrack item, Animation<double> animation) {
+                                  return FadeTransition(
+                                    key: Key(item.id),
+                                    opacity: animation,
+                                    child: SizeTransition(
+                                      sizeFactor: CurvedAnimation(
+                                        parent: animation,
+                                        curve: Curves.easeOut,
+                                        reverseCurve: Curves.easeIn,
+                                      ),
+                                      child: TrackTile(item),
+                                    ),
+                                  );
+                                },
+                              );
+                            }),
                           );
                         }),
-                      );
-                    }),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
-          ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.only(top: 6.0, bottom: 16.0, left: 28.0, right: 8.0),
-                    child: Text(
-                      "Liked Albums",
-                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16.0),
-                    ),
-                  ),
-                  Selector<UserProvider, List<String>>(
-                    selector: (_, user) => user.library?.liked_albums ?? [],
-                    builder: ((context, value, child) {
-                      if (value.isEmpty) {
-                        return const Padding(
-                          padding: EdgeInsets.only(top: 6.0, bottom: 24.0),
-                          child: Center(
-                            child: Text("You have no liked albums"),
-                          ),
-                        );
-                      }
-
-                      return FutureBuilder(
-                        future: context.read<MusicInfoProvider>().libraryBatch(LibraryType.liked_albums, limit: 5),
-                        builder: ((context, snapshot) {
-                          if (!snapshot.hasData) {
-                            return const SizedBox(height: 200, child: AlbumLoadingTile());
-                          }
-
-                          return SizedBox(
-                            height: 200,
-                            child: AutomaticAnimatedList(
-                              scrollDirection: Axis.horizontal,
-                              items: snapshot.data!.albums,
-                              keyingFunction: (item) => Key(item.id),
-                              itemBuilder: (BuildContext context, MusicAlbum item, Animation<double> animation) {
-                                List<Widget> resRow = [];
-
-                                resRow.add(Padding(
-                                  padding: const EdgeInsets.only(right: 12.0),
-                                  child: ArtistAlbumTile.small(
-                                    item,
-                                    then: () => context.read<ThemeProvider>().resetTheme(),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                child: Card(
+                  elevation: 2.0,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 16.0, right: 8.0),
+                        child: Row(
+                          children: [
+                            const Expanded(
+                              child: Text(
+                                "Liked Playlists",
+                                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16.0),
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).push(CupertinoPageRoute(
+                                  builder: (context) => ContentListView<MusicPlaylist>(
+                                    itemBuilder: (context, item) => SearchPlaylistTile(item),
+                                    retriever: () async {
+                                      final items = await context.read<MusicInfoProvider>().libraryBatch(LibraryType.liked_playlists, limit: 50);
+                                      return items.playlists;
+                                    },
+                                    loadingWidget: const PlaylistLoadingTile(itemCount: 8),
+                                    title: const Text(
+                                      "Liked Playlists",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
                                   ),
                                 ));
+                              },
+                              child: const Text("Show All"),
+                            )
+                          ],
+                        ),
+                      ),
+                      Selector<UserProvider, List<String>>(
+                        selector: (_, user) => user.library?.liked_playlists ?? [],
+                        builder: ((context, value, child) {
+                          if (value.isEmpty) {
+                            return const Padding(
+                              padding: EdgeInsets.only(top: 6.0, bottom: 24.0),
+                              child: Center(
+                                child: Text("You have no liked playlists"),
+                              ),
+                            );
+                          }
 
-                                if (snapshot.data!.albums.first == item) {
-                                  resRow = [const SizedBox(width: 26), ...resRow];
-                                } else if (snapshot.data!.albums.last == item) {
-                                  resRow = [...resRow, const SizedBox(width: 26)];
-                                }
+                          return FutureBuilder(
+                            future: context.read<MusicInfoProvider>().libraryBatch(LibraryType.liked_playlists, limit: 3),
+                            builder: ((context, snapshot) {
+                              if (!snapshot.hasData) {
+                                return const PlaylistLoadingTile();
+                              }
 
-                                return Align(
-                                  alignment: Alignment.topCenter,
-                                  child: FadeTransition(
+                              return AutomaticAnimatedList(
+                                physics: const NeverScrollableScrollPhysics(),
+                                shrinkWrap: true,
+                                items: snapshot.data!.playlists,
+                                keyingFunction: (item) => Key(item.id),
+                                itemBuilder: (BuildContext context, MusicPlaylist item, Animation<double> animation) {
+                                  return FadeTransition(
+                                    key: Key(item.id),
+                                    opacity: animation,
+                                    child: SizeTransition(
+                                      sizeFactor: CurvedAnimation(
+                                        parent: animation,
+                                        curve: Curves.easeOut,
+                                        reverseCurve: Curves.easeIn,
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(right: 12.0),
+                                        child: SearchPlaylistTile(
+                                          item,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              );
+                            }),
+                          );
+                        }),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.only(top: 12.0, bottom: 12.0, left: 28.0, right: 8.0),
+                      child: Text(
+                        "Liked Artists",
+                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16.0),
+                      ),
+                    ),
+                    Selector<UserProvider, List<String>>(
+                      selector: (_, user) => user.library?.liked_artists ?? [],
+                      builder: ((context, value, child) {
+                        if (value.isEmpty) {
+                          return const Padding(
+                            padding: EdgeInsets.only(top: 6.0, bottom: 24.0),
+                            child: Center(
+                              child: Text("You have no liked artist"),
+                            ),
+                          );
+                        }
+
+                        return FutureBuilder(
+                          future: context.read<MusicInfoProvider>().libraryBatch(LibraryType.liked_artists, limit: 3),
+                          builder: ((context, snapshot) {
+                            if (!snapshot.hasData) {
+                              return const SizedBox(height: 150, child: ArtistLoadingTile());
+                            }
+
+                            return SizedBox(
+                              height: 150,
+                              child: AutomaticAnimatedList(
+                                scrollDirection: Axis.horizontal,
+                                items: snapshot.data!.artists,
+                                keyingFunction: (item) => Key(item.id),
+                                itemBuilder: (BuildContext context, MusicArtist item, Animation<double> animation) {
+                                  List<Widget> resRow = [];
+
+                                  resRow.add(Padding(
+                                    padding: const EdgeInsets.only(right: 12.0),
+                                    child: ArtistArtistTile(
+                                      item,
+                                      then: () => context.read<ThemeProvider>().resetTheme(),
+                                    ),
+                                  ));
+
+                                  if (snapshot.data!.artists.first == item) {
+                                    resRow = [const SizedBox(width: 24), ...resRow];
+                                  } else if (snapshot.data!.artists.last == item) {
+                                    resRow = [...resRow, const SizedBox(width: 24)];
+                                  }
+
+                                  return FadeTransition(
                                     key: Key(item.id),
                                     opacity: animation,
                                     child: SizeTransition(
@@ -529,28 +449,111 @@ class _LibraryPageState extends State<LibraryPage> {
                                         children: resRow,
                                       ),
                                     ),
-                                  ),
-                                );
-                              },
+                                  );
+                                },
+                              ),
+                            );
+                          }),
+                        );
+                      }),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.only(top: 6.0, bottom: 16.0, left: 28.0, right: 8.0),
+                      child: Text(
+                        "Liked Albums",
+                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16.0),
+                      ),
+                    ),
+                    Selector<UserProvider, List<String>>(
+                      selector: (_, user) => user.library?.liked_albums ?? [],
+                      builder: ((context, value, child) {
+                        if (value.isEmpty) {
+                          return const Padding(
+                            padding: EdgeInsets.only(top: 6.0, bottom: 24.0),
+                            child: Center(
+                              child: Text("You have no liked albums"),
                             ),
                           );
-                        }),
-                      );
-                    }),
-                  ),
-                ],
+                        }
+
+                        return FutureBuilder(
+                          future: context.read<MusicInfoProvider>().libraryBatch(LibraryType.liked_albums, limit: 5),
+                          builder: ((context, snapshot) {
+                            if (!snapshot.hasData) {
+                              return const SizedBox(height: 200, child: AlbumLoadingTile());
+                            }
+
+                            return SizedBox(
+                              height: 200,
+                              child: AutomaticAnimatedList(
+                                scrollDirection: Axis.horizontal,
+                                items: snapshot.data!.albums,
+                                keyingFunction: (item) => Key(item.id),
+                                itemBuilder: (BuildContext context, MusicAlbum item, Animation<double> animation) {
+                                  List<Widget> resRow = [];
+
+                                  resRow.add(Padding(
+                                    padding: const EdgeInsets.only(right: 12.0),
+                                    child: ArtistAlbumTile.small(
+                                      item,
+                                      then: () => context.read<ThemeProvider>().resetTheme(),
+                                    ),
+                                  ));
+
+                                  if (snapshot.data!.albums.first == item) {
+                                    resRow = [const SizedBox(width: 26), ...resRow];
+                                  } else if (snapshot.data!.albums.last == item) {
+                                    resRow = [...resRow, const SizedBox(width: 26)];
+                                  }
+
+                                  return Align(
+                                    alignment: Alignment.topCenter,
+                                    child: FadeTransition(
+                                      key: Key(item.id),
+                                      opacity: animation,
+                                      child: SizeTransition(
+                                        sizeFactor: CurvedAnimation(
+                                          parent: animation,
+                                          curve: Curves.easeOut,
+                                          reverseCurve: Curves.easeIn,
+                                        ),
+                                        child: Row(
+                                          children: resRow,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            );
+                          }),
+                        );
+                      }),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-          const SliverToBoxAdapter(
-            child: SafeArea(
-              top: false,
-              child: SizedBox(
-                height: 200,
+            const SliverToBoxAdapter(
+              child: SafeArea(
+                top: false,
+                child: SizedBox(
+                  height: 200,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

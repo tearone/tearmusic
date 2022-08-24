@@ -1,4 +1,5 @@
 import 'package:animations/animations.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tearmusic/models/music/album.dart';
@@ -75,15 +76,17 @@ class _HomePageState extends State<HomePage> {
                               alignment: Alignment.topCenter,
                               child: TrackLoadingTile(itemCount: 8),
                             )
-                          : ListView.builder(
-                              itemCount: snapshot.data!.length + 1,
-                              itemBuilder: (context, index) {
-                                if (index == snapshot.data!.length) {
-                                  return const SizedBox(height: 200);
-                                }
+                          : CupertinoScrollbar(
+                              child: ListView.builder(
+                                itemCount: snapshot.data!.length + 1,
+                                itemBuilder: (context, index) {
+                                  if (index == snapshot.data!.length) {
+                                    return const SizedBox(height: 200);
+                                  }
 
-                                return SearchAlbumTile(snapshot.data![index]);
-                              },
+                                  return SearchAlbumTile(snapshot.data![index]);
+                                },
+                              ),
                             ),
                     );
                   },

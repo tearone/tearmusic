@@ -128,46 +128,61 @@ class _NavigationScreenState extends State<NavigationScreen> with SingleTickerPr
           child: Stack(
             alignment: Alignment.bottomCenter,
             children: [
-              IndexedStack(
-                index: _selected.index,
-                children: [
-                  Navigator(
-                    key: _homeNavigatorState,
-                    onGenerateRoute: (_) {
-                      return PageRouteBuilder(
-                        pageBuilder: (context, animation, secondaryAnimation) {
-                          context.read<NavigatorProvider>().setState(MobileRoute.home, Navigator.of(context));
-                          context.read<ThemeProvider>().setState(MobileRoute.home);
-                          return homePage;
-                        },
-                      );
-                    },
-                  ),
-                  Navigator(
-                    key: _searchNavigatorState,
-                    onGenerateRoute: (_) {
-                      return PageRouteBuilder(
-                        pageBuilder: (context, animation, secondaryAnimation) {
-                          context.read<NavigatorProvider>().setState(MobileRoute.search, Navigator.of(context));
-                          context.read<ThemeProvider>().setState(MobileRoute.search);
-                          return searchPage;
-                        },
-                      );
-                    },
-                  ),
-                  Navigator(
-                    key: _libraryNavigatorState,
-                    onGenerateRoute: (_) {
-                      return PageRouteBuilder(
-                        pageBuilder: (context, animation, secondaryAnimation) {
-                          context.read<NavigatorProvider>().setState(MobileRoute.library, Navigator.of(context));
-                          context.read<ThemeProvider>().setState(MobileRoute.library);
-                          return libraryPage;
-                        },
-                      );
-                    },
-                  ),
-                ],
+              AnimatedBuilder(
+                animation: animation,
+                builder: (context, child) {
+                  return SizedBox(
+                    height: MediaQuery.of(context).size.height - ((1 - (animation.value).clamp(0.0, 1.0)) * (80.0 + (bottom ?? 0))),
+                    child: Transform.scale(
+                      scale: (animation.value.clamp(0.0, 1.0) + 1) / 20 + 0.95,
+                      child: Transform.translate(
+                        offset: Offset(0, ((80.0 + (bottom ?? 0)) * 0.8) * (animation.value).clamp(0.0, 1.0) - (80.0 + (bottom ?? 0))),
+                        child: child,
+                      ),
+                    ),
+                  );
+                },
+                child: IndexedStack(
+                  index: _selected.index,
+                  children: [
+                    Navigator(
+                      key: _homeNavigatorState,
+                      onGenerateRoute: (_) {
+                        return PageRouteBuilder(
+                          pageBuilder: (context, animation, secondaryAnimation) {
+                            context.read<NavigatorProvider>().setState(MobileRoute.home, Navigator.of(context));
+                            context.read<ThemeProvider>().setState(MobileRoute.home);
+                            return homePage;
+                          },
+                        );
+                      },
+                    ),
+                    Navigator(
+                      key: _searchNavigatorState,
+                      onGenerateRoute: (_) {
+                        return PageRouteBuilder(
+                          pageBuilder: (context, animation, secondaryAnimation) {
+                            context.read<NavigatorProvider>().setState(MobileRoute.search, Navigator.of(context));
+                            context.read<ThemeProvider>().setState(MobileRoute.search);
+                            return searchPage;
+                          },
+                        );
+                      },
+                    ),
+                    Navigator(
+                      key: _libraryNavigatorState,
+                      onGenerateRoute: (_) {
+                        return PageRouteBuilder(
+                          pageBuilder: (context, animation, secondaryAnimation) {
+                            context.read<NavigatorProvider>().setState(MobileRoute.library, Navigator.of(context));
+                            context.read<ThemeProvider>().setState(MobileRoute.library);
+                            return libraryPage;
+                          },
+                        );
+                      },
+                    ),
+                  ],
+                ),
               ),
 
               AnimatedTheme(
@@ -176,7 +191,7 @@ class _NavigationScreenState extends State<NavigationScreen> with SingleTickerPr
                   animation: animation,
                   builder: (context, child) {
                     return Transform.translate(
-                      offset: Offset(0, (animation.value * 120).clamp(0, 120)),
+                      offset: Offset(0, (animation.value * (80.0 + (bottom ?? 0))).clamp(0, 120)),
                       child: child,
                     );
                   },

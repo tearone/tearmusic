@@ -9,6 +9,7 @@ import 'package:tearmusic/providers/theme_provider.dart';
 import 'package:tearmusic/providers/user_provider.dart';
 import 'package:tearmusic/providers/will_pop_provider.dart';
 import 'package:tearmusic/ui/mobile/common/player/player.dart';
+import 'package:tearmusic/ui/mobile/common/theme_switcher/host.dart';
 import 'package:tearmusic/ui/mobile/common/wallpaper.dart';
 import 'package:tearmusic/ui/mobile/pages/home/home_page.dart';
 import 'package:tearmusic/ui/mobile/pages/library/library_page.dart';
@@ -122,146 +123,148 @@ class _NavigationScreenState extends State<NavigationScreen> with SingleTickerPr
           child: child!,
         );
       },
-      child: Scaffold(
-        resizeToAvoidBottomInset: false,
-        body: Material(
-          child: Stack(
-            alignment: Alignment.bottomCenter,
-            children: [
-              IndexedStack(
-                index: _selected.index,
-                children: [
-                  Navigator(
-                    key: _homeNavigatorState,
-                    onGenerateRoute: (_) {
-                      return PageRouteBuilder(
-                        pageBuilder: (context, animation, secondaryAnimation) {
-                          context.read<NavigatorProvider>().setState(MobileRoute.home, Navigator.of(context));
-                          context.read<ThemeProvider>().setState(MobileRoute.home);
-                          return homePage;
-                        },
-                      );
-                    },
-                  ),
-                  Navigator(
-                    key: _searchNavigatorState,
-                    onGenerateRoute: (_) {
-                      return PageRouteBuilder(
-                        pageBuilder: (context, animation, secondaryAnimation) {
-                          context.read<NavigatorProvider>().setState(MobileRoute.search, Navigator.of(context));
-                          context.read<ThemeProvider>().setState(MobileRoute.search);
-                          return searchPage;
-                        },
-                      );
-                    },
-                  ),
-                  Navigator(
-                    key: _libraryNavigatorState,
-                    onGenerateRoute: (_) {
-                      return PageRouteBuilder(
-                        pageBuilder: (context, animation, secondaryAnimation) {
-                          context.read<NavigatorProvider>().setState(MobileRoute.library, Navigator.of(context));
-                          context.read<ThemeProvider>().setState(MobileRoute.library);
-                          return libraryPage;
-                        },
-                      );
-                    },
-                  ),
-                ],
-              ),
-
-              AnimatedTheme(
-                data: context.select<ThemeProvider, ThemeData>((e) => e.navigationTheme),
-                child: AnimatedBuilder(
-                  animation: animation,
-                  builder: (context, child) {
-                    return Transform.translate(
-                      offset: Offset(0, (animation.value * 120).clamp(0, 120)),
-                      child: child,
-                    );
-                  },
-                  child: MediaQuery(
-                    data: MediaQueryData(padding: EdgeInsets.only(bottom: bottom ?? 0)),
-                    child: NavigationBar(
-                      selectedIndex: _selected.index,
-                      onDestinationSelected: (value) {
-                        if (value == _selected.index) return;
-                        setState(() => _selected = MobileRoute.values[value]);
-                        // _navigatorState.currentState?.pushNamedAndRemoveUntil(MobileRoutes.values[value].name, (route) => false);
-                        context.read<NavigatorProvider>().restoreState(_selected, notify: true);
-                        context.read<ThemeProvider>().restoreState(_selected);
+      child: ThemeSwitcherHost(
+        builder: (context) => Scaffold(
+          resizeToAvoidBottomInset: false,
+          body: Material(
+            child: Stack(
+              alignment: Alignment.bottomCenter,
+              children: [
+                IndexedStack(
+                  index: _selected.index,
+                  children: [
+                    Navigator(
+                      key: _homeNavigatorState,
+                      onGenerateRoute: (_) {
+                        return PageRouteBuilder(
+                          pageBuilder: (context, animation, secondaryAnimation) {
+                            context.read<NavigatorProvider>().setState(MobileRoute.home, Navigator.of(context));
+                            context.read<ThemeProvider>().setState(MobileRoute.home);
+                            return homePage;
+                          },
+                        );
                       },
-                      destinations: const [
-                        NavigationDestination(
-                          label: "Home",
-                          icon: Icon(Icons.home_outlined),
-                          selectedIcon: Icon(Icons.home_filled),
-                        ),
-                        NavigationDestination(
-                          label: "Search",
-                          icon: Icon(Icons.search_outlined),
-                        ),
-                        NavigationDestination(
-                          label: "Library",
-                          icon: Icon(Icons.library_music_outlined),
-                          selectedIcon: Icon(Icons.library_music),
-                        ),
-                      ],
+                    ),
+                    Navigator(
+                      key: _searchNavigatorState,
+                      onGenerateRoute: (_) {
+                        return PageRouteBuilder(
+                          pageBuilder: (context, animation, secondaryAnimation) {
+                            context.read<NavigatorProvider>().setState(MobileRoute.search, Navigator.of(context));
+                            context.read<ThemeProvider>().setState(MobileRoute.search);
+                            return searchPage;
+                          },
+                        );
+                      },
+                    ),
+                    Navigator(
+                      key: _libraryNavigatorState,
+                      onGenerateRoute: (_) {
+                        return PageRouteBuilder(
+                          pageBuilder: (context, animation, secondaryAnimation) {
+                            context.read<NavigatorProvider>().setState(MobileRoute.library, Navigator.of(context));
+                            context.read<ThemeProvider>().setState(MobileRoute.library);
+                            return libraryPage;
+                          },
+                        );
+                      },
+                    ),
+                  ],
+                ),
+
+                AnimatedTheme(
+                  data: context.select<ThemeProvider, ThemeData>((e) => e.navigationTheme),
+                  child: AnimatedBuilder(
+                    animation: animation,
+                    builder: (context, child) {
+                      return Transform.translate(
+                        offset: Offset(0, (animation.value * 120).clamp(0, 120)),
+                        child: child,
+                      );
+                    },
+                    child: MediaQuery(
+                      data: MediaQueryData(padding: EdgeInsets.only(bottom: bottom ?? 0)),
+                      child: NavigationBar(
+                        selectedIndex: _selected.index,
+                        onDestinationSelected: (value) {
+                          if (value == _selected.index) return;
+                          setState(() => _selected = MobileRoute.values[value]);
+                          // _navigatorState.currentState?.pushNamedAndRemoveUntil(MobileRoutes.values[value].name, (route) => false);
+                          context.read<NavigatorProvider>().restoreState(_selected, notify: true);
+                          context.read<ThemeProvider>().restoreState(_selected);
+                        },
+                        destinations: const [
+                          NavigationDestination(
+                            label: "Home",
+                            icon: Icon(Icons.home_outlined),
+                            selectedIcon: Icon(Icons.home_filled),
+                          ),
+                          NavigationDestination(
+                            label: "Search",
+                            icon: Icon(Icons.search_outlined),
+                          ),
+                          NavigationDestination(
+                            label: "Library",
+                            icon: Icon(Icons.library_music_outlined),
+                            selectedIcon: Icon(Icons.library_music),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
 
-              /// Opacity
-              Positioned.fill(
-                child: AnimatedBuilder(
-                  animation: animation,
-                  builder: (context, child) {
-                    if (animation.value > 0.01) {
-                      return Container(
-                        color: Colors.black.withOpacity((animation.value * 1.2).clamp(0, 1)),
-                        child: Container(
-                          color: Theme.of(context).colorScheme.onSecondary.withOpacity((animation.value * 3 - 2).clamp(0, .45)),
-                        ),
-                      );
-                    } else {
-                      return const SizedBox();
-                    }
-                  },
+                /// Opacity
+                Positioned.fill(
+                  child: AnimatedBuilder(
+                    animation: animation,
+                    builder: (context, child) {
+                      if (animation.value > 0.01) {
+                        return Container(
+                          color: Colors.black.withOpacity((animation.value * 1.2).clamp(0, 1)),
+                          child: Container(
+                            color: Theme.of(context).colorScheme.onSecondary.withOpacity((animation.value * 3 - 2).clamp(0, .45)),
+                          ),
+                        );
+                      } else {
+                        return const SizedBox();
+                      }
+                    },
+                  ),
                 ),
-              ),
 
-              /// Player Wallpaper
-              Positioned.fill(
-                child: AnimatedBuilder(
-                  animation: animation,
-                  builder: (context, child) {
-                    if (animation.value > 0.01) {
-                      return Opacity(
-                        opacity: animation.value.clamp(0.0, 1.0),
-                        child: const Wallpaper(gradient: false, particleOpacity: .3),
-                      );
-                    } else {
-                      return const SizedBox();
-                    }
-                  },
+                /// Player Wallpaper
+                Positioned.fill(
+                  child: AnimatedBuilder(
+                    animation: animation,
+                    builder: (context, child) {
+                      if (animation.value > 0.01) {
+                        return Opacity(
+                          opacity: animation.value.clamp(0.0, 1.0),
+                          child: const Wallpaper(gradient: false, particleOpacity: .3),
+                        );
+                      } else {
+                        return const SizedBox();
+                      }
+                    },
+                  ),
                 ),
-              ),
 
-              /// Miniplayer
-              Selector<CurrentMusicProvider, bool>(
-                selector: (_, p) => p.playing != null,
-                builder: (context, value, child) {
-                  if (!value) return const SizedBox();
-                  return AnimatedOpacity(
-                    duration: const Duration(milliseconds: 500),
-                    opacity: value ? 1 : 0,
-                    child: child,
-                  );
-                },
-                child: Player(animation: animation),
-              ),
-            ],
+                /// Miniplayer
+                Selector<CurrentMusicProvider, bool>(
+                  selector: (_, p) => p.playing != null,
+                  builder: (context, value, child) {
+                    if (!value) return const SizedBox();
+                    return AnimatedOpacity(
+                      duration: const Duration(milliseconds: 500),
+                      opacity: value ? 1 : 0,
+                      child: child,
+                    );
+                  },
+                  child: Player(animation: animation),
+                ),
+              ],
+            ),
           ),
         ),
       ),

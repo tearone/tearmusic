@@ -18,7 +18,7 @@ class App extends StatelessWidget {
           title: 'Tear Music',
           debugShowCheckedModeBanner: false,
           themeMode: ThemeMode.dark,
-          darkTheme: context.select<ThemeProvider, ThemeData>((e) => e.appTheme),
+          // darkTheme: context.select<ThemeProvider, ThemeData>((e) => e.appTheme),
           home: const NavigationScreen(),
         );
       }),

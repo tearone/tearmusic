@@ -16,11 +16,12 @@ import 'package:tearmusic/ui/mobile/common/views/artist_view.dart';
 import 'package:tearmusic/ui/mobile/common/views/manual_match_view.dart';
 
 class TrackTile extends StatelessWidget {
-  const TrackTile(this.track, {Key? key, this.leadingTrackNumber = false, this.trailingDuration = false}) : super(key: key);
+  TrackTile(this.track, {Key? key, this.leadingTrackNumber = false, this.trailingDuration = false}) : super(key: key);
 
   final MusicTrack track;
   final bool leadingTrackNumber;
   final bool trailingDuration;
+  final _globalKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -121,7 +122,12 @@ class TrackTile extends StatelessWidget {
                       ]),
                     ),
                   ),
-                  if (track.album != null && track.album!.images != null) CachedImage(track.album!.images!, size: const Size(64, 64)),
+                  if (track.album != null && track.album!.images != null)
+                    CachedImage(
+                      key: _globalKey,
+                      track.album!.images!,
+                      size: const Size(64, 64),
+                    ),
                   AnimatedOpacity(
                     duration: const Duration(milliseconds: 500),
                     opacity: track == value ? 1 : 0,
@@ -195,7 +201,7 @@ class TrackTile extends StatelessWidget {
                   CachedImage(track.album!.images!).getImage(const Size(64, 64)).then((value) {
                     final colors = generateColorPalette(value);
                     final theme = context.read<ThemeProvider>();
-                    if (theme.key != colors[1]) theme.setThemeKey(colors[1]);
+                    if (theme.key != colors[1]) theme.setThemeKey(colors[1], key: _globalKey);
                     currentMusic.playTrack(track);
                   });
                 }

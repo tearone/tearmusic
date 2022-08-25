@@ -163,9 +163,13 @@ class _LibraryPageState extends State<LibraryPage> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Padding(
-                        padding: const EdgeInsets.only(left: 16.0, right: 8.0),
+                        padding: const EdgeInsets.only(left: 12.0, right: 8.0),
                         child: Row(
                           children: [
+                            const Padding(
+                              padding: EdgeInsets.only(right: 8.0),
+                              child: Icon(CupertinoIcons.memories, size: 20.0),
+                            ),
                             const Expanded(
                               child: Text(
                                 "Recently played",
@@ -264,9 +268,13 @@ class _LibraryPageState extends State<LibraryPage> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Padding(
-                        padding: const EdgeInsets.only(left: 16.0, right: 8.0),
+                        padding: const EdgeInsets.only(left: 12.0, right: 8.0),
                         child: Row(
                           children: [
+                            const Padding(
+                              padding: EdgeInsets.only(right: 8.0),
+                              child: Icon(CupertinoIcons.music_note_2, size: 20.0),
+                            ),
                             const Expanded(
                               child: Text(
                                 "Liked Songs",
@@ -358,9 +366,13 @@ class _LibraryPageState extends State<LibraryPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Padding(
-                        padding: const EdgeInsets.only(left: 16.0, right: 8.0),
+                        padding: const EdgeInsets.only(left: 12.0, right: 8.0),
                         child: Row(
                           children: [
+                            const Padding(
+                              padding: EdgeInsets.only(right: 8.0),
+                              child: Icon(CupertinoIcons.music_note_list, size: 20.0),
+                            ),
                             const Expanded(
                               child: Text(
                                 "Liked Playlists",
@@ -450,11 +462,19 @@ class _LibraryPageState extends State<LibraryPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Padding(
-                      padding: EdgeInsets.only(top: 12.0, bottom: 12.0, left: 28.0, right: 8.0),
-                      child: Text(
-                        "Followed Artists",
-                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16.0),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 12.0, bottom: 12.0, left: 28.0, right: 8.0),
+                      child: Row(
+                        children: const [
+                          Padding(
+                            padding: EdgeInsets.only(right: 8.0),
+                            child: Icon(CupertinoIcons.person_fill, size: 20.0),
+                          ),
+                          Text(
+                            "Followed Artists",
+                            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16.0),
+                          ),
+                        ],
                       ),
                     ),
                     Selector<UserProvider, List<String>>(
@@ -530,11 +550,19 @@ class _LibraryPageState extends State<LibraryPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Padding(
-                      padding: EdgeInsets.only(top: 6.0, bottom: 16.0, left: 28.0, right: 8.0),
-                      child: Text(
-                        "Liked Albums",
-                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16.0),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6.0, bottom: 16.0, left: 28.0, right: 8.0),
+                      child: Row(
+                        children: const [
+                          Padding(
+                            padding: EdgeInsets.only(right: 8.0),
+                            child: Icon(CupertinoIcons.music_albums_fill, size: 20.0),
+                          ),
+                          Text(
+                            "Liked Albums",
+                            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16.0),
+                          ),
+                        ],
                       ),
                     ),
                     Selector<UserProvider, List<String>>(

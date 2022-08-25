@@ -1,14 +1,15 @@
 import 'dart:async';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:provider/provider.dart';
 import 'package:tearmusic/models/music/lyrics.dart';
 import 'package:tearmusic/models/music/track.dart';
 import 'package:tearmusic/providers/current_music_provider.dart';
 import 'package:tearmusic/providers/music_info_provider.dart';
 import 'package:tearmusic/providers/theme_provider.dart';
+import 'package:tearmusic/ui/mobile/common/knob.dart';
 import 'package:tearmusic/ui/mobile/common/player/lyrics_view/unavailable.dart';
 import 'package:tearmusic/ui/mobile/common/player/lyrics_view/full_text.dart';
 import 'package:tearmusic/ui/mobile/common/player/lyrics_view/subtitle.dart';
@@ -21,16 +22,22 @@ class LyricsView extends StatefulWidget {
 
   final MusicTrack track;
 
-  static Future<void> view(MusicTrack value, {required BuildContext context}) => Navigator.of(context, rootNavigator: true).push(
-        CupertinoPageRoute(builder: (context) => LyricsView(value), fullscreenDialog: true),
-      );
+  static Future<void> view(MusicTrack value, {required BuildContext context}) {
+    return showCupertinoModalBottomSheet(
+      context: context,
+      useRootNavigator: true,
+      barrierColor: Colors.black.withOpacity(.3),
+      builder: (context) => LyricsView(value),
+    );
+  }
 
   @override
   State<LyricsView> createState() => _LyricsViewState();
 }
 
 class _LyricsViewState extends State<LyricsView> with SingleTickerProviderStateMixin {
-  final ScrollController _controller = ScrollController();
+  ScrollController? _controller;
+  late double contentHeight;
   List<List<bool>> actives = [];
   double? lastPos;
   bool autoScroll = true;
@@ -38,6 +45,7 @@ class _LyricsViewState extends State<LyricsView> with SingleTickerProviderStateM
   late StreamSubscription<Duration> progressSub;
   List<TimedSegment>? lSub;
   List<LyricsLine>? lRich;
+  static const verticalPadding = 100.0;
 
   void scrollListener() {
     autoScroll = false;
@@ -79,13 +87,13 @@ class _LyricsViewState extends State<LyricsView> with SingleTickerProviderStateM
       }
     }
 
-    if (_controller.positions.isNotEmpty) {
-      height = (height + 200 - MediaQuery.of(context).size.height / 2).clamp(0, _controller.position.maxScrollExtent);
+    if (_controller?.positions.isNotEmpty ?? true) {
+      height = (height + verticalPadding - contentHeight / 2).clamp(0, _controller?.position.maxScrollExtent ?? 0);
       if (lastPos == null) {
-        _controller.jumpTo(height);
+        _controller?.jumpTo(height);
         autoScroll = true;
       } else if (height != lastPos && autoScroll) {
-        _controller.animateTo(height, duration: const Duration(milliseconds: 500), curve: Curves.easeIn);
+        _controller?.animateTo(height, duration: const Duration(milliseconds: 500), curve: Curves.easeIn);
         autoScroll = true;
       }
       lastPos = height;
@@ -95,8 +103,6 @@ class _LyricsViewState extends State<LyricsView> with SingleTickerProviderStateM
   @override
   void initState() {
     super.initState();
-    _controller.addListener(scrollListener);
-
     final currentMusic = context.read<CurrentMusicProvider>();
     progressSub = currentMusic.player.positionStream.distinct().listen(progressListener);
 
@@ -107,112 +113,114 @@ class _LyricsViewState extends State<LyricsView> with SingleTickerProviderStateM
   void dispose() {
     Wakelock.disable();
     progressSub.cancel();
-    _controller.removeListener(scrollListener);
-    _controller.dispose();
+    _controller?.removeListener(scrollListener);
+    _controller?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: FutureBuilder<MusicLyrics>(
-        future: context.read<MusicInfoProvider>().lyrics(widget.track),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return Center(
-              child: LoadingAnimationWidget.staggeredDotsWave(
-                color: Theme.of(context).colorScheme.secondary.withOpacity(.2),
-                size: 64.0,
-              ),
-            );
-          }
+    if (_controller == null) {
+      _controller = ModalScrollController.of(context) ?? ScrollController();
+      _controller!.addListener(scrollListener);
+    }
 
-          // final dataLength = snapshot.data!.richSync?.length ?? snapshot.data!.subtitle?.length ?? 0;
+    return LayoutBuilder(builder: (context, constraints) {
+      contentHeight = constraints.maxHeight;
+      return Scaffold(
+        body: FutureBuilder<MusicLyrics>(
+          future: context.read<MusicInfoProvider>().lyrics(widget.track),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return Center(
+                child: LoadingAnimationWidget.staggeredDotsWave(
+                  color: Theme.of(context).colorScheme.secondary.withOpacity(.2),
+                  size: 64.0,
+                ),
+              );
+            }
 
-          // if (actives.isEmpty) {
-          //   actives = List.generate(dataLength, (index) {
-          //     if (snapshot.data!.richSync != null) {
-          //       final line = snapshot.data!.richSync!.elementAt(index);
-          //       return List.generate(line.segments.length,
-          //           (i) => (line.start + line.segments[i].offset).inMilliseconds / widget.track.duration.inMilliseconds > animation.value);
-          //     }
-          //     if (snapshot.data!.subtitle != null) {
-          //       return [animation.value > snapshot.data!.subtitle!.elementAt(index).offset.inMilliseconds / widget.track.duration.inMilliseconds];
-          //     }
-          //     return [false];
-          //   });
-          // }
+            // final dataLength = snapshot.data!.richSync?.length ?? snapshot.data!.subtitle?.length ?? 0;
 
-          lSub = snapshot.data!.subtitle;
-          lRich = snapshot.data!.richSync;
+            // if (actives.isEmpty) {
+            //   actives = List.generate(dataLength, (index) {
+            //     if (snapshot.data!.richSync != null) {
+            //       final line = snapshot.data!.richSync!.elementAt(index);
+            //       return List.generate(line.segments.length,
+            //           (i) => (line.start + line.segments[i].offset).inMilliseconds / widget.track.duration.inMilliseconds > animation.value);
+            //     }
+            //     if (snapshot.data!.subtitle != null) {
+            //       return [animation.value > snapshot.data!.subtitle!.elementAt(index).offset.inMilliseconds / widget.track.duration.inMilliseconds];
+            //     }
+            //     return [false];
+            //   });
+            // }
 
-          return Stack(
-            children: [
-              if (snapshot.data!.lyricsType != LyricsType.unavailable) const Wallpaper(particleOpacity: .07),
-              CustomScrollView(
-                controller: _controller,
-                slivers: [
-                  SliverToBoxAdapter(
-                    child: SizedBox(height: 200 + MediaQuery.of(context).padding.top),
-                  ),
-                  if (snapshot.data!.lyricsType == LyricsType.unavailable)
-                    const SliverToBoxAdapter(
-                      child: LyricsUnavailalbe(),
-                    ),
-                  if (snapshot.data!.lyricsType == LyricsType.fullText)
+            lSub = snapshot.data!.subtitle;
+            lRich = snapshot.data!.richSync;
+
+            return Stack(
+              children: [
+                if (snapshot.data!.lyricsType != LyricsType.unavailable) const Wallpaper(particleOpacity: .07),
+                CustomScrollView(
+                  controller: ModalScrollController.of(context),
+                  slivers: [
                     SliverToBoxAdapter(
-                      child: LyricsFullText(snapshot.data!.fullText!),
+                      child: SizedBox(height: verticalPadding + MediaQuery.of(context).padding.top),
                     ),
-                  if (snapshot.data!.lyricsType == LyricsType.subtitle)
-                    SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        childCount: snapshot.data!.subtitle!.length,
-                        subtitleListBuilder(snapshot.data!.subtitle!, widget.track),
+                    if (snapshot.data!.lyricsType == LyricsType.unavailable)
+                      const SliverToBoxAdapter(
+                        child: LyricsUnavailalbe(),
                       ),
-                    ),
-                  if (snapshot.data!.lyricsType == LyricsType.richsync)
-                    SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        childCount: snapshot.data!.richSync!.length,
-                        richSyncListBuilder(snapshot.data!.richSync!, widget.track),
+                    if (snapshot.data!.lyricsType == LyricsType.fullText)
+                      SliverToBoxAdapter(
+                        child: LyricsFullText(snapshot.data!.fullText!),
                       ),
+                    if (snapshot.data!.lyricsType == LyricsType.subtitle)
+                      SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          childCount: snapshot.data!.subtitle!.length,
+                          subtitleListBuilder(snapshot.data!.subtitle!),
+                        ),
+                      ),
+                    if (snapshot.data!.lyricsType == LyricsType.richsync)
+                      SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          childCount: snapshot.data!.richSync!.length,
+                          richSyncListBuilder(snapshot.data!.richSync!),
+                        ),
+                      ),
+                    SliverToBoxAdapter(
+                      child: SizedBox(height: verticalPadding + MediaQuery.of(context).padding.bottom),
                     ),
-                  SliverToBoxAdapter(
-                    child: SizedBox(height: 200 + MediaQuery.of(context).padding.bottom),
-                  ),
-                ],
-              ),
-              if (snapshot.data!.lyricsType != LyricsType.unavailable)
-                Positioned.fill(
-                  child: IgnorePointer(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          stops: const [0, .3, .6, 1],
-                          colors: [
-                            Theme.of(context).scaffoldBackgroundColor.withOpacity(.7),
-                            Theme.of(context).scaffoldBackgroundColor.withOpacity(0),
-                            Theme.of(context).scaffoldBackgroundColor.withOpacity(0),
-                            Theme.of(context).scaffoldBackgroundColor.withOpacity(.8),
-                          ],
+                  ],
+                ),
+                if (snapshot.data!.lyricsType != LyricsType.unavailable)
+                  Positioned.fill(
+                    child: IgnorePointer(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            stops: const [0, .3, .6, 1],
+                            colors: [
+                              Theme.of(context).scaffoldBackgroundColor.withOpacity(.7),
+                              Theme.of(context).scaffoldBackgroundColor.withOpacity(0),
+                              Theme.of(context).scaffoldBackgroundColor.withOpacity(0),
+                              Theme.of(context).scaffoldBackgroundColor.withOpacity(.8),
+                            ],
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              if (snapshot.data!.lyricsType != LyricsType.unavailable)
-                const SafeArea(
-                  child: Padding(
-                    padding: EdgeInsets.all(12.0),
-                    child: BackButton(),
-                  ),
-                ),
-            ],
-          );
-        },
-      ),
-    );
+                const Knob(),
+              ],
+            );
+          },
+        ),
+      );
+    });
   }
 }

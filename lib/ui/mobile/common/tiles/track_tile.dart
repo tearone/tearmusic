@@ -87,7 +87,7 @@ class TrackTile extends StatelessWidget {
                   },
                   child: track == value
                       ? Icon(
-                          Icons.volume_up,
+                          CupertinoIcons.play_fill,
                           key: const Key("playing"),
                           color: Theme.of(context).colorScheme.primary,
                         )
@@ -132,7 +132,7 @@ class TrackTile extends StatelessWidget {
                       ),
                       child: Center(
                         child: Icon(
-                          Icons.volume_up,
+                          CupertinoIcons.play_fill,
                           color: Theme.of(context).colorScheme.onSecondaryContainer,
                         ),
                       ),

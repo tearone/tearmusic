@@ -46,6 +46,7 @@ dependencies:
   shimmer: ^2.0.0
   wakelock: ^0.6.2
   async: ^2.9.0
+  modal_bottom_sheet: ^2.1.0
 
 dev_dependencies:
   flutter_test:

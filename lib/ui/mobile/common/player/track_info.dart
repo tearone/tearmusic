@@ -37,7 +37,7 @@ class TrackInfo extends StatelessWidget {
     final double opacity = (inverseAboveOne(p) * 10 - 9).clamp(0, 1);
 
     return Transform.translate(
-      offset: Offset(0, bottomOffset + (-maxOffset / 3.8 * p.clamp(0, 2))),
+      offset: Offset(0, bottomOffset + (-maxOffset / 3.6 * p.clamp(0, 2))),
       child: Padding(
         padding: EdgeInsets.all(12.0 * (1 - cp)).add(EdgeInsets.symmetric(horizontal: 24.0 * cp)),
         child: Align(

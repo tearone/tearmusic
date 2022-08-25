@@ -64,28 +64,31 @@ class _WallpaperState extends State<Wallpaper> with TickerProviderStateMixin {
             child: const SizedBox(),
           );
 
-          return Stack(
-            children: [
-              if (widget.gradient)
-                Container(
-                  decoration: BoxDecoration(
-                    gradient: RadialGradient(
-                      center: const Alignment(0.95, -0.95),
-                      radius: 1.0,
-                      colors: [
-                        Theme.of(context).colorScheme.onSecondary.withOpacity(.3),
-                        Theme.of(context).colorScheme.onSecondary.withOpacity(.2),
-                      ],
+          return Scaffold(
+            resizeToAvoidBottomInset: false,
+            body: Stack(
+              children: [
+                if (widget.gradient)
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: RadialGradient(
+                        center: const Alignment(0.95, -0.95),
+                        radius: 1.0,
+                        colors: [
+                          Theme.of(context).colorScheme.onSecondary.withOpacity(.3),
+                          Theme.of(context).colorScheme.onSecondary.withOpacity(.2),
+                        ],
+                      ),
                     ),
                   ),
+                AnimatedOpacity(
+                  duration: const Duration(seconds: 1),
+                  opacity: playing ? 1 : 0,
+                  child: background,
                 ),
-              AnimatedOpacity(
-                duration: const Duration(seconds: 1),
-                opacity: playing ? 1 : 0,
-                child: background,
-              ),
-              if (widget.child != null) widget.child!,
-            ],
+                if (widget.child != null) widget.child!,
+              ],
+            ),
           );
         },
       ),

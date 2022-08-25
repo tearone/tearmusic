@@ -18,7 +18,7 @@ class QueueView extends StatelessWidget {
           child: ListView.builder(
             controller: controller,
             physics: scrollable ? const AlwaysScrollableScrollPhysics() : const NeverScrollableScrollPhysics(),
-            itemCount: 50,
+            itemCount: 25,
             itemBuilder: (context, index) {
               if (index == 0) {
                 return Padding(

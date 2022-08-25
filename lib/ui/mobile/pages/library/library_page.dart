@@ -207,8 +207,8 @@ class _LibraryPageState extends State<LibraryPage> {
                       Selector<UserProvider, List<UserTrackHistory>>(
                         selector: (_, user) => user.library?.track_history ?? [],
                         shouldRebuild: (previous, next) {
-                          final value = listEquals(previous, next);
-                          if (!value) {
+                          final value = !listEquals(previous, next);
+                          if (value) {
                             _trackHistoryNeedsRefresh = true;
                           }
                           return value;
@@ -311,6 +311,13 @@ class _LibraryPageState extends State<LibraryPage> {
                       ),
                       Selector<UserProvider, List<String>>(
                         selector: (_, user) => user.library?.liked_tracks ?? [],
+                        shouldRebuild: (previous, next) {
+                          final value = !listEquals(previous, next);
+                          if (value) {
+                            _likedSongsNeedsRefresh = true;
+                          }
+                          return value;
+                        },
                         builder: ((context, value, child) {
                           if (value.isEmpty) {
                             return const Padding(
@@ -405,6 +412,13 @@ class _LibraryPageState extends State<LibraryPage> {
                       ),
                       Selector<UserProvider, List<String>>(
                         selector: (_, user) => user.library?.liked_playlists ?? [],
+                        shouldRebuild: (previous, next) {
+                          final value = !listEquals(previous, next);
+                          if (value) {
+                            _likedPlaylistsNeedsRefresh = true;
+                          }
+                          return value;
+                        },
                         builder: ((context, value, child) {
                           if (value.isEmpty) {
                             return const Padding(
@@ -468,7 +482,7 @@ class _LibraryPageState extends State<LibraryPage> {
                         children: const [
                           Padding(
                             padding: EdgeInsets.only(right: 8.0),
-                            child: Icon(CupertinoIcons.person_fill, size: 20.0),
+                            child: Icon(CupertinoIcons.person, size: 20.0),
                           ),
                           Text(
                             "Followed Artists",
@@ -479,6 +493,13 @@ class _LibraryPageState extends State<LibraryPage> {
                     ),
                     Selector<UserProvider, List<String>>(
                       selector: (_, user) => user.library?.liked_artists ?? [],
+                      shouldRebuild: (previous, next) {
+                        final value = !listEquals(previous, next);
+                        if (value) {
+                          _likedArtistsNeedsRefresh = true;
+                        }
+                        return value;
+                      },
                       builder: ((context, value, child) {
                         if (value.isEmpty) {
                           return const Padding(
@@ -556,7 +577,7 @@ class _LibraryPageState extends State<LibraryPage> {
                         children: const [
                           Padding(
                             padding: EdgeInsets.only(right: 8.0),
-                            child: Icon(CupertinoIcons.music_albums_fill, size: 20.0),
+                            child: Icon(CupertinoIcons.music_albums, size: 20.0),
                           ),
                           Text(
                             "Liked Albums",
@@ -567,6 +588,13 @@ class _LibraryPageState extends State<LibraryPage> {
                     ),
                     Selector<UserProvider, List<String>>(
                       selector: (_, user) => user.library?.liked_albums ?? [],
+                      shouldRebuild: (previous, next) {
+                        final value = !listEquals(previous, next);
+                        if (value) {
+                          _likedAlbumsNeedsRefresh = true;
+                        }
+                        return value;
+                      },
                       builder: ((context, value, child) {
                         if (value.isEmpty) {
                           return const Padding(

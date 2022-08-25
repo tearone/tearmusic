@@ -136,11 +136,17 @@ class _NavigationScreenState extends State<NavigationScreen> with SingleTickerPr
                   builder: (context, child) {
                     return SizedBox(
                       height: MediaQuery.of(context).size.height - (1 - (animation.value).clamp(0.0, 1.0)) * (80.0 + (bottom ?? 0)),
-                      child: Transform.scale(
-                        scale: (animation.value.clamp(0.0, 1.0) + 1) / 10 + 0.9,
-                        child: Transform.translate(
-                          offset: Offset(0, -32 * (animation.value).clamp(0.0, 1.0)),
-                          child: child,
+                      child: Container(
+                        color: Colors.black.withOpacity((animation.value * 4.0).clamp(0.0, 1.0)),
+                        child: Transform.scale(
+                          scale: (1 - animation.value.clamp(0.0, 1.0)) / 10 + 0.9,
+                          child: Transform.translate(
+                            offset: Offset(0, (animation.value).clamp(0.0, 1.0)),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular((animation.value * 150.0).clamp(0.0, 42.0)),
+                              child: child,
+                            ),
+                          ),
                         ),
                       ),
                     );
@@ -234,41 +240,41 @@ class _NavigationScreenState extends State<NavigationScreen> with SingleTickerPr
                   ),
                 ),
 
-              /// Opacity
-              Positioned.fill(
-                child: AnimatedBuilder(
-                  animation: animation,
-                  builder: (context, child) {
-                    if (animation.value > 0.01) {
-                      return Container(
-                        color: Colors.black.withOpacity((animation.value * 1.2).clamp(0, 1)),
-                        child: Container(
-                          color: Theme.of(context).colorScheme.onSecondary.withOpacity((animation.value * 3 - 2).clamp(0, .45)),
-                        ),
-                      );
-                    } else {
-                      return const SizedBox();
-                    }
-                  },
+                /// Opacity
+                Positioned.fill(
+                  child: AnimatedBuilder(
+                    animation: animation,
+                    builder: (context, child) {
+                      if (animation.value > 0.01) {
+                        return Container(
+                          color: Colors.black.withOpacity((animation.value * 1.2).clamp(0, 1)),
+                          child: Container(
+                            color: Theme.of(context).colorScheme.onSecondary.withOpacity((animation.value * 3 - 2).clamp(0, .45)),
+                          ),
+                        );
+                      } else {
+                        return const SizedBox();
+                      }
+                    },
+                  ),
                 ),
-              ),
 
-              /// Player Wallpaper
-              Positioned.fill(
-                child: AnimatedBuilder(
-                  animation: animation,
-                  builder: (context, child) {
-                    if (animation.value > 0.01) {
-                      return Opacity(
-                        opacity: animation.value.clamp(0.0, 1.0),
-                        child: const Wallpaper(gradient: false, particleOpacity: .3),
-                      );
-                    } else {
-                      return const SizedBox();
-                    }
-                  },
+                /// Player Wallpaper
+                Positioned.fill(
+                  child: AnimatedBuilder(
+                    animation: animation,
+                    builder: (context, child) {
+                      if (animation.value > 0.01) {
+                        return Opacity(
+                          opacity: animation.value.clamp(0.0, 1.0),
+                          child: const Wallpaper(gradient: false, particleOpacity: .3),
+                        );
+                      } else {
+                        return const SizedBox();
+                      }
+                    },
+                  ),
                 ),
-              ),
 
                 /// Miniplayer
                 Selector<CurrentMusicProvider, bool>(

@@ -12,7 +12,7 @@ class LatestRelease extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 3,
+      elevation: 1.0,
       child: InkWell(
         onTap: () {
           AlbumView.view(album, context: context).then((_) => then != null ? then!() : null);

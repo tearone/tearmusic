@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:tearmusic/providers/theme_provider.dart';
+import 'package:tearmusic/ui/mobile/common/bottom_sheet.dart';
 import 'package:tearmusic/ui/mobile/navigator.dart';
 
 class NavigatorPageState {
@@ -47,6 +49,25 @@ class NavigatorProvider extends ChangeNotifier {
       _uriHistory.add(uri);
     }
     return _state.push(route);
+  }
+
+  static const Radius _kDefaultTopRadius = Radius.circular(12);
+
+  Future<T?> pushModal<T>({required Widget Function(BuildContext) builder, String? uri}) {
+    return push<T>(
+      CupertinoModalBottomSheetRoute<T>(
+        builder: builder,
+        containerBuilder: (context, _, child) => BottomSheetContainer(
+          topRadius: _kDefaultTopRadius,
+          child: child,
+        ),
+        expanded: false,
+      ),
+      uri: uri,
+    ).then((value) {
+      if (_uriHistory.isNotEmpty) _uriHistory.removeLast();
+      return value;
+    });
   }
 
   void pop<T extends Object?>([T? result]) {

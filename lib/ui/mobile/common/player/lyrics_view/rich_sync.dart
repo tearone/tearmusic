@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tearmusic/models/music/lyrics.dart';
-import 'package:tearmusic/models/music/track.dart';
 import 'package:tearmusic/providers/current_music_provider.dart';
 
-Widget Function(BuildContext, int) richSyncListBuilder(List<LyricsLine> richSync, MusicTrack track) {
+Widget Function(BuildContext, int) richSyncListBuilder(List<LyricsLine> richSync) {
   return (context, index) {
-    final richSyncLine = richSync[index];
-    double progress([Duration? o]) => (richSyncLine.start + (o ?? Duration.zero)).inMilliseconds / track.duration.inMilliseconds;
-    double progressEnd() => richSyncLine.end.inMilliseconds / track.duration.inMilliseconds;
-
     final currentMusic = context.read<CurrentMusicProvider>();
+
+    final richSyncLine = richSync[index];
+    double progress([Duration? o]) => (richSyncLine.start + (o ?? Duration.zero)).inMilliseconds / currentMusic.player.duration!.inMilliseconds;
+    double progressEnd() => richSyncLine.end.inMilliseconds / currentMusic.player.duration!.inMilliseconds;
 
     return StreamBuilder<Duration>(
         stream: currentMusic.player.positionStream,

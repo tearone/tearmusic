@@ -9,13 +9,14 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:provider/provider.dart';
 import 'package:tearmusic/providers/current_music_provider.dart';
 import 'package:tearmusic/providers/theme_provider.dart';
 import 'package:tearmusic/providers/will_pop_provider.dart';
 import 'package:tearmusic/ui/mobile/common/player/lyrics_view.dart';
 import 'package:tearmusic/ui/mobile/common/player/queue_view.dart';
-import 'package:tearmusic/ui/mobile/common/player/slider.dart';
+import 'package:tearmusic/ui/mobile/common/player/waveform_slider.dart';
 import 'package:tearmusic/ui/mobile/common/player/track_image.dart';
 import 'package:tearmusic/ui/mobile/common/player/track_info.dart';
 import 'package:tearmusic/ui/common/format.dart';
@@ -456,8 +457,21 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                                     ),
                                   ),
                                   IconButton(
-                                    onPressed: () {},
-                                    icon: Icon(Icons.more_vert, color: onSecondary),
+                                    onPressed: () {
+                                      showMaterialModalBottomSheet(
+                                        context: context,
+                                        useRootNavigator: true,
+                                        builder: (context) => Container(height: 300),
+                                      );
+                                    },
+                                    icon: Container(
+                                      padding: const EdgeInsets.all(4.0),
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context).colorScheme.secondary.withOpacity(.2),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(CupertinoIcons.ellipsis, color: onSecondary),
+                                    ),
                                     iconSize: 26.0,
                                   ),
                                 ],
@@ -486,7 +500,7 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                       offset: Offset(
                           0,
                           bottomOffset +
-                              (-maxOffset / 7.5 * bp) +
+                              (-maxOffset / 7.0 * bp) +
                               ((-maxOffset + topInset + 80.0) *
                                   (!bounceUp
                                       ? !bounceDown
@@ -879,7 +893,7 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                     Opacity(
                       opacity: fastOpacity,
                       child: Transform.translate(
-                        offset: Offset(0, bottomOffset + (-maxOffset / 4.4 * p)),
+                        offset: Offset(0, bottomOffset + (-maxOffset / 4.0 * p)),
                         child: Align(
                           alignment: Alignment.bottomLeft,
                           child: Column(

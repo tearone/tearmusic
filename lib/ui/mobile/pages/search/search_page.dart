@@ -74,6 +74,7 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
   }
 
   void pageChangeListener() {
+    if (!mounted) return;
     if (context.read<NavigatorProvider>().currentRoute == MobileRoute.search) {
       srw = List.generate(7, (_) => math.Random().nextInt(120) + 75);
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -544,7 +545,7 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                                           case 3:
                                             return TopResultContainer(
                                               kind: "Artists",
-                                              icon: CupertinoIcons.person_fill,
+                                              icon: CupertinoIcons.person,
                                               results: results!.artists
                                                   .sublist(0, math.min(results!.artists.length, topShowCount))
                                                   .map((e) => SearchArtistTile(e))

@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tearmusic/models/music/lyrics.dart';
-import 'package:tearmusic/models/music/track.dart';
 import 'package:tearmusic/providers/current_music_provider.dart';
 
-Widget Function(BuildContext, int) subtitleListBuilder(List<TimedSegment> subtitle, MusicTrack track) {
+Widget Function(BuildContext, int) subtitleListBuilder(List<TimedSegment> subtitle) {
   return (context, index) {
+    final currentMusic = context.read<CurrentMusicProvider>();
+
     final subtitleLine = subtitle[index];
     final subtitleNext = subtitle[(index + 1).clamp(0, subtitle.length - 1)];
-    final progress = subtitleLine.offset.inMilliseconds / track.duration.inMilliseconds;
-    final progressEnd = (subtitleNext.offset.inMilliseconds - 200) / track.duration.inMilliseconds;
+    final progress = subtitleLine.offset.inMilliseconds / currentMusic.player.duration!.inMilliseconds;
+    final progressEnd = (subtitleNext.offset.inMilliseconds - 200) / currentMusic.player.duration!.inMilliseconds;
 
     // if (actives[index][0] != (animation.value > progress)) {
     //   actives[index][0] = animation.value > progress;
@@ -20,8 +21,6 @@ Widget Function(BuildContext, int) subtitleListBuilder(List<TimedSegment> subtit
     if (text.trim() == "") {
       text = "🎶";
     }
-
-    final currentMusic = context.read<CurrentMusicProvider>();
 
     return StreamBuilder<Duration>(
       stream: currentMusic.player.positionStream,

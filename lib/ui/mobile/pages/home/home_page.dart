@@ -55,7 +55,10 @@ class _HomePageState extends State<HomePage> {
                 padding: const EdgeInsets.only(left: 24.0, top: 32.0, bottom: 8.0),
                 child: Text(
                   "New Releases".toUpperCase(),
-                  style: const TextStyle(fontWeight: FontWeight.w600),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ),
               Expanded(

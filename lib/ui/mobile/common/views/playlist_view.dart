@@ -239,7 +239,7 @@ class _PlaylistViewState extends State<PlaylistView> {
                                       IconButton(
                                         onPressed: () {},
                                         icon: Icon(
-                                          Icons.cloud_download_outlined,
+                                          CupertinoIcons.cloud_download,
                                           color: theme.colorScheme.onSecondaryContainer,
                                           size: 26.0,
                                         ),
@@ -268,13 +268,13 @@ class _PlaylistViewState extends State<PlaylistView> {
                                               },
                                               likeBuilder: (value) => value
                                                   ? Icon(
-                                                      Icons.favorite,
-                                                      color: theme.colorScheme.primary,
+                                                      CupertinoIcons.heart_fill,
+                                                      color: Theme.of(context).colorScheme.primary,
                                                       size: 26.0,
                                                     )
                                                   : Icon(
-                                                      Icons.favorite_border_outlined,
-                                                      color: theme.colorScheme.onSecondaryContainer,
+                                                      CupertinoIcons.heart,
+                                                      color: Theme.of(context).colorScheme.onSecondaryContainer,
                                                       size: 26.0,
                                                     ),
                                             );

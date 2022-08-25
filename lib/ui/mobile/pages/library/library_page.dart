@@ -148,7 +148,7 @@ class _LibraryPageState extends State<LibraryPage> {
               actions: const [
                 Center(
                   child: Padding(
-                    padding: EdgeInsets.only(right: 32.0),
+                    padding: EdgeInsets.only(right: 14.0),
                     child: ProfileButton(),
                   ),
                 ),

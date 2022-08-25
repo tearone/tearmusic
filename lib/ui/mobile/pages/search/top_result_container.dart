@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 class TopResultContainer extends StatelessWidget {
   const TopResultContainer({
     Key? key,
+    this.icon,
     required this.results,
     required this.kind,
     required this.index,
@@ -15,6 +16,7 @@ class TopResultContainer extends StatelessWidget {
   final int index;
   final TabController tabController;
   final PageController pageController;
+  final IconData? icon;
 
   @override
   Widget build(BuildContext context) {
@@ -28,9 +30,17 @@ class TopResultContainer extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Padding(
-              padding: const EdgeInsets.only(left: 16.0, right: 8.0),
+              padding: const EdgeInsets.only(left: 14.0, right: 8.0),
               child: Row(
                 children: [
+                  if (icon != null)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8.0),
+                      child: Icon(
+                        icon,
+                        size: 20.0,
+                      ),
+                    ),
                   Expanded(
                     child: Text(
                       "Top $kind",

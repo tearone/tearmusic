@@ -4,6 +4,7 @@ import 'dart:ui';
 
 import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:animations/animations.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -418,8 +419,8 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                                     onPressed: () {
                                       snapToMini();
                                     },
-                                    icon: Icon(Icons.expand_more, color: onSecondary),
-                                    iconSize: 32.0,
+                                    icon: Icon(CupertinoIcons.chevron_down, color: onSecondary),
+                                    iconSize: 26.0,
                                   ),
                                   Expanded(
                                     child: InkWell(
@@ -509,12 +510,12 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                                       children: [
                                         IconButton(
                                           iconSize: 28.0,
-                                          icon: Icon(Icons.shuffle, color: onSecondary),
+                                          icon: Icon(CupertinoIcons.shuffle, color: onSecondary),
                                           onPressed: () {},
                                         ),
                                         IconButton(
                                           iconSize: 28.0,
-                                          icon: Icon(Icons.repeat, color: onSecondary),
+                                          icon: Icon(CupertinoIcons.repeat, color: onSecondary),
                                           onPressed: () {},
                                         ),
                                       ],
@@ -531,12 +532,12 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                                       children: [
                                         IconButton(
                                           iconSize: 40.0,
-                                          icon: Icon(Icons.skip_previous, color: onSecondary),
+                                          icon: Icon(Icons.skip_previous_rounded, color: onSecondary),
                                           onPressed: snapToPrev,
                                         ),
                                         IconButton(
                                           iconSize: 40.0,
-                                          icon: Icon(Icons.skip_next, color: onSecondary),
+                                          icon: Icon(Icons.skip_next_rounded, color: onSecondary),
                                           onPressed: snapToNext,
                                         ),
                                       ],
@@ -698,7 +699,7 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                       child: Opacity(
                         opacity: opacity,
                         child: Transform.translate(
-                          offset: Offset(-46, -100 * ip),
+                          offset: Offset(-50, -100 * ip),
                           child: Align(
                             alignment: Alignment.bottomRight,
                             child: SafeArea(
@@ -709,7 +710,11 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                                     final track = context.read<CurrentMusicProvider>().playing!;
                                     LyricsView.view(track, context: context);
                                   },
-                                  icon: Icon(Icons.format_quote, size: 28.0, color: Theme.of(context).colorScheme.onSecondaryContainer),
+                                  icon: Icon(
+                                    CupertinoIcons.quote_bubble,
+                                    size: 28.0,
+                                    color: Theme.of(context).colorScheme.onSecondaryContainer,
+                                  ),
                                 ),
                               ),
                             ),
@@ -735,7 +740,11 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                                   onPressed: () {
                                     snapToQueue();
                                   },
-                                  icon: Icon(Icons.queue_music, size: 24.0, color: Theme.of(context).colorScheme.onSecondaryContainer),
+                                  icon: Icon(
+                                    CupertinoIcons.music_note_list,
+                                    size: 24.0,
+                                    color: Theme.of(context).colorScheme.onSecondaryContainer,
+                                  ),
                                 ),
                               ),
                             ),

@@ -440,15 +440,12 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                         }
 
                         return Padding(
-                          padding: const EdgeInsets.only(bottom: 200.0),
+                          padding: const EdgeInsets.only(bottom: 100.0),
                           child: Center(
-                            child: Transform.rotate(
-                              angle: math.pi / 14.0,
-                              child: Icon(
-                                Icons.music_note,
-                                size: 82.0,
-                                color: Theme.of(context).colorScheme.secondaryContainer,
-                              ),
+                            child: Icon(
+                              CupertinoIcons.music_note_2,
+                              size: 82.0,
+                              color: Theme.of(context).colorScheme.secondaryContainer,
                             ),
                           ),
                         );
@@ -456,7 +453,7 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                         return noResultsWidget;
                       case SearchResult.loading:
                         return Padding(
-                          padding: const EdgeInsets.only(bottom: 200.0),
+                          padding: const EdgeInsets.only(bottom: 100.0),
                           child: Center(
                             child: LoadingAnimationWidget.staggeredDotsWave(
                               color: Theme.of(context).colorScheme.secondary.withOpacity(.2),
@@ -508,6 +505,7 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                                           case 0:
                                             return TopResultContainer(
                                               kind: "Songs",
+                                              icon: CupertinoIcons.music_note_2,
                                               results: results!.tracks
                                                   .sublist(0, math.min(results!.tracks.length, topShowCount))
                                                   .map((e) => SearchTrackTile(e))
@@ -520,6 +518,7 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                                           case 1:
                                             return TopResultContainer(
                                               kind: "Albums",
+                                              icon: CupertinoIcons.music_albums,
                                               results: results!.albums
                                                   .sublist(0, math.min(results!.albums.length, topShowCount))
                                                   .map((e) => SearchAlbumTile(e))
@@ -532,6 +531,7 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                                           case 2:
                                             return TopResultContainer(
                                               kind: "Playlists",
+                                              icon: CupertinoIcons.music_note_list,
                                               results: results!.playlists
                                                   .sublist(0, math.min(results!.playlists.length, topShowCount))
                                                   .map((e) => SearchPlaylistTile(e))
@@ -544,6 +544,7 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                                           case 3:
                                             return TopResultContainer(
                                               kind: "Artists",
+                                              icon: CupertinoIcons.person_fill,
                                               results: results!.artists
                                                   .sublist(0, math.min(results!.artists.length, topShowCount))
                                                   .map((e) => SearchArtistTile(e))

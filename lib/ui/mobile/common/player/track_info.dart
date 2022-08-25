@@ -1,5 +1,6 @@
 import 'package:animations/animations.dart';
 import 'package:audio_service/audio_service.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:like_button/like_button.dart';
 import 'package:provider/provider.dart';
@@ -119,6 +120,7 @@ class TrackInfo extends StatelessWidget {
                                 final currentMusic = context.read<CurrentMusicProvider>();
 
                                 return LikeButton(
+                                  padding: const EdgeInsets.only(bottom: 12.0),
                                   bubblesColor: BubblesColor(
                                     dotPrimaryColor: Theme.of(context).colorScheme.primary,
                                     dotSecondaryColor: Theme.of(context).colorScheme.primaryContainer,
@@ -136,14 +138,14 @@ class TrackInfo extends StatelessWidget {
                                   },
                                   likeBuilder: (value) => value
                                       ? Icon(
-                                          Icons.favorite,
+                                          CupertinoIcons.heart_fill,
                                           color: Theme.of(context).colorScheme.primary,
-                                          size: 30.0,
+                                          size: 32.0,
                                         )
                                       : Icon(
-                                          Icons.favorite_border_outlined,
+                                          CupertinoIcons.heart,
                                           color: Theme.of(context).colorScheme.onSecondaryContainer,
-                                          size: 30.0,
+                                          size: 32.0,
                                         ),
                                 );
                               },

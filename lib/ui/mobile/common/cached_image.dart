@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:animations/animations.dart';
 import 'package:async/async.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:tearmusic/models/music/images.dart';
@@ -80,7 +81,7 @@ class _CachedImageState extends State<CachedImage> {
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(widget.borderRadius)),
                               color: Theme.of(context).colorScheme.secondaryContainer,
                               child: Icon(
-                                Icons.music_note,
+                                CupertinoIcons.music_note,
                                 size: sqrt(constraints.maxWidth * constraints.maxHeight) / 2,
                                 color: Theme.of(context).colorScheme.secondary,
                               ),

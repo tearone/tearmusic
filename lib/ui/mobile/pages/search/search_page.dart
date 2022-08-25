@@ -77,7 +77,7 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
     if (context.read<NavigatorProvider>().currentRoute == MobileRoute.search) {
       srw = List.generate(7, (_) => math.Random().nextInt(120) + 75);
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _searchInputFocus.requestFocus();
+        if (!Navigator.of(context).canPop()) _searchInputFocus.requestFocus();
       });
     } else {
       _searchInputFocus.unfocus();

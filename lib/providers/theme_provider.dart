@@ -3,7 +3,7 @@ import 'package:tearmusic/ui/mobile/navigator.dart';
 
 class ThemePageState {
   ThemeData? _appThemeB;
-  ThemeData? _navigationThemeB;
+  ThemeData? _navigationTheme;
   Color? _key;
 }
 
@@ -15,18 +15,16 @@ class ThemeProvider extends ChangeNotifier {
   ThemePageState get _defaultPlaceholderPage => ThemePageState();
   ThemePageState get _currentPage => _pages[_currentRoute] ?? _defaultPlaceholderPage;
 
-  late ThemeData _appThemeA;
-  late ThemeData _navigationThemeA;
-
   ThemeData? get _appThemeB => _currentPage._appThemeB;
   set _appThemeB(value) => _currentPage._appThemeB = value;
-  ThemeData? get _navigationThemeB => _currentPage._navigationThemeB;
-  set _navigationThemeB(value) => _currentPage._navigationThemeB = value;
+  ThemeData? get _navigationTheme => _currentPage._navigationTheme;
+  set _navigationTheme(value) => _currentPage._navigationTheme = value;
   Color? get _key => _currentPage._key;
   set _key(value) => _currentPage._key = value;
 
+  late ThemeData _appThemeA;
   ThemeData get appTheme => _appThemeB ?? _appThemeA;
-  ThemeData get navigationTheme => _navigationThemeB ?? _navigationThemeA;
+  ThemeData get navigationTheme => _navigationTheme ?? _appThemeA;
   Color get key => _key ?? Colors.blue;
 
   ThemeProvider() {
@@ -49,19 +47,18 @@ class ThemeProvider extends ChangeNotifier {
   }
 
   void tempNavTheme(ThemeData theme) {
-    _navigationThemeB = theme;
+    _navigationTheme = theme;
     notifyListeners();
   }
 
   void resetTheme() {
     _appThemeB = null;
-    _navigationThemeB = null;
+    _navigationTheme = null;
     notifyListeners();
   }
 
   void setTheme(ThemeData theme) {
     _appThemeA = theme;
-    _navigationThemeA = theme;
     notifyListeners();
   }
 

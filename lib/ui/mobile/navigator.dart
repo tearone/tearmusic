@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -101,7 +102,8 @@ class _NavigationScreenState extends State<NavigationScreen> with SingleTickerPr
 
     context.read<NavigatorProvider>().setScaffoldState(ScaffoldMessenger.of(context));
 
-    bottom ??= MediaQuery.of(context).padding.bottom;
+    bottom ??= MediaQuery.of(context).viewPadding.bottom;
+    if (bottom == 0) bottom = null;
 
     return Consumer<WillPopProvider>(
       builder: (context, value, child) {
@@ -125,92 +127,112 @@ class _NavigationScreenState extends State<NavigationScreen> with SingleTickerPr
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         body: Material(
-          child: Stack(
-            alignment: Alignment.bottomCenter,
-            children: [
-              IndexedStack(
-                index: _selected.index,
-                children: [
-                  Navigator(
-                    key: _homeNavigatorState,
-                    onGenerateRoute: (_) {
-                      return PageRouteBuilder(
-                        pageBuilder: (context, animation, secondaryAnimation) {
-                          context.read<NavigatorProvider>().setState(MobileRoute.home, Navigator.of(context));
-                          context.read<ThemeProvider>().setState(MobileRoute.home);
-                          return homePage;
-                        },
-                      );
-                    },
-                  ),
-                  Navigator(
-                    key: _searchNavigatorState,
-                    onGenerateRoute: (_) {
-                      return PageRouteBuilder(
-                        pageBuilder: (context, animation, secondaryAnimation) {
-                          context.read<NavigatorProvider>().setState(MobileRoute.search, Navigator.of(context));
-                          context.read<ThemeProvider>().setState(MobileRoute.search);
-                          return searchPage;
-                        },
-                      );
-                    },
-                  ),
-                  Navigator(
-                    key: _libraryNavigatorState,
-                    onGenerateRoute: (_) {
-                      return PageRouteBuilder(
-                        pageBuilder: (context, animation, secondaryAnimation) {
-                          context.read<NavigatorProvider>().setState(MobileRoute.library, Navigator.of(context));
-                          context.read<ThemeProvider>().setState(MobileRoute.library);
-                          return libraryPage;
-                        },
-                      );
-                    },
-                  ),
-                ],
-              ),
-
-              AnimatedTheme(
-                data: context.select<ThemeProvider, ThemeData>((e) => e.navigationTheme),
-                child: AnimatedBuilder(
+          child: SizedBox(
+            height: double.infinity,
+            child: Stack(
+              children: [
+                AnimatedBuilder(
                   animation: animation,
                   builder: (context, child) {
-                    return Transform.translate(
-                      offset: Offset(0, (animation.value * 120).clamp(0, 120)),
-                      child: child,
+                    return SizedBox(
+                      height: MediaQuery.of(context).size.height - (1 - (animation.value).clamp(0.0, 1.0)) * (80.0 + (bottom ?? 0)),
+                      child: Transform.scale(
+                        scale: (animation.value.clamp(0.0, 1.0) + 1) / 10 + 0.9,
+                        child: Transform.translate(
+                          offset: Offset(0, -32 * (animation.value).clamp(0.0, 1.0)),
+                          child: child,
+                        ),
+                      ),
                     );
                   },
-                  child: MediaQuery(
-                    data: MediaQueryData(padding: EdgeInsets.only(bottom: bottom ?? 0)),
-                    child: NavigationBar(
-                      selectedIndex: _selected.index,
-                      onDestinationSelected: (value) {
-                        if (value == _selected.index) return;
-                        setState(() => _selected = MobileRoute.values[value]);
-                        // _navigatorState.currentState?.pushNamedAndRemoveUntil(MobileRoutes.values[value].name, (route) => false);
-                        context.read<NavigatorProvider>().restoreState(_selected, notify: true);
-                        context.read<ThemeProvider>().restoreState(_selected);
+                  child: IndexedStack(
+                    index: _selected.index,
+                    children: [
+                      Navigator(
+                        key: _homeNavigatorState,
+                        onGenerateRoute: (_) {
+                          return PageRouteBuilder(
+                            pageBuilder: (context, animation, secondaryAnimation) {
+                              context.read<NavigatorProvider>().setState(MobileRoute.home, Navigator.of(context));
+                              context.read<ThemeProvider>().setState(MobileRoute.home);
+                              return homePage;
+                            },
+                          );
+                        },
+                      ),
+                      Navigator(
+                        key: _searchNavigatorState,
+                        onGenerateRoute: (_) {
+                          return PageRouteBuilder(
+                            pageBuilder: (context, animation, secondaryAnimation) {
+                              context.read<NavigatorProvider>().setState(MobileRoute.search, Navigator.of(context));
+                              context.read<ThemeProvider>().setState(MobileRoute.search);
+                              return searchPage;
+                            },
+                          );
+                        },
+                      ),
+                      Navigator(
+                        key: _libraryNavigatorState,
+                        onGenerateRoute: (_) {
+                          return PageRouteBuilder(
+                            pageBuilder: (context, animation, secondaryAnimation) {
+                              context.read<NavigatorProvider>().setState(MobileRoute.library, Navigator.of(context));
+                              context.read<ThemeProvider>().setState(MobileRoute.library);
+                              return libraryPage;
+                            },
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: AnimatedTheme(
+                    data: context.select<ThemeProvider, ThemeData>((e) => e.navigationTheme),
+                    child: AnimatedBuilder(
+                      animation: animation,
+                      builder: (context, child) {
+                        return Transform.translate(
+                          offset: Offset(0, (animation.value * (80.0 + (bottom ?? 0))).clamp(0, 120)),
+                          child: child,
+                        );
                       },
-                      destinations: const [
-                        NavigationDestination(
-                          label: "Home",
-                          icon: Icon(Icons.home_outlined),
-                          selectedIcon: Icon(Icons.home_filled),
+                      child: MediaQuery(
+                        data: MediaQueryData(padding: EdgeInsets.only(bottom: bottom ?? 0)),
+                        child: NavigationBar(
+                          elevation: 10.0,
+                          selectedIndex: _selected.index,
+                          onDestinationSelected: (value) {
+                            if (value == _selected.index) return;
+                            setState(() => _selected = MobileRoute.values[value]);
+                            // _navigatorState.currentState?.pushNamedAndRemoveUntil(MobileRoutes.values[value].name, (route) => false);
+                            context.read<NavigatorProvider>().restoreState(_selected, notify: true);
+                            context.read<ThemeProvider>().restoreState(_selected);
+                          },
+                          destinations: const [
+                            NavigationDestination(
+                              label: "Home",
+                              icon: Icon(CupertinoIcons.house),
+                              selectedIcon: Icon(CupertinoIcons.house_fill),
+                            ),
+                            NavigationDestination(
+                              label: "Search",
+                              icon: Icon(CupertinoIcons.search),
+                            ),
+                            NavigationDestination(
+                              label: "Library",
+                              icon: Icon(CupertinoIcons.music_albums),
+                              selectedIcon: Icon(CupertinoIcons.music_albums_fill),
+                            ),
+                          ],
                         ),
-                        NavigationDestination(
-                          label: "Search",
-                          icon: Icon(Icons.search_outlined),
-                        ),
-                        NavigationDestination(
-                          label: "Library",
-                          icon: Icon(Icons.library_music_outlined),
-                          selectedIcon: Icon(Icons.library_music),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
-              ),
 
               /// Opacity
               Positioned.fill(
@@ -248,20 +270,20 @@ class _NavigationScreenState extends State<NavigationScreen> with SingleTickerPr
                 ),
               ),
 
-              /// Miniplayer
-              Selector<CurrentMusicProvider, bool>(
-                selector: (_, p) => p.playing != null,
-                builder: (context, value, child) {
-                  if (!value) return const SizedBox();
-                  return AnimatedOpacity(
-                    duration: const Duration(milliseconds: 500),
-                    opacity: value ? 1 : 0,
-                    child: child,
-                  );
-                },
-                child: Player(animation: animation),
-              ),
-            ],
+                /// Miniplayer
+                Selector<CurrentMusicProvider, bool>(
+                  selector: (_, p) => p.playing != null,
+                  builder: (context, value, child) {
+                    return AnimatedOpacity(
+                      duration: const Duration(milliseconds: 500),
+                      opacity: value ? 1 : 0,
+                      child: value ? child : const SizedBox(),
+                    );
+                  },
+                  child: Player(animation: animation),
+                ),
+              ],
+            ),
           ),
         ),
       ),

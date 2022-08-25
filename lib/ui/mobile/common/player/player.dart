@@ -919,7 +919,7 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                                           ),
                                         ]),
                                         Text(
-                                          currentMusic.player.duration?.shortFormat() ?? "00:00",
+                                          currentMusic.player.duration?.shortFormat() ?? "0:00",
                                           style: TextStyle(color: onSecondary),
                                         ),
                                       ],

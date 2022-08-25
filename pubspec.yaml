@@ -45,6 +45,7 @@ dependencies:
   automatic_animated_list: ^1.1.0
   shimmer: ^2.0.0
   wakelock: ^0.6.2
+  async: ^2.9.0
 
 dev_dependencies:
   flutter_test:

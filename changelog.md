@@ -1,1 +1,5 @@
+- new icons
+- improved animations
+- scrollbars
+- modal bottom sheets for views
 - bugfixes

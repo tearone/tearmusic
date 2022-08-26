@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -231,7 +230,7 @@ class _ArtistViewState extends State<ArtistView> {
                                       ],
                                     ),
                                   ),
-                                  ...details.tracks.sublist(0, math.min(details.tracks.length, 5)).map((e) => ArtistTrackTile(e)),
+                                  ...details.tracks.sublist(0, math.min(details.tracks.length, 3)).map((e) => ArtistTrackTile(e)),
                                 ],
                               ),
                             ),

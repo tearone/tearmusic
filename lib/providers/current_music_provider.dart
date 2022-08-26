@@ -20,7 +20,7 @@ class CurrentMusicProvider extends BaseAudioHandler with ChangeNotifier {
   final UserProvider _userApi;
   final MusicInfoProvider _musicApi;
 
-  final player = AudioPlayer(handleInterruptions: false);
+  var player = AudioPlayer(handleInterruptions: false);
 
   AudioLoadingState audioLoading = AudioLoadingState.ready;
   PlayingFrom playingFrom = PlayingFrom.none;

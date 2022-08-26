@@ -1,6 +1,7 @@
 // Feed your own stream of bytes into the player
 import 'dart:async';
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:just_audio/just_audio.dart';
 import 'package:tearmusic/models/music/track.dart';
@@ -25,40 +26,53 @@ class TearMusicAudioSource extends StreamAudioSource {
 
   Future<List<Segmented>> silence() async => playback.isCompleted ? (await playback.future).silence : playbackHead?.silence ?? [];
 
+  String get contentType {
+    if (Platform.isIOS) {
+      return 'audio/mp3';
+    } else {
+      return 'audio/mp4';
+    }
+  }
+
   @override
   Future<StreamAudioResponse> request([int? start, int? end]) async {
     log("StreamAudioRequest($start-$end)");
     start ??= 0;
 
     await cached.future;
-    if (playback.isCompleted || start >= bytes.length) {
-      final pb = await playback.future;
-      end ??= sourceLength;
+    if (start >= bytes.length) await playback.future;
+    // if (playback.isCompleted || start >= bytes.length) {
+    //   final pb = await playback.future;
+    //   end ??= sourceLength;
 
-      var req = http.Request('GET', Uri.parse(pb.streamUrl));
-      req.headers['range'] = 'bytes=$start-$end';
+    //   var req = http.Request('GET', Uri.parse(pb.streamUrl));
+    //   req.headers['range'] = 'bytes=$start-$end';
 
-      final res = await req.send();
+    //   final res = await req.send();
 
-      return StreamAudioResponse(
-        sourceLength: sourceLength,
-        contentLength: int.tryParse(res.headers['content-length'] ?? "") ?? 0,
-        offset: start,
-        stream: res.stream,
-        contentType: 'audio/mp4',
-      );
-    }
+    //   log("SENT");
+
+    //   return StreamAudioResponse(
+    //     sourceLength: sourceLength,
+    //     contentLength: int.tryParse(res.headers['content-length'] ?? "") ?? 0,
+    //     offset: start,
+    //     stream: res.stream,
+    //     contentType: 'audio/mp3',
+    //   );
+    // }
 
     end ??= sourceLength;
 
     final partial = bytes.sublist(start, end.clamp(0, bytes.length));
+
+    log("srclen $sourceLength");
 
     return StreamAudioResponse(
       sourceLength: sourceLength,
       contentLength: end - start,
       offset: start,
       stream: Stream.value(partial),
-      contentType: 'audio/mp4',
+      contentType: contentType,
     );
   }
 
@@ -77,10 +91,12 @@ class TearMusicAudioSource extends StreamAudioSource {
   Future<bool> body() async {
     try {
       final pb = await _api.playback(track);
-      if (sourceLength == 0) {
-        final res = await http.head(Uri.parse(pb.streamUrl), headers: {"range": "bytes=-"});
-        sourceLength = int.tryParse(res.headers['content-range']?.split("/").last ?? "") ?? bytes.length;
-      }
+      // if (sourceLength == 0) {
+      final res = await http.get(Uri.parse(pb.streamUrl), headers: {"range": "bytes=0-"});
+      sourceLength = int.tryParse(res.headers['content-range']?.split("/").last ?? "") ?? bytes.length;
+      bytes = res.bodyBytes;
+      log("got response ${res.statusCode} ${res.headers}");
+      // }
       if (!playback.isCompleted) playback.complete(pb);
       if (!cached.isCompleted) cached.complete(true);
       return true;

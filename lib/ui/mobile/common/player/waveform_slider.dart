@@ -1,8 +1,11 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:tearmusic/models/playback.dart';
+import 'package:tearmusic/player/audio_source.dart';
 import 'package:tearmusic/providers/current_music_provider.dart';
 import 'dart:math' as math;
 
@@ -17,6 +20,7 @@ class _WaveformSliderState extends State<WaveformSlider> {
   int get tickerCount => waveform.isNotEmpty ? waveform.length : 50;
   double progress = 0.0;
   late List<double> waveform;
+  late List<double> cachedWaveform;
   late List<bool> actives;
   bool sliding = false;
 
@@ -27,12 +31,27 @@ class _WaveformSliderState extends State<WaveformSlider> {
   void initState() {
     super.initState();
 
+    waveform = [];
+    cachedWaveform = [];
+
+    loadingTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
+      if (waveform.isNotEmpty) return;
+
+      setState(() {
+        whereCenter += 0.5;
+        if (whereCenter > 6) whereCenter = 0;
+      });
+    });
+  }
+
+  void generateWaveform() {
     final currentMusic = context.read<CurrentMusicProvider>();
 
     progress =
         currentMusic.player.duration != null ? currentMusic.player.position.inMilliseconds / currentMusic.player.duration!.inMilliseconds : 0.0;
 
     waveform = [];
+    cachedWaveform = [];
     actives = List.generate(tickerCount, (i) => tickerCount * progress >= i);
 
     currentMusic.tma?.playback.future.then((value) {
@@ -54,15 +73,7 @@ class _WaveformSliderState extends State<WaveformSlider> {
       }
 
       waveform = List.castFrom(effects);
-    });
-
-    loadingTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
-      if (waveform.isNotEmpty) loadingTimer.cancel();
-
-      setState(() {
-        whereCenter += 0.5;
-        if (whereCenter > 6) whereCenter = 0;
-      });
+      cachedWaveform = value.waveform;
     });
   }
 
@@ -81,66 +92,78 @@ class _WaveformSliderState extends State<WaveformSlider> {
   Widget build(BuildContext context) {
     final currentMusic = context.read<CurrentMusicProvider>();
 
-    return StreamBuilder(
-      stream: currentMusic.player.positionStream,
-      builder: (context, snapshot) {
-        final List<Widget> tickers = [];
-
-        for (int i = 0; i < tickerCount; i++) {
-          final bool active = tickerCount * progress >= i;
-
-          if (sliding && active != actives[i]) {
-            HapticFeedback.lightImpact();
-            actives[i] = active;
+    return Selector<CurrentMusicProvider, Completer<Playback>?>(
+        selector: (_, cmp) => cmp.tma?.playback,
+        builder: (context, value, child) {
+          if (!value!.isCompleted) {
+            waveform.clear();
+          } else {
+            value.future.then((value) {
+              if (value.waveform != cachedWaveform) generateWaveform();
+            });
           }
 
-          tickers.add(AnimatedContainer(
-            duration: const Duration(milliseconds: 150),
-            width: 3.0,
-            height: waveform.isEmpty
-                ? normalizeInRange(math.sin(whereCenter - i * 0.75), -1.0, 1.0, 7.5, 25.0)
-                : waveform[i].toDouble() * (active ? 1.0 : 0.9),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary.withOpacity(active ? 1.0 : 0.3),
-              borderRadius: BorderRadius.circular(45.0),
-            ),
-          ));
-        }
+          return StreamBuilder(
+            stream: currentMusic.player.positionStream,
+            builder: (context, snapshot) {
+              final List<Widget> tickers = [];
 
-        if (!sliding) progress = currentMusic.progress;
+              for (int i = 0; i < tickerCount; i++) {
+                final bool active = tickerCount * progress >= i;
 
-        return LayoutBuilder(
-          builder: (context, constraints) {
-            return GestureDetector(
-              onTapUp: (details) {
-                progress = details.localPosition.dx / constraints.maxWidth;
-                setProgress();
-                currentMusic.seek(Duration(milliseconds: ((currentMusic.player.duration?.inMilliseconds ?? 0) * progress).round()));
-                sliding = false;
-              },
-              onHorizontalDragStart: (details) {
-                sliding = true;
-              },
-              onHorizontalDragUpdate: (details) {
-                progress = details.localPosition.dx / constraints.maxWidth;
-                setProgress();
-              },
-              onHorizontalDragEnd: (details) {
-                currentMusic.seek(Duration(milliseconds: ((currentMusic.player.duration?.inMilliseconds ?? 0) * progress).round()));
-                sliding = false;
-              },
-              child: Container(
-                color: Colors.transparent,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: tickers,
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
+                if (sliding && active != actives[i]) {
+                  HapticFeedback.lightImpact();
+                  actives[i] = active;
+                }
+
+                tickers.add(AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  width: 3.0,
+                  height: waveform.isEmpty
+                      ? normalizeInRange(math.sin(whereCenter - i * 0.75), -1.0, 1.0, 7.5, 25.0)
+                      : waveform[i].toDouble() * (active ? 1.0 : 0.9),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary.withOpacity(active ? 1.0 : 0.3),
+                    borderRadius: BorderRadius.circular(45.0),
+                  ),
+                ));
+              }
+
+              if (!sliding) progress = currentMusic.progress;
+
+              return LayoutBuilder(
+                builder: (context, constraints) {
+                  return GestureDetector(
+                    onTapUp: (details) {
+                      progress = details.localPosition.dx / constraints.maxWidth;
+                      setProgress();
+                      currentMusic.seek(Duration(milliseconds: ((currentMusic.player.duration?.inMilliseconds ?? 0) * progress).round()));
+                      sliding = false;
+                    },
+                    onHorizontalDragStart: (details) {
+                      sliding = true;
+                    },
+                    onHorizontalDragUpdate: (details) {
+                      progress = details.localPosition.dx / constraints.maxWidth;
+                      setProgress();
+                    },
+                    onHorizontalDragEnd: (details) {
+                      currentMusic.seek(Duration(milliseconds: ((currentMusic.player.duration?.inMilliseconds ?? 0) * progress).round()));
+                      sliding = false;
+                    },
+                    child: Container(
+                      color: Colors.transparent,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: tickers,
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+          );
+        });
   }
 }
 

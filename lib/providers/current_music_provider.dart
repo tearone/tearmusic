@@ -7,6 +7,7 @@ import 'package:just_audio/just_audio.dart';
 import 'package:tearmusic/models/library.dart';
 import 'package:tearmusic/models/music/playlist.dart';
 import 'package:tearmusic/models/music/track.dart';
+import 'package:tearmusic/models/player_info.dart';
 import 'package:tearmusic/player/audio_source.dart';
 import 'package:tearmusic/player/media_control.dart';
 import 'package:tearmusic/providers/music_info_provider.dart';
@@ -73,6 +74,12 @@ class CurrentMusicProvider extends BaseAudioHandler with ChangeNotifier {
       log('Devices removed: ${event.devicesRemoved}');
     });
 
+    player.playerStateStream.listen((event) {
+      if (event.processingState == ProcessingState.completed) {
+        _userApi.skipToNext();
+      }
+    });
+
     player.playbackEventStream.map(_transformEvent).pipe(playbackState);
   }
 
@@ -109,9 +116,21 @@ class CurrentMusicProvider extends BaseAudioHandler with ChangeNotifier {
     );
   }
 
+  bool checkThisTrackIsPlaying(MusicTrack track) {
+    return _userApi.playerInfo.currentMusic!.id == track.id;
+  }
+
   // ! POC only
-  Future<void> playTrack(MusicTrack track) async {
+  Future<void> playTrack(MusicTrack track, {bool fromPrimary = true, bool startInstant = true, bool clearHistory = false}) async {
     player.stop();
+
+    if (clearHistory) {
+      _userApi.postClear(PlayerInfoPostType.history, DateTime.now().millisecondsSinceEpoch);
+    }
+
+    if (_userApi.playerInfo.currentMusic == null || _userApi.playerInfo.currentMusic!.id != track.id) {
+      _userApi.postCurrentMusic(track.id, DateTime.now().millisecondsSinceEpoch, fromPrimary: fromPrimary);
+    }
 
     playing = track;
     liked = (await _userApi.getLibrary()).liked_tracks.contains(track.id);
@@ -128,6 +147,10 @@ class CurrentMusicProvider extends BaseAudioHandler with ChangeNotifier {
     audioLoading = AudioLoadingState.loading;
     notifyListeners();
 
+    if (!checkThisTrackIsPlaying(track)) {
+      return;
+    }
+
     tma = TearMusicAudioSource(track, api: _musicApi);
     final result = await tma!.head();
 
@@ -135,8 +158,15 @@ class CurrentMusicProvider extends BaseAudioHandler with ChangeNotifier {
       audioLoading = AudioLoadingState.ready;
     } else {
       audioLoading = AudioLoadingState.error;
+      _userApi.skipToNext();
+      notifyListeners();
+      return;
     }
     notifyListeners();
+
+    if (!checkThisTrackIsPlaying(track)) {
+      return;
+    }
 
     await player.setAudioSource(tma!);
     final silence = await tma!.silence();
@@ -149,9 +179,13 @@ class CurrentMusicProvider extends BaseAudioHandler with ChangeNotifier {
       }
     }
 
-    player.play();
+    if (startInstant) player.play();
 
     _userApi.putLibrary(playing!, LibraryType.track_history);
+
+    if (!checkThisTrackIsPlaying(track)) {
+      return;
+    }
 
     if (!tma!.playback.isCompleted) await tma!.body();
   }
@@ -169,6 +203,16 @@ class CurrentMusicProvider extends BaseAudioHandler with ChangeNotifier {
   @override
   Future<void> seek(Duration position) async {
     player.seek(position);
+  }
+
+  @override
+  Future<void> skipToNext() async {
+    _userApi.skipToNext();
+  }
+
+  @override
+  Future<void> skipToPrevious() async {
+    _userApi.skipToPrev();
   }
 
   @override

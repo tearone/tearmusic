@@ -82,25 +82,28 @@ class UserApi {
     return PlayerInfo.decode(jsonDecode(res.body));
   }
 
-  Future<bool> isPlayerSynced(PlayerInfo playerInfo) async {
+  Future<int> getPlayerVersion() async {
     final res = await http.head(
-      Uri.parse("${BaseApi.url}/user/player-info?version=${playerInfo.version}"),
+      Uri.parse("${BaseApi.url}/user/player-info"),
       headers: {"authorization": await base.getToken()},
     );
 
-    _reschk(res, "isPlayerSynced");
+    _reschk(res, "getPlayerVersion");
 
-    return res.statusCode == 202;
+    return int.tryParse(res.headers["x-tmc-version"]!) ?? 0;
   }
 
   Future<bool> syncPlayerOperations(PlayerInfo playerInfo) async {
     final res = await http.post(
-      Uri.parse("${BaseApi.url}/user/player-info?${playerInfo.version}"),
+      Uri.parse("${BaseApi.url}/user/player-info?version=${playerInfo.version}&operations_version=${playerInfo.operationsVersion}"),
       headers: {"authorization": await base.getToken()},
-      body: {"operations": playerInfo.operations},
+      body: {"operations": jsonEncode(playerInfo.operations)},
     );
 
-    _reschk(res, "syncPlayerOperations");
+    log("syncPlayerOperations tried to sync: ${playerInfo.operations}");
+    log("syncPlayerOperations code: ${res.statusCode}");
+
+    //_reschk(res, "syncPlayerOperations");
 
     // return success or not
     return res.statusCode == 200;

@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -8,13 +10,20 @@ import 'package:tearmusic/api/user_api.dart';
 import 'package:tearmusic/exceptionts.dart';
 import 'package:tearmusic/models/library.dart';
 import 'package:tearmusic/models/model.dart';
+import 'package:tearmusic/models/music/playlist.dart';
+import 'package:tearmusic/models/music/track.dart';
 import 'package:tearmusic/models/player_info.dart';
+import 'package:tearmusic/providers/current_music_provider.dart';
 import 'package:tearmusic/providers/music_info_provider.dart';
 
 class UserProvider extends ChangeNotifier {
   UserProvider({required BaseApi base, required MusicInfoProvider musicInfo})
       : _api = UserApi(base: base),
         _musicInfoProvider = musicInfo;
+
+  void setCurrentMusicProvider(CurrentMusicProvider currentMusicProvider) {
+    _currentMusicProvider = currentMusicProvider;
+  }
 
   Future<void> init() async {
     _store = await Hive.openBox("user");
@@ -29,12 +38,12 @@ class UserProvider extends ChangeNotifier {
       log("Library decode error: $e");
     }
 
-    try {
-      final stPlayerInfo = _store.get("player_info");
-      if (stPlayerInfo != null) playerInfo = PlayerInfo.decode(jsonDecode(stPlayerInfo));
-    } catch (e) {
-      log("Player Info decode error: $e");
-    }
+    //try {
+    final stPlayerInfo = _store.get("player_info");
+    if (stPlayerInfo != null) playerInfo = PlayerInfo.decode(jsonDecode(stPlayerInfo));
+    // } catch (e) {
+    //   log("Player Info decode error: $e");
+    // }
 
     String? accessToken = _store.get("access_token");
     String? refreshToken = _store.get("refresh_token");
@@ -46,12 +55,13 @@ class UserProvider extends ChangeNotifier {
     if (accessToken != null) loggedIn = true;
     notifyListeners();
 
-    _getUser();
+    if (loggedIn) _getUser();
   }
 
   late Box _store;
   final UserApi _api;
   final MusicInfoProvider _musicInfoProvider;
+  late final CurrentMusicProvider _currentMusicProvider;
 
   bool loggedIn = false;
 
@@ -59,7 +69,10 @@ class UserProvider extends ChangeNotifier {
   String? _username;
   String? _avatar;
   UserLibrary? library;
-  PlayerInfo playerInfo = PlayerInfo(version: 0);
+  PlayerInfo playerInfo = PlayerInfo(version: 0, queueSource: QueueSource(type: PlayerInfoSourceType.radio));
+
+  Timer playerSyncTimer = Timer(const Duration(seconds: 0), () {});
+
   String get username => _username ?? "";
   String get avatar => _avatar ?? "";
 
@@ -97,13 +110,11 @@ class UserProvider extends ChangeNotifier {
     try {
       final user = await _api.getInfo();
       final lib = await _api.getLibrary();
-      final pinfo = await _api.getPlayerInfo();
 
       _username = user.username;
       _avatar = user.avatar;
       _id = user.id;
       library = lib;
-      playerInfo = pinfo;
       notifyListeners();
 
       _musicInfoProvider.userId = _id ?? "";
@@ -112,6 +123,8 @@ class UserProvider extends ChangeNotifier {
       _store.put("avatar", _avatar);
       _store.put("id", _id);
       _store.put("library", jsonEncode(library!.encode()));
+
+      await matchPlayerInfo();
       _store.put("player_info", jsonEncode(playerInfo.encode()));
     } on AuthException {
       loggedIn = false;
@@ -198,30 +211,132 @@ class UserProvider extends ChangeNotifier {
   }
 
   // QUEUE STUFF
+  // QUEUE STUFF
 
-  void _stackPlayerOperation(Map body, {int? newVersion}) {
-    playerInfo.operations.add(body);
-    if (newVersion != null) playerInfo.version = newVersion;
+  List<String> getAllTracks({includeHistory = true, includeCurrent = true}) {
+    return (playerInfo.normalQueue + playerInfo.primaryQueue + (includeHistory ? playerInfo.queueHistory.map((e) => e.id).toList() : []))
+        .toSet()
+        .toList();
   }
 
-  void postAdd(String id, {PlayerInfoPostType whereTo = PlayerInfoPostType.normal, fromPrimary = false, int? newVersion}) {
+  Future<void> matchPlayerInfo() async {
+    log("[Player] matchPlayerInfo all queued tracks: ${getAllTracks()}");
+
+    // caching tracks
+    await _musicInfoProvider.batchTracks(getAllTracks());
+
+    final playerVersion = await _api.getPlayerVersion();
+
+    if (playerVersion == playerInfo.version) {
+      log("[Player] matchPlayerInfo version match: $playerVersion");
+      playerInfo.operations.clear();
+      playerInfo.operationsVersion = playerVersion;
+    } else {
+      log("[Player] matchPlayerInfo version mismatch: $playerVersion - ${playerInfo.version}");
+
+      if (playerVersion < playerInfo.version) {
+        if (playerVersion != playerInfo.operationsVersion) {
+          log("[Player] matchPlayerInfo operations version not matches, overwriting");
+
+          playerInfo.operations.clear();
+          playerInfo.operationsVersion = playerInfo.version;
+          postOverwrite(playerInfo.version);
+        } else {
+          await syncPlayerOperations();
+        }
+      } else {
+        log("[Player] matchPlayerInfo cloud version is newer, syncing");
+
+        playerInfo = await _api.getPlayerInfo();
+      }
+    }
+
+    if (playerInfo.currentMusic != null) {
+      final currentTrack = await _musicInfoProvider.batchTracks([playerInfo.currentMusic!.id]);
+
+      if (currentTrack.isNotEmpty) {
+        log("[Player] Playing current music: ${currentTrack.first}");
+        _currentMusicProvider.playTrack(currentTrack.first, startInstant: false);
+      } else {
+        log("[Player] Failed to play current music because is empty");
+      }
+    }
+
+    log("[Player] matched info: ${playerInfo.encode()}");
+  }
+
+  void _stackPlayerOperation(Map body, int newVersion) {
+    if (playerInfo.operations.isEmpty) {
+      playerInfo.operationsVersion = playerInfo.version;
+    }
+    playerInfo.version = newVersion;
+    log("[Player] operation version is: ${playerInfo.operationsVersion} - new version is: $newVersion");
+    playerInfo.operations.add(body);
+
+    //log("[Player] starting operations sync timer with operations: ${playerInfo.operations}");
+
+    if (playerSyncTimer.isActive) playerSyncTimer.cancel();
+
+    playerSyncTimer = Timer(const Duration(seconds: 3), () {
+      log("[Player] pushing operations to db");
+
+      syncPlayerOperations();
+
+      playerSyncTimer.cancel();
+    });
+  }
+
+  Future<void> syncPlayerOperations() async {
+    final isSuccess = await _api.syncPlayerOperations(playerInfo);
+
+    log("[Player] ${isSuccess ? 'Success to' : 'Failed to'} sync player operations: ${playerInfo.operations}");
+    log("[Player] new queue: ${getAllTracks(includeHistory: false)}");
+
+    playerInfo.operations.clear();
+    playerInfo.operationsVersion = playerInfo.version;
+    if (!isSuccess) {
+      log("[Player] failed to sync, overwriting with version: ${playerInfo.version}");
+
+      postOverwrite(playerInfo.version);
+    }
+
+    _store.put("player_info", jsonEncode(playerInfo.encode()));
+  }
+
+  void postAdd(String id, int newVersion, {PlayerInfoPostType whereTo = PlayerInfoPostType.normal, bool fromPrimary = false, bool toStart = false}) {
     switch (whereTo) {
       case PlayerInfoPostType.primary:
-        playerInfo.primaryQueue.add(id);
-        break;
-      case PlayerInfoPostType.normal:
-        playerInfo.queueHistory.add(QueueHistory(id: id, fromPrimary: fromPrimary));
+        if (toStart) {
+          playerInfo.primaryQueue.insert(0, id);
+        } else {
+          playerInfo.primaryQueue.add(id);
+        }
         break;
       case PlayerInfoPostType.history:
-        playerInfo.normalQueue.add(id);
+        final item = QueueItem(id: id, fromPrimary: fromPrimary);
+
+        if (toStart) {
+          playerInfo.queueHistory.insert(0, item);
+        } else {
+          playerInfo.queueHistory.add(item);
+        }
+        break;
+      case PlayerInfoPostType.normal:
+        if (toStart) {
+          playerInfo.normalQueue.insert(0, id);
+        } else {
+          playerInfo.normalQueue.add(id);
+        }
+        break;
+      case PlayerInfoPostType.current:
         break;
     }
 
-    final body = {"id": id, "where_to": whereTo.name, "from_primary": fromPrimary};
-    _stackPlayerOperation(body, newVersion: newVersion);
+    final body = {"type": "add", "id": id, "where_to": whereTo.name, "from_primary": fromPrimary, "to_start": toStart};
+    _stackPlayerOperation(body, newVersion);
   }
 
-  void postRemove(int index, {PlayerInfoPostType removeFrom = PlayerInfoPostType.normal, int? newVersion}) {
+  void postRemove(int index, int newVersion, {PlayerInfoPostType removeFrom = PlayerInfoPostType.normal}) {
     switch (removeFrom) {
       case PlayerInfoPostType.primary:
         if (checkCorrectIndex(0, index, playerInfo.primaryQueue)) playerInfo.primaryQueue.removeAt(index);
@@ -232,15 +347,15 @@ class UserProvider extends ChangeNotifier {
       case PlayerInfoPostType.history:
         if (checkCorrectIndex(0, index, playerInfo.queueHistory)) playerInfo.queueHistory.removeAt(index);
         break;
+      case PlayerInfoPostType.current:
+        break;
     }
-    final body = {"index": index, "remove_from": removeFrom.name};
-    _stackPlayerOperation(body, newVersion: newVersion);
+    final body = {"type": "remove", "index": index, "remove_from": removeFrom.name};
+    _stackPlayerOperation(body, newVersion);
   }
 
-  void postReorder(int fromIndex, int toIndex,
-      {PlayerInfoReorderMoveType moveFrom = PlayerInfoReorderMoveType.normal,
-      PlayerInfoReorderMoveType moveTo = PlayerInfoReorderMoveType.normal,
-      int? newVersion}) {
+  void postReorder(int fromIndex, int toIndex, int newVersion,
+      {PlayerInfoReorderMoveType moveFrom = PlayerInfoReorderMoveType.normal, PlayerInfoReorderMoveType moveTo = PlayerInfoReorderMoveType.normal}) {
     String moveId;
 
     if (moveFrom == PlayerInfoReorderMoveType.primary) {
@@ -265,20 +380,158 @@ class UserProvider extends ChangeNotifier {
       playerInfo.normalQueue.insert(toIndex, moveId);
     }
 
-    final body = {"from_index": fromIndex, "to_index": toIndex, "move_from": moveFrom, "move_to": moveTo};
-    _stackPlayerOperation(body, newVersion: newVersion);
+    final body = {"type": "reorder", "from_index": fromIndex, "to_index": toIndex, "move_from": moveFrom, "move_to": moveTo};
+    _stackPlayerOperation(body, newVersion);
   }
 
-  void postOverwrite({int? newVersion}) {
+  void postOverwrite(int newVersion) {
     final body = {
+      "type": "overwrite",
       "new_normal_queue": playerInfo.normalQueue,
       "new_primary_queue": playerInfo.primaryQueue,
-      "new_queue_history": playerInfo.queueHistory
+      "new_queue_history": playerInfo.queueHistory.map((e) => e.encode()).toList(),
     };
-    _stackPlayerOperation(body, newVersion: newVersion);
+    _stackPlayerOperation(body, newVersion);
+  }
+
+  void postCurrentMusic(String id, int newVersion, {bool fromPrimary = false}) {
+    final body = {"type": "current", "id": id, "from_primary": fromPrimary};
+
+    playerInfo.currentMusic = QueueItem(id: id, fromPrimary: fromPrimary);
+
+    _stackPlayerOperation(body, newVersion);
+  }
+
+  void postClear(PlayerInfoPostType type, int newVersion) {
+    final body = {"type": "current", "clear_type": type.name};
+
+    switch (type) {
+      case PlayerInfoPostType.primary:
+        playerInfo.primaryQueue.clear();
+        break;
+      case PlayerInfoPostType.normal:
+        playerInfo.normalQueue.clear();
+        break;
+      case PlayerInfoPostType.history:
+        playerInfo.queueHistory.clear();
+        break;
+      case PlayerInfoPostType.current:
+        playerInfo.currentMusic = null;
+        break;
+    }
+
+    _stackPlayerOperation(body, newVersion);
+  }
+
+  void postSource(String id, int seed, PlayerInfoSourceType type, List<MusicTrack> tracks, int newVersion) {
+    final body = {"type": "source", "id": id, "seed": seed, "source_type": type.name, "tracks": tracks.map((e) => e.id).toList()};
+
+    switch (type) {
+      case PlayerInfoSourceType.playlist:
+        playerInfo.currentMusic = QueueItem(id: tracks[0].id, fromPrimary: false);
+        playerInfo.normalQueue = tracks.map((e) => e.id).toList();
+        playerInfo.normalQueue.removeAt(0);
+        playerInfo.queueHistory = [];
+
+        _currentMusicProvider.playTrack(tracks[0]);
+        break;
+      case PlayerInfoSourceType.album:
+        break;
+      case PlayerInfoSourceType.artist:
+        break;
+      case PlayerInfoSourceType.radio:
+        break;
+    }
+
+    _stackPlayerOperation(body, newVersion);
+  }
+
+  Future<void> queuePlaylist(MusicPlaylist playlist) async {
+    final seed = randomBetween(10000, 99999);
+
+    final playlistDetails = await _musicInfoProvider.playlistTracks(playlist);
+
+    playlistDetails.tracks.shuffle(math.Random(seed));
+
+    // TODO: queue source is radio if length < 50
+
+    final queueTracks = playlistDetails.tracks.sublist(0, playlistDetails.tracks.length.clamp(0, 50));
+
+    playerInfo.normalQueue = queueTracks.map((e) => e.id).toList();
+
+    postSource(playlist.id, seed, PlayerInfoSourceType.playlist, queueTracks, DateTime.now().millisecondsSinceEpoch);
+  }
+
+  void skipToPrev() {
+    final queueHistory = playerInfo.queueHistory;
+
+    final newVersion = DateTime.now().millisecondsSinceEpoch;
+
+    QueueItem nextToPlay;
+
+    if (playerInfo.queueHistory.isNotEmpty) {
+      nextToPlay = queueHistory.last;
+
+      postRemove(queueHistory.length - 1, newVersion, removeFrom: PlayerInfoPostType.history);
+      postAdd(playerInfo.currentMusic!.id, newVersion,
+          whereTo: nextToPlay.fromPrimary ? PlayerInfoPostType.primary : PlayerInfoPostType.normal, toStart: true);
+    } else {
+      return;
+    }
+
+    postCurrentMusic(nextToPlay.id, DateTime.now().millisecondsSinceEpoch, fromPrimary: true);
+
+    log("[Player State] next to play from history: $nextToPlay");
+
+    playTrackById(nextToPlay.id, nextToPlay.fromPrimary);
+  }
+
+  void skipToNext() {
+    final primaryQueue = playerInfo.primaryQueue;
+    final normalQueue = playerInfo.normalQueue;
+
+    final newVersion = DateTime.now().millisecondsSinceEpoch;
+
+    var nextToPlay = "";
+    var fromPrimary = true;
+
+    var currentMusicId = playerInfo.currentMusic!.id;
+
+    if (primaryQueue.isNotEmpty) {
+      nextToPlay = primaryQueue.first;
+
+      postAdd(currentMusicId, newVersion, whereTo: PlayerInfoPostType.history, fromPrimary: true);
+      postRemove(0, newVersion, removeFrom: PlayerInfoPostType.primary);
+    } else if (normalQueue.isNotEmpty) {
+      nextToPlay = normalQueue.first;
+
+      fromPrimary = false;
+
+      postAdd(currentMusicId, newVersion, whereTo: PlayerInfoPostType.history);
+      postRemove(0, newVersion);
+    } else {
+      return;
+    }
+
+    postCurrentMusic(nextToPlay, DateTime.now().millisecondsSinceEpoch, fromPrimary: true);
+
+    log("[Player State] next to play from queue: $nextToPlay");
+
+    playTrackById(nextToPlay, fromPrimary);
+  }
+
+  void playTrackById(String id, bool fromPrimary) {
+    _currentMusicProvider.seek(Duration.zero);
+
+    final playTrack = _musicInfoProvider.batchTracks([id]);
+    playTrack.then((value) {
+      _currentMusicProvider.playTrack(value.first, fromPrimary: fromPrimary);
+    });
   }
 }
 
 bool checkCorrectIndex(int type, int index, List list) {
-  return (index < 0 || (type == 0 ? index >= list.length : index > list.length));
+  return !(index < 0 || (type == 0 ? index >= list.length : index > list.length));
 }
+
+int randomBetween(int min, int max) => min + math.Random().nextInt((max + 1) - min);

@@ -1,18 +1,25 @@
 // ignore_for_file: dead_code
 
+import 'dart:developer';
 import 'dart:ui';
 
 import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:animations/animations.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:provider/provider.dart';
+import 'package:tearmusic/models/music/track.dart';
+import 'package:tearmusic/models/player_info.dart';
+import 'package:tearmusic/player/audio_source.dart';
 import 'package:tearmusic/providers/current_music_provider.dart';
+import 'package:tearmusic/providers/music_info_provider.dart';
 import 'package:tearmusic/providers/theme_provider.dart';
+import 'package:tearmusic/providers/user_provider.dart';
 import 'package:tearmusic/providers/will_pop_provider.dart';
 import 'package:tearmusic/ui/mobile/common/player/lyrics_view.dart';
 import 'package:tearmusic/ui/mobile/common/player/queue_view.dart';
@@ -63,6 +70,17 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
   bool queueScrollable = false;
   bool bounceUp = false;
   bool bounceDown = false;
+
+  bool _queueItemsNeedRefresh = true;
+
+  MusicTrack? nextItem;
+  MusicTrack? lastItem;
+  List<String> allItems = [];
+
+  List<MusicTrack> playerNormalQueue = [];
+  List<MusicTrack> playerPrimaryQueue = [];
+  List<MusicTrack> playerQueueHistory = [];
+  List<MusicTrack> fullQueue = []; // primary + normal
 
   @override
   void initState() {
@@ -159,18 +177,18 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
     if (haptic && (prevOffset - offset).abs() > actuationOffset) HapticFeedback.lightImpact();
   }
 
-  void snapToPrev() {
+  void snapToPrev(BuildContext context) {
+    context.read<UserProvider>().skipToPrev();
+
     sOffset = -sMaxOffset;
     sAnim
         .animateTo(
       -1.0,
       curve: bouncingCurve,
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 3000),
     )
         .then((_) {
-      sOffset = 0;
-      sAnim.animateTo(0.0, duration: Duration.zero);
-      // tracks.insert(0, tracks.removeLast());
+      _queueItemsNeedRefresh = true;
     });
     if ((sPrevOffset - sOffset).abs() > actuationOffset) HapticFeedback.lightImpact();
   }
@@ -185,7 +203,9 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
     if ((sPrevOffset - sOffset).abs() > actuationOffset) HapticFeedback.lightImpact();
   }
 
-  void snapToNext() {
+  void snapToNext(BuildContext context) async {
+    context.read<UserProvider>().skipToNext();
+
     sOffset = sMaxOffset;
     sAnim
         .animateTo(
@@ -194,16 +214,37 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
       duration: const Duration(milliseconds: 300),
     )
         .then((_) {
-      sOffset = 0;
-      sAnim.animateTo(0.0, duration: Duration.zero);
-      // tracks.add(tracks.removeAt(0));
+      _queueItemsNeedRefresh = true;
     });
     if ((sPrevOffset - sOffset).abs() > actuationOffset) HapticFeedback.lightImpact();
+  }
+
+  Future<void> readQueueItems() async {
+    final userProvider = context.read<UserProvider>();
+    final tracks = userProvider.getAllTracks();
+
+    if (!listEquals(tracks, allItems)) {
+      final items = await context.read<MusicInfoProvider>().batchTracks(tracks);
+
+      playerNormalQueue = items.where((element) => userProvider.playerInfo.normalQueue.contains(element.id)).toList();
+      playerPrimaryQueue = items.where((element) => userProvider.playerInfo.primaryQueue.contains(element.id)).toList();
+      playerQueueHistory = items.where((element) => userProvider.playerInfo.queueHistory.map((e) => e.id).contains(element.id)).toList();
+      fullQueue = [...playerPrimaryQueue, ...playerNormalQueue];
+
+      sOffset = 0;
+      sAnim.animateTo(0.0, duration: Duration.zero);
+
+      allItems = tracks;
+
+      _queueItemsNeedRefresh = false;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final currentMusic = context.watch<CurrentMusicProvider>();
+
+    log("[Player State] rebuild player");
 
     return Consumer<WillPopProvider>(
       builder: (context, willPop, child) {
@@ -275,13 +316,11 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
 
           /// Horizontal
           onHorizontalDragStart: (details) {
-            return;
             if (offset > maxOffset) return;
 
             sPrevOffset = sOffset;
           },
           onHorizontalDragUpdate: (details) {
-            return;
             if (offset > maxOffset) return;
             if (details.globalPosition.dy > screenSize.height - deadSpace) return;
 
@@ -291,7 +330,6 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
             sAnim.animateTo(sOffset / sMaxOffset, duration: Duration.zero);
           },
           onHorizontalDragEnd: (details) {
-            return;
             if (offset > maxOffset) return;
 
             final distance = sPrevOffset - sOffset;
@@ -302,9 +340,9 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
             // used to actuate on fast flicks too
 
             if (speed > threshold || distance > actuationOffset * sActuationMulti) {
-              snapToPrev();
+              snapToPrev(context);
             } else if (-speed > threshold || -distance > actuationOffset * sActuationMulti) {
-              snapToNext();
+              snapToNext(context);
             } else {
               snapToCurrent();
             }
@@ -546,13 +584,13 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                                       children: [
                                         IconButton(
                                           iconSize: 40.0,
-                                          icon: Icon(Icons.skip_previous_rounded, color: onSecondary),
-                                          onPressed: snapToPrev,
+                                          icon: Icon(Icons.skip_previous, color: onSecondary),
+                                          onPressed: () => snapToPrev(context),
                                         ),
                                         IconButton(
                                           iconSize: 40.0,
-                                          icon: Icon(Icons.skip_next_rounded, color: onSecondary),
-                                          onPressed: snapToNext,
+                                          icon: Icon(Icons.skip_next, color: onSecondary),
+                                          onPressed: () => snapToNext(context),
                                         ),
                                       ],
                                     ),
@@ -768,122 +806,137 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                     ),
 
                   /// Track Info
-                  Material(
-                    type: MaterialType.transparency,
-                    child: AnimatedBuilder(
-                      animation: sAnim,
-                      builder: (context, child) {
-                        return Stack(
-                          children: [
-                            // Opacity(
-                            //   opacity: -sAnim.value.clamp(-1.0, 0.0),
-                            //   child: Transform.translate(
-                            //     offset: Offset(-sAnim.value * sMaxOffset / stParallax - sMaxOffset / stParallax, 0),
-                            //     child: TrackInfo(
-                            //         artist: tracks[0].artists.map((e) => e.name).join(", "),
-                            //         title: tracks[0].name,
-                            //         cp: cp,
-                            //         p: p,
-                            //         bottomOffset: bottomOffset,
-                            //         maxOffset: maxOffset,
-                            //         screenSize: screenSize),
-                            //   ),
-                            // ),
-                            Opacity(
-                              opacity: 1 - sAnim.value.abs(),
-                              child: Transform.translate(
-                                offset: Offset(
-                                    -sAnim.value * sMaxOffset / stParallax + (12.0 * qp),
-                                    (-maxOffset + topInset + 102.0) *
-                                        (!bounceUp
-                                            ? !bounceDown
-                                                ? qp
-                                                : (1 - bp)
-                                            : 0.0)),
-                                child: TrackInfo(
-                                  artist: currentMusic.playing?.artistsLabel ?? "?",
-                                  title: currentMusic.playing?.name ?? "?",
-                                  p: bp,
-                                  cp: bcp,
-                                  bottomOffset: bottomOffset,
-                                  maxOffset: maxOffset,
-                                  screenSize: screenSize,
+                  FutureBuilder(
+                    future: readQueueItems(),
+                    builder: (context, snapshot) {
+                      return Material(
+                        type: MaterialType.transparency,
+                        child: AnimatedBuilder(
+                          animation: sAnim,
+                          builder: (context, child) {
+                            return Stack(
+                              children: [
+                                if (playerQueueHistory.isNotEmpty)
+                                  Opacity(
+                                    opacity: -sAnim.value.clamp(-1.0, 0.0),
+                                    child: Transform.translate(
+                                      offset: Offset(-sAnim.value * sMaxOffset / stParallax - sMaxOffset / stParallax, 0),
+                                      child: TrackInfo(
+                                          artist: playerQueueHistory.last.artists.map((e) => e.name).join(", "),
+                                          title: playerQueueHistory.last.name,
+                                          cp: cp,
+                                          p: p,
+                                          bottomOffset: bottomOffset,
+                                          maxOffset: maxOffset,
+                                          screenSize: screenSize),
+                                    ),
+                                  ),
+                                Opacity(
+                                  opacity: 1 - sAnim.value.abs(),
+                                  child: Transform.translate(
+                                    offset: Offset(
+                                        -sAnim.value * sMaxOffset / stParallax + (12.0 * qp),
+                                        (-maxOffset + topInset + 102.0) *
+                                            (!bounceUp
+                                                ? !bounceDown
+                                                    ? qp
+                                                    : (1 - bp)
+                                                : 0.0)),
+                                    child: TrackInfo(
+                                      artist: currentMusic.playing?.artistsLabel ?? "?",
+                                      title: currentMusic.playing?.name ?? "?",
+                                      p: bp,
+                                      cp: bcp,
+                                      bottomOffset: bottomOffset,
+                                      maxOffset: maxOffset,
+                                      screenSize: screenSize,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
-                            // Opacity(
-                            //   opacity: sAnim.value.clamp(0.0, 1.0),
-                            //   child: Transform.translate(
-                            //     offset: Offset(-sAnim.value * sMaxOffset / stParallax + sMaxOffset / stParallax, 0),
-                            //     child: TrackInfo(
-                            //         artist: tracks[2].artists.map((e) => e.name).join(", "),
-                            //         title: tracks[2].name,
-                            //         cp: cp,
-                            //         p: p,
-                            //         bottomOffset: bottomOffset,
-                            //         maxOffset: maxOffset,
-                            //         screenSize: screenSize),
-                            //   ),
-                            // ),
-                          ],
-                        );
-                      },
-                    ),
+                                if (fullQueue.isNotEmpty)
+                                  Opacity(
+                                    opacity: sAnim.value.clamp(0.0, 1.0),
+                                    child: Transform.translate(
+                                      offset: Offset(-sAnim.value * sMaxOffset / stParallax + sMaxOffset / stParallax, 0),
+                                      child: TrackInfo(
+                                          artist: fullQueue.first.artists.map((e) => e.name).join(", "),
+                                          title: fullQueue.first.name,
+                                          cp: cp,
+                                          p: p,
+                                          bottomOffset: bottomOffset,
+                                          maxOffset: maxOffset,
+                                          screenSize: screenSize),
+                                    ),
+                                  ),
+                              ],
+                            );
+                          },
+                        ),
+                      );
+                    },
                   ),
 
                   /// Track Image
-                  AnimatedBuilder(
-                    animation: sAnim,
-                    builder: (context, child) {
-                      return Stack(
-                        children: [
-                          // Opacity(
-                          //   opacity: -sAnim.value.clamp(-1.0, 0.0),
-                          //   child: Transform.translate(
-                          //     offset: Offset(-sAnim.value * sMaxOffset / siParallax - sMaxOffset / siParallax, 0),
-                          //     child: TrackImage(
-                          //       image: tracks[0].album?.images!.maxSize,
-                          //       large: true,
-                          //       p: p,
-                          //       cp: cp,
-                          //       screenSize: screenSize,
-                          //       bottomOffset: bottomOffset,
-                          //       maxOffset: maxOffset,
-                          //     ),
-                          //   ),
-                          // ),
-                          Opacity(
-                            opacity: 1 - sAnim.value.abs(),
-                            child: Transform.translate(
-                              offset: Offset(-sAnim.value * sMaxOffset / siParallax,
-                                  !bounceUp ? (-maxOffset + topInset + 108.0) * (!bounceDown ? qp : (1 - bp)) : 0.0),
-                              child: TrackImage(
-                                images: currentMusic.playing?.album?.images,
-                                p: bp,
-                                cp: bcp,
-                                width: vp(a: 82.0, b: 92.0, c: qp),
-                                screenSize: screenSize,
-                                bottomOffset: bottomOffset,
-                                maxOffset: maxOffset,
+
+                  FutureBuilder(
+                    future: readQueueItems(),
+                    builder: (context, snapshot) {
+                      return AnimatedBuilder(
+                        animation: sAnim,
+                        builder: (context, child) {
+                          return Stack(
+                            children: [
+                              if (playerQueueHistory.isNotEmpty)
+                                Opacity(
+                                  opacity: -sAnim.value.clamp(-1.0, 0.0),
+                                  child: Transform.translate(
+                                    offset: Offset(-sAnim.value * sMaxOffset / siParallax - sMaxOffset / siParallax, 0),
+                                    child: TrackImage(
+                                      images: playerQueueHistory.last.album?.images,
+                                      large: true,
+                                      p: p,
+                                      cp: cp,
+                                      screenSize: screenSize,
+                                      bottomOffset: bottomOffset,
+                                      maxOffset: maxOffset,
+                                    ),
+                                  ),
+                                ),
+                              Opacity(
+                                opacity: 1 - sAnim.value.abs(),
+                                child: Transform.translate(
+                                  offset: Offset(-sAnim.value * sMaxOffset / siParallax,
+                                      !bounceUp ? (-maxOffset + topInset + 108.0) * (!bounceDown ? qp : (1 - bp)) : 0.0),
+                                  child: TrackImage(
+                                    images: currentMusic.playing?.album?.images,
+                                    p: bp,
+                                    cp: bcp,
+                                    width: vp(a: 82.0, b: 92.0, c: qp),
+                                    screenSize: screenSize,
+                                    bottomOffset: bottomOffset,
+                                    maxOffset: maxOffset,
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
-                          // Opacity(
-                          //   opacity: sAnim.value.clamp(0.0, 1.0),
-                          //   child: Transform.translate(
-                          //     offset: Offset(-sAnim.value * sMaxOffset / siParallax + sMaxOffset / siParallax, 0),
-                          //     child: TrackImage(
-                          //       image: tracks[2].album?.images!.maxSize,
-                          //       large: true,
-                          //       p: p,
-                          //       cp: cp,
-                          //       screenSize: screenSize,
-                          //       bottomOffset: bottomOffset,
-                          //       maxOffset: maxOffset,
-                          //     ),
-                          //   ),
-                          // ),
-                        ],
+                              if (fullQueue.isNotEmpty)
+                                Opacity(
+                                  opacity: sAnim.value.clamp(0.0, 1.0),
+                                  child: Transform.translate(
+                                    offset: Offset(-sAnim.value * sMaxOffset / siParallax + sMaxOffset / siParallax, 0),
+                                    child: TrackImage(
+                                      images: fullQueue.first.album?.images,
+                                      large: true,
+                                      p: p,
+                                      cp: cp,
+                                      screenSize: screenSize,
+                                      bottomOffset: bottomOffset,
+                                      maxOffset: maxOffset,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          );
+                        },
                       );
                     },
                   ),
@@ -963,7 +1016,7 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                         offset: Offset(0, (1 - queueOffset) * maxOffset),
                         child: IgnorePointer(
                           ignoring: !queueScrollable,
-                          child: QueueView(controller: scrollController),
+                          child: QueueView(controller: scrollController, normalQueue: playerNormalQueue, primaryQueue: playerPrimaryQueue),
                         ),
                       ),
                     ),

@@ -249,4 +249,17 @@ class MusicApi {
 
     return BatchLibrary.decode(jsonDecode(res.body));
   }
+
+  Future<List<MusicTrack>> batchTracks(List<String> idList) async {
+    log("fetching: $idList");
+
+    final res = await http.get(
+      Uri.parse("${BaseApi.url}/music/batch-tracks?ids=${idList.join(',')}"),
+      headers: {"authorization": await base.getToken()},
+    );
+
+    _reschk(res, "batchTracks");
+
+    return jsonDecode(res.body)["tracks"].map((e) => MusicTrack.decode(e)).toList().cast<MusicTrack>();
+  }
 }

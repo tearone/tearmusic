@@ -1,12 +1,16 @@
+import 'dart:developer';
+
 import 'package:animations/animations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tearmusic/models/music/track.dart';
+import 'package:tearmusic/models/player_info.dart';
 import 'package:tearmusic/providers/current_music_provider.dart';
 import 'package:tearmusic/providers/music_info_provider.dart';
 import 'package:tearmusic/providers/navigator_provider.dart';
 import 'package:tearmusic/providers/theme_provider.dart';
+import 'package:tearmusic/providers/user_provider.dart';
 import 'package:tearmusic/ui/common/image_color.dart';
 import 'package:tearmusic/ui/mobile/common/cached_image.dart';
 import 'package:tearmusic/ui/common/format.dart';
@@ -24,47 +28,25 @@ class TrackTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoContextMenu(
-      previewBuilder: (context, animation, child) {
-        return TrackTilePreview(track, animation: animation);
+    return Dismissible(
+      key: ValueKey(track.id),
+      confirmDismiss: (direction) async {
+        log("Item dismissed");
+        context.read<UserProvider>().postAdd(track.id, DateTime.now().millisecondsSinceEpoch, whereTo: PlayerInfoPostType.primary);
+
+        return false;
       },
-      actions: [
-        CupertinoContextMenuAction(
-          child: const Text("View Artist"),
-          onPressed: () {
-            Navigator.of(context, rootNavigator: true).pop();
-            Future.delayed(const Duration(seconds: 1)).then((_) {
-              ArtistView.view(track.artists.first, context: context).then((_) => context.read<ThemeProvider>().resetTheme());
-            });
-          },
+      direction: DismissDirection.startToEnd,
+      background: Container(
+        color: Colors.green.withOpacity(.3),
+        child: const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 24.0),
+          child: Align(alignment: Alignment.centerLeft, child: Icon(Icons.queue_music)),
         ),
-        if (track.album != null)
-          CupertinoContextMenuAction(
-            child: const Text("View Album"),
-            onPressed: () {
-              Navigator.of(context, rootNavigator: true).pop();
-              Future.delayed(const Duration(seconds: 1)).then((_) {
-                AlbumView.view(track.album!, context: context).then((_) => context.read<ThemeProvider>().resetTheme());
-              });
-            },
-          ),
-        CupertinoContextMenuAction(
-          child: const Text("Purge Cache"),
-          onPressed: () {
-            Navigator.of(context, rootNavigator: true).pop();
-            context.read<MusicInfoProvider>().purgeCache(track);
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              context.read<NavigatorProvider>().showSnackBar(const SnackBar(content: Text("Track cache deleted")));
-            });
-          },
-        ),
-        CupertinoContextMenuAction(
-          child: const Text("Manual Match"),
-          onPressed: () {
-            ManualMatchView.view(track, context: context);
-          },
-        ),
-      ],
+      ),
+      movementDuration: const Duration(milliseconds: 50),
+      dismissThresholds: const {DismissDirection.startToEnd: 0.45, DismissDirection.endToStart: 0.45},
+      resizeDuration: const Duration(milliseconds: 50),
       child: Selector<CurrentMusicProvider, MusicTrack?>(
         selector: (_, p) => p.playing,
         builder: (context, value, child) {
@@ -196,7 +178,7 @@ class TrackTile extends StatelessWidget {
                     final colors = generateColorPalette(value);
                     final theme = context.read<ThemeProvider>();
                     if (theme.key != colors[1]) theme.setThemeKey(colors[1]);
-                    currentMusic.playTrack(track);
+                    currentMusic.playTrack(track, clearHistory: true);
                   });
                 }
               },

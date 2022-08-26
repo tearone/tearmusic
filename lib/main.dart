@@ -28,8 +28,11 @@ void main() async {
   // Create Providers
   final baseApi = BaseApi();
   final musicInfoProvider = MusicInfoProvider(base: baseApi);
+
   final userProvider = UserProvider(base: baseApi, musicInfo: musicInfoProvider);
   final currentMusicProvider = CurrentMusicProvider(musicApi: musicInfoProvider, userApi: userProvider);
+  userProvider.setCurrentMusicProvider(currentMusicProvider);
+  
   final themeProvider = ThemeProvider();
 
   // Initialize background audio

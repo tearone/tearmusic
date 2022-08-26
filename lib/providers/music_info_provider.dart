@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:tearmusic/api/base_api.dart';
@@ -256,6 +257,43 @@ class MusicInfoProvider {
 
   Future<void> matchManual(MusicTrack track, String videoId) async {
     await _api.matchManual(track, videoId);
+  }
+
+  Future<List<MusicTrack>> batchTracks(List<String> idList) async {
+    log("[Queue] fetching batch tracks: $idList");
+
+    List<MusicTrack> tracks = [];
+
+    List<String> needToFetch = [];
+    for (var t in idList) {
+      log("[Queue] checking: $t");
+
+      final cacheKey = "tracks_$t";
+      final String? cache = _store.get(cacheKey);
+      if (cache != null) {
+        try {
+          tracks.add(MusicTrack.decode(jsonDecode(cache)));
+        } catch (e) {
+          log("[Queue] cant decode $t");
+          needToFetch.add(t);
+        }
+      } else {
+        needToFetch.add(t);
+      }
+    }
+
+    log("[Queue] batch tracks need to fetch: $needToFetch");
+
+    if (needToFetch.isNotEmpty) {
+      final data = await _api.batchTracks(needToFetch);
+
+      for (final t in data) {
+        tracks.add(t);
+        _store.put("tracks_$t", jsonEncode(t.encode()));
+      }
+    }
+
+    return tracks;
   }
 
   Future<BatchLibrary> libraryBatch(LibraryType type, {int limit = 10, int offset = 0}) async {

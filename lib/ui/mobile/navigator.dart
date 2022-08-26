@@ -140,12 +140,9 @@ class _NavigationScreenState extends State<NavigationScreen> with SingleTickerPr
                         color: Colors.black.withOpacity((animation.value * 4.0).clamp(0.0, 1.0)),
                         child: Transform.scale(
                           scale: (1 - animation.value.clamp(0.0, 1.0)) / 10 + 0.9,
-                          child: Transform.translate(
-                            offset: Offset(0, (animation.value).clamp(0.0, 1.0)),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular((animation.value * 150.0).clamp(0.0, 42.0)),
-                              child: child,
-                            ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular((animation.value * 150.0).clamp(0.0, 42.0)),
+                            child: child,
                           ),
                         ),
                       ),

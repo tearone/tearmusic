@@ -119,6 +119,7 @@ class _AlbumViewState extends State<AlbumView> {
                                   style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.w500),
                                 ),
                               ),
+                              centerTitle: true,
                               background: SafeArea(
                                 child: Padding(
                                   padding: const EdgeInsets.only(top: 64.0),

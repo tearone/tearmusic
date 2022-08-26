@@ -8,8 +8,9 @@ Widget Function(BuildContext, int) richSyncListBuilder(List<LyricsLine> richSync
     final currentMusic = context.read<CurrentMusicProvider>();
 
     final richSyncLine = richSync[index];
-    double progress([Duration? o]) => (richSyncLine.start + (o ?? Duration.zero)).inMilliseconds / currentMusic.player.duration!.inMilliseconds;
-    double progressEnd() => richSyncLine.end.inMilliseconds / currentMusic.player.duration!.inMilliseconds;
+    double progress([Duration? o]) =>
+        (richSyncLine.start + (o ?? Duration.zero)).inMilliseconds / (currentMusic.player.duration?.inMilliseconds ?? 1);
+    double progressEnd() => richSyncLine.end.inMilliseconds / (currentMusic.player.duration?.inMilliseconds ?? 1);
 
     return StreamBuilder<Duration>(
         stream: currentMusic.player.positionStream,

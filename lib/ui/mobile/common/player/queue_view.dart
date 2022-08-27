@@ -24,7 +24,7 @@ class QueueView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fullQueue = (primaryQueue + normalQueue);
+    final fullQueue = [...primaryQueue, ...normalQueue];
 
     return SafeArea(
       bottom: false,

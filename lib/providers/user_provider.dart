@@ -315,11 +315,7 @@ class UserProvider extends ChangeNotifier {
       case PlayerInfoPostType.history:
         final item = QueueItem(id: id, fromPrimary: fromPrimary);
 
-        if (toStart) {
-          playerInfo.queueHistory.insert(0, item);
-        } else {
-          playerInfo.queueHistory.add(item);
-        }
+        playerInfo.queueHistory.add(item);
         break;
       case PlayerInfoPostType.normal:
         if (toStart) {
@@ -472,9 +468,15 @@ class UserProvider extends ChangeNotifier {
     if (playerInfo.queueHistory.isNotEmpty) {
       nextToPlay = queueHistory.last;
 
+      final currentMusic = playerInfo.currentMusic!;
+
       postRemove(queueHistory.length - 1, newVersion, removeFrom: PlayerInfoPostType.history);
-      postAdd(playerInfo.currentMusic!.id, newVersion,
-          whereTo: nextToPlay.fromPrimary ? PlayerInfoPostType.primary : PlayerInfoPostType.normal, toStart: true);
+      postAdd(currentMusic.id, newVersion,
+          whereTo: currentMusic.fromPrimary ? PlayerInfoPostType.primary : PlayerInfoPostType.normal, toStart: true);
+
+      // if we want "skip" and "prev" track always be the same, we need to add the track to primary:
+      // postAdd(currentMusic.id, newVersion,
+      //     whereTo: PlayerInfoPostType.primary, toStart: true);
     } else {
       return;
     }

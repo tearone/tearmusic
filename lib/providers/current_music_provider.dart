@@ -157,8 +157,10 @@ class CurrentMusicProvider extends BaseAudioHandler with ChangeNotifier {
     if (result) {
       audioLoading = AudioLoadingState.ready;
     } else {
-      audioLoading = AudioLoadingState.error;
-      _userApi.skipToNext();
+      if (checkThisTrackIsPlaying(track)) {
+        audioLoading = AudioLoadingState.error;
+        _userApi.skipToNext();
+      }
       notifyListeners();
       return;
     }

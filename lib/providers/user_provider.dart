@@ -458,7 +458,7 @@ class UserProvider extends ChangeNotifier {
     postSource(playlist.id, seed, PlayerInfoSourceType.playlist, queueTracks, DateTime.now().millisecondsSinceEpoch);
   }
 
-  void skipToPrev() {
+  bool skipToPrev() {
     final queueHistory = playerInfo.queueHistory;
 
     final newVersion = DateTime.now().millisecondsSinceEpoch;
@@ -478,7 +478,7 @@ class UserProvider extends ChangeNotifier {
       // postAdd(currentMusic.id, newVersion,
       //     whereTo: PlayerInfoPostType.primary, toStart: true);
     } else {
-      return;
+      return false;
     }
 
     postCurrentMusic(nextToPlay.id, DateTime.now().millisecondsSinceEpoch, fromPrimary: true);
@@ -486,9 +486,11 @@ class UserProvider extends ChangeNotifier {
     log("[Player State] next to play from history: $nextToPlay");
 
     playTrackById(nextToPlay.id, nextToPlay.fromPrimary);
+
+    return true;
   }
 
-  void skipToNext() {
+  bool skipToNext() {
     final primaryQueue = playerInfo.primaryQueue;
     final normalQueue = playerInfo.normalQueue;
 
@@ -512,7 +514,7 @@ class UserProvider extends ChangeNotifier {
       postAdd(currentMusicId, newVersion, whereTo: PlayerInfoPostType.history);
       postRemove(0, newVersion);
     } else {
-      return;
+      return false;
     }
 
     postCurrentMusic(nextToPlay, DateTime.now().millisecondsSinceEpoch, fromPrimary: true);
@@ -520,6 +522,8 @@ class UserProvider extends ChangeNotifier {
     log("[Player State] next to play from queue: $nextToPlay");
 
     playTrackById(nextToPlay, fromPrimary);
+
+    return true;
   }
 
   void playTrackById(String id, bool fromPrimary) {

@@ -75,7 +75,6 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
 
   MusicTrack? nextItem;
   MusicTrack? lastItem;
-  List<String> allItems = [];
 
   List<MusicTrack> playerNormalQueue = [];
   List<MusicTrack> playerPrimaryQueue = [];
@@ -178,17 +177,25 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
   }
 
   void snapToPrev(BuildContext context) {
-    context.read<UserProvider>().skipToPrev();
+    final canPrev = context.read<UserProvider>().skipToPrev();
+
+    if (!canPrev) return;
+
+    _queueItemsNeedRefresh = true;
+
+    final checkCurrentMusic = context.read<CurrentMusicProvider>().playing!.id;
 
     sOffset = -sMaxOffset;
     sAnim
         .animateTo(
       -1.0,
       curve: bouncingCurve,
-      duration: const Duration(milliseconds: 3000),
+      duration: const Duration(milliseconds: 300),
     )
         .then((_) {
-      _queueItemsNeedRefresh = true;
+      if (checkCurrentMusic == context.read<CurrentMusicProvider>().playing!.id) {
+        _queueItemsNeedRefresh = true;
+      }
     });
     if ((sPrevOffset - sOffset).abs() > actuationOffset) HapticFeedback.lightImpact();
   }
@@ -204,7 +211,12 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
   }
 
   void snapToNext(BuildContext context) async {
-    context.read<UserProvider>().skipToNext();
+    final canSkip = context.read<UserProvider>().skipToNext();
+
+    if (!canSkip) return;
+
+    _queueItemsNeedRefresh = true;
+    final checkCurrentMusic = context.read<CurrentMusicProvider>().playing!.id;
 
     sOffset = sMaxOffset;
     sAnim
@@ -214,27 +226,27 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
       duration: const Duration(milliseconds: 300),
     )
         .then((_) {
-      _queueItemsNeedRefresh = true;
+      if (checkCurrentMusic == context.read<CurrentMusicProvider>().playing!.id) {
+        _queueItemsNeedRefresh = true;
+      }
     });
     if ((sPrevOffset - sOffset).abs() > actuationOffset) HapticFeedback.lightImpact();
   }
 
   Future<void> readQueueItems() async {
     final userProvider = context.read<UserProvider>();
-    final tracks = userProvider.getAllTracks();
 
-    if (!listEquals(tracks, allItems)) {
-      final items = await context.read<MusicInfoProvider>().batchTracks(tracks);
+    if (_queueItemsNeedRefresh) {
+      final items = await context.read<MusicInfoProvider>().batchTracks(userProvider.getAllTracks());
 
+      final historyIds = userProvider.playerInfo.queueHistory.map((e) => e.id);
       playerNormalQueue = items.where((element) => userProvider.playerInfo.normalQueue.contains(element.id)).toList();
       playerPrimaryQueue = items.where((element) => userProvider.playerInfo.primaryQueue.contains(element.id)).toList();
-      playerQueueHistory = items.where((element) => userProvider.playerInfo.queueHistory.map((e) => e.id).contains(element.id)).toList();
+      playerQueueHistory = items.where((element) => historyIds.contains(element.id)).toList();
       fullQueue = [...playerPrimaryQueue, ...playerNormalQueue];
 
       sOffset = 0;
       sAnim.animateTo(0.0, duration: Duration.zero);
-
-      allItems = tracks;
 
       _queueItemsNeedRefresh = false;
     }

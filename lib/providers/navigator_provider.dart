@@ -62,6 +62,8 @@ class NavigatorProvider extends ChangeNotifier {
           child: child,
         ),
         expanded: false,
+        duration: const Duration(milliseconds: 300),
+        animationCurve: Curves.fastLinearToSlowEaseIn,
       ),
       uri: uri,
     ).then((value) {

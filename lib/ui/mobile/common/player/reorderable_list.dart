@@ -10,8 +10,8 @@ import 'dart:math';
 import 'dart:async';
 import 'dart:ui' show lerpDouble;
 
-typedef bool ReorderItemCallback(Key draggedItem, Key newPosition, BuildContext context);
-typedef void ReorderCompleteCallback(Key draggedItem);
+typedef ReorderItemCallback = bool Function(Key draggedItem, Key newPosition, BuildContext context);
+typedef ReorderCompleteCallback = void Function(Key draggedItem);
 
 // Represents placeholder for currently dragged row including decorations
 // (i.e. before and after shadow)
@@ -27,7 +27,7 @@ class DecoratedPlaceholder {
 }
 
 // Decorates current placeholder widget
-typedef DecoratedPlaceholder DecoratePlaceholder(
+typedef DecoratePlaceholder = DecoratedPlaceholder Function(
   Widget widget,
   double decorationOpacity,
 );
@@ -44,7 +44,7 @@ class CancellationToken {
 }
 
 class ReorderableList extends StatefulWidget {
-  ReorderableList({
+  const ReorderableList({
     Key? key,
     required this.child,
     required this.onReorder,
@@ -80,7 +80,7 @@ enum ReorderableItemState {
   dragProxyFinished
 }
 
-typedef Widget ReorderableItemChildBuilder(
+typedef ReorderableItemChildBuilder = Widget Function(
   BuildContext context,
   ReorderableItemState state,
 );
@@ -88,7 +88,7 @@ typedef Widget ReorderableItemChildBuilder(
 class ReorderableItem extends StatefulWidget {
   /// [key] must be unique key for every item. It must be stable and not change
   /// when items are reordered
-  ReorderableItem({
+  const ReorderableItem({
     required Key key,
     required this.childBuilder,
   }) : super(key: key);
@@ -102,7 +102,7 @@ class ReorderableItem extends StatefulWidget {
 typedef ReorderableListenerCallback = bool Function();
 
 class ReorderableListener extends StatelessWidget {
-  ReorderableListener({
+  const ReorderableListener({
     Key? key,
     this.child,
     this.canStart,
@@ -162,7 +162,7 @@ class ReorderableListener extends StatelessWidget {
 }
 
 class DelayedReorderableListener extends ReorderableListener {
-  DelayedReorderableListener({
+  const DelayedReorderableListener({
     Key? key,
     Widget? child,
     ReorderableListenerCallback? canStart,
@@ -172,6 +172,7 @@ class DelayedReorderableListener extends ReorderableListener {
   final Duration delay;
 
   @protected
+  @override
   MultiDragGestureRecognizer createRecognizer({
     required Object? debugOwner,
     Set<PointerDeviceKind>? supportedDevices,
@@ -198,14 +199,14 @@ class _ReorderableListState extends State<ReorderableList>
   void initState() {
     super.initState();
     if (widget.cancellationToken != null) {
-      widget.cancellationToken!._callbacks.add(this._cancel);
+      widget.cancellationToken!._callbacks.add(_cancel);
     }
   }
 
   @override
   void dispose() {
     if (widget.cancellationToken != null) {
-      widget.cancellationToken!._callbacks.remove(this._cancel);
+      widget.cancellationToken!._callbacks.remove(_cancel);
     }
     _finalAnimation?.dispose();
     for (final c in _itemTranslations.values) {
@@ -283,7 +284,7 @@ class _ReorderableListState extends State<ReorderableList>
         draggedItem.widget
             .childBuilder(draggedItem.context, ReorderableItemState.dragProxy),
         draggedItem.context.findRenderObject() as RenderBox);
-    this._scrollable!.position.addListener(this._scrolled);
+    _scrollable!.position.addListener(_scrolled);
 
     return this;
   }
@@ -300,6 +301,7 @@ class _ReorderableListState extends State<ReorderableList>
     checkDragPosition();
   }
 
+  @override
   void update(DragUpdateDetails details) {
     _dragProxy!.offset += details.delta.dy;
     checkDragPosition();
@@ -322,7 +324,7 @@ class _ReorderableListState extends State<ReorderableList>
 
       double top = d.padding.top;
       double bottom =
-          this._scrollable!.position.viewportDimension - d.padding.bottom;
+          _scrollable!.position.viewportDimension - d.padding.bottom;
 
       if (_dragProxy!.offset < top &&
           position.pixels > position.minScrollExtent) {
@@ -344,7 +346,7 @@ class _ReorderableListState extends State<ReorderableList>
 
       if ((newOffset - position.pixels).abs() >= 1.0) {
         _scrolling = true;
-        await this._scrollable!.position.animateTo(newOffset,
+        await _scrollable!.position.animateTo(newOffset,
             duration: Duration(milliseconds: duration), curve: Curves.linear);
         _scrolling = false;
         if (_dragging != null) {
@@ -357,10 +359,12 @@ class _ReorderableListState extends State<ReorderableList>
 
   bool _scrolling = false;
 
+  @override
   void cancel() {
     end(null);
   }
 
+  @override
   end(DragEndDetails? details) async {
     if (_dragging == null) {
       return;
@@ -370,7 +374,7 @@ class _ReorderableListState extends State<ReorderableList>
     if (_scrolling) {
       var prevDragging = _dragging;
       _dragging = null;
-      SchedulerBinding.instance!.addPostFrameCallback((Duration timeStamp) {
+      SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
         _dragging = prevDragging;
         end(details);
       });
@@ -378,13 +382,13 @@ class _ReorderableListState extends State<ReorderableList>
     }
 
     if (_scheduledRebuild) {
-      SchedulerBinding.instance!.addPostFrameCallback((Duration timeStamp) {
+      SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
         if (mounted) end(details);
       });
       return;
     }
 
-    this._scrollable!.position.removeListener(this._scrolled);
+    _scrollable!.position.removeListener(_scrolled);
 
     var current = _items[_dragging];
     if (current == null) return;
@@ -400,7 +404,7 @@ class _ReorderableListState extends State<ReorderableList>
         lowerBound: 0.0,
         upperBound: 1.0,
         value: 0.0,
-        duration: Duration(milliseconds: 300));
+        duration: const Duration(milliseconds: 300));
 
     _finalAnimation!.addListener(() {
       _dragProxy!.offset = lerpDouble(
@@ -498,7 +502,7 @@ class _ReorderableListState extends State<ReorderableList>
     if (closest != null &&
         closest.key != _dragging &&
         closest.key != _lastReportedKey) {
-      SchedulerBinding.instance!.addPostFrameCallback((Duration timeStamp) {
+      SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
         _scheduledRebuild = false;
       });
       _scheduledRebuild = true;
@@ -549,13 +553,14 @@ class _ReorderableListState extends State<ReorderableList>
 
   //
 
-  Map<Key, AnimationController> _itemTranslations = HashMap();
+  final Map<Key, AnimationController> _itemTranslations = HashMap();
 
   double itemTranslation(Key key) {
-    if (!_itemTranslations.containsKey(key))
+    if (!_itemTranslations.containsKey(key)) {
       return 0.0;
-    else
+    } else {
       return _itemTranslations[key]!.value;
+    }
   }
 
   void _adjustItemTranslation(Key key, double delta, double max) {
@@ -620,7 +625,7 @@ class _ReorderableItemState extends State<ReorderableItem> {
     super.didUpdateWidget(oldWidget);
 
     _listState = _ReorderableListState.of(context);
-    if (_listState!.dragging == this.key) {
+    if (_listState!.dragging == key) {
       _listState!._draggedItemWidgetUpdated();
     }
   }
@@ -647,7 +652,7 @@ class _DragProxy extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => _DragProxyState();
 
-  _DragProxy(this.decoratePlaceholder);
+  const _DragProxy(this.decoratePlaceholder);
 }
 
 class _DragProxyState extends State<_DragProxy> {
@@ -708,22 +713,22 @@ class _DragProxyState extends State<_DragProxy> {
       final w = IgnorePointer(
         child: MediaQuery.removePadding(
           context: context,
-          child: _widget!,
           removeTop: true,
           removeBottom: true,
+          child: _widget!,
         ),
       );
 
       final decoratedPlaceholder =
           widget.decoratePlaceholder(w, _decorationOpacity);
       return Positioned(
-        child: decoratedPlaceholder.widget,
         left: _offsetX,
         width: _size.width,
         top: offset - decoratedPlaceholder.offset,
+        child: decoratedPlaceholder.widget,
       );
     } else {
-      return Container(width: 0.0, height: 0.0);
+      return const SizedBox(width: 0.0, height: 0.0);
     }
   }
 
@@ -738,7 +743,7 @@ class _VerticalPointerState extends MultiDragPointerState {
   _VerticalPointerState(Offset initialPosition, PointerDeviceKind kind,
       DeviceGestureSettings? gestureSettings)
       : super(initialPosition, kind, gestureSettings) {
-    _resolveTimer = Timer(Duration(milliseconds: 150), () {
+    _resolveTimer = Timer(const Duration(milliseconds: 150), () {
       resolve(GestureDisposition.accepted);
       _resolveTimer = null;
     });
@@ -747,8 +752,9 @@ class _VerticalPointerState extends MultiDragPointerState {
   @override
   void checkForResolutionAfterMove() {
     assert(pendingDelta != null);
-    if (pendingDelta!.dy.abs() > pendingDelta!.dx.abs())
+    if (pendingDelta!.dy.abs() > pendingDelta!.dx.abs()) {
       resolve(GestureDisposition.accepted);
+    }
   }
 
   @override
@@ -758,6 +764,7 @@ class _VerticalPointerState extends MultiDragPointerState {
     _resolveTimer = null;
   }
 
+  @override
   void dispose() {
     _resolveTimer?.cancel();
     _resolveTimer = null;
@@ -791,7 +798,7 @@ class _Recognizer extends MultiDragGestureRecognizer {
 
 DecoratedPlaceholder _defaultDecoratePlaceholder(
     Widget widget, double decorationOpacity) {
-  final double decorationHeight = 10.0;
+  const double decorationHeight = 10.0;
 
   final decoratedWidget = Builder(builder: (BuildContext context) {
     final mq = MediaQuery.of(context);
@@ -805,9 +812,9 @@ DecoratedPlaceholder _defaultDecoratePlaceholder(
                 decoration: BoxDecoration(
                   border: Border(
                       bottom: BorderSide(
-                          color: Color(0x50000000),
+                          color: const Color(0x50000000),
                           width: 1.0 / mq.devicePixelRatio)),
-                  gradient: LinearGradient(
+                  gradient: const LinearGradient(
                     begin: Alignment(0.0, -1.0),
                     end: Alignment(0.0, 1.0),
                     colors: <Color>[
@@ -826,9 +833,9 @@ DecoratedPlaceholder _defaultDecoratePlaceholder(
                 decoration: BoxDecoration(
                   border: Border(
                       top: BorderSide(
-                          color: Color(0x50000000),
+                          color: const Color(0x50000000),
                           width: 1.0 / mq.devicePixelRatio)),
-                  gradient: LinearGradient(
+                  gradient: const LinearGradient(
                     begin: Alignment(0.0, -1.0),
                     end: Alignment(0.0, 1.0),
                     colors: <Color>[

@@ -1,12 +1,10 @@
 // ignore_for_file: dead_code
 
-import 'dart:developer';
 import 'dart:ui';
 
 import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:animations/animations.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -14,8 +12,6 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:provider/provider.dart';
 import 'package:tearmusic/models/music/track.dart';
-import 'package:tearmusic/models/player_info.dart';
-import 'package:tearmusic/player/audio_source.dart';
 import 'package:tearmusic/providers/current_music_provider.dart';
 import 'package:tearmusic/providers/music_info_provider.dart';
 import 'package:tearmusic/providers/theme_provider.dart';
@@ -74,8 +70,6 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
   bool queueScrollable = false;
   bool bounceUp = false;
   bool bounceDown = false;
-
-  bool _queueItemsNeedRefresh = true;
 
   MusicTrack? nextItem;
   MusicTrack? lastItem;

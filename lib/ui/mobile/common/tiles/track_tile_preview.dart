@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:tearmusic/models/music/track.dart';
-import 'package:tearmusic/providers/theme_provider.dart';
-import 'package:tearmusic/ui/mobile/common/cached_image.dart';
 import 'package:tearmusic/ui/mobile/common/tiles/track_tile.dart';
 
 class TrackTilePreview extends StatelessWidget {

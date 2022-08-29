@@ -10,7 +10,6 @@ import 'package:tearmusic/api/user_api.dart';
 import 'package:tearmusic/exceptionts.dart';
 import 'package:tearmusic/models/library.dart';
 import 'package:tearmusic/models/model.dart';
-import 'package:tearmusic/models/music/playlist.dart';
 import 'package:tearmusic/models/music/track.dart';
 import 'package:tearmusic/models/player_info.dart';
 import 'package:tearmusic/providers/current_music_provider.dart';

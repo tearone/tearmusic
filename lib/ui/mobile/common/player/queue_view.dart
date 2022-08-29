@@ -1,22 +1,19 @@
 import 'dart:developer';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide ReorderableList;
 import 'package:provider/provider.dart';
 import 'package:tearmusic/models/music/track.dart';
 import 'package:tearmusic/models/player_info.dart';
-import 'package:tearmusic/providers/current_music_provider.dart';
 import 'package:tearmusic/providers/music_info_provider.dart';
 import 'package:tearmusic/providers/user_provider.dart';
 import 'package:tearmusic/ui/mobile/common/player/player.dart';
-import 'package:tearmusic/ui/mobile/common/player/queue_tile.dart';
 import 'package:tearmusic/ui/mobile/common/player/reorderable_list.dart';
 import 'package:tearmusic/ui/mobile/common/tiles/track_tile.dart';
 
 int moveFromIndex = -1;
 
 class TrackData extends StatelessWidget {
-  TrackData({
+  const TrackData({
     Key? key,
     required this.itemKey,
     this.track,
@@ -24,8 +21,8 @@ class TrackData extends StatelessWidget {
     this.canMove = true,
   }) : super(key: key);
 
-  bool canMove;
-  Widget? item;
+  final bool canMove;
+  final Widget? item;
   final MusicTrack? track;
   final Key itemKey;
 
@@ -156,9 +153,9 @@ class _QueueViewState extends State<QueueView> {
 
     fullQueue.insert(
       0,
-      TrackData(
-        itemKey: const ValueKey("queue-text"),
-        item: const Padding(
+      const TrackData(
+        itemKey: ValueKey("queue-text"),
+        item: Padding(
           padding: EdgeInsets.only(left: 24.0, top: 16.0, bottom: 12.0),
           child: Text(
             "Queue",
@@ -251,8 +248,6 @@ class _QueueViewState extends State<QueueView> {
   @override
   Widget build(BuildContext context) {
     log("[Queue View] rebuild");
-
-    final cm = context.watch<CurrentMusicProvider>();
 
     if (context.read<UserProvider>().playerInfo.version != lastVersion) buildQueue();
 

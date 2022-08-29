@@ -93,7 +93,7 @@ class _PlaylistViewState extends State<PlaylistView> {
         final theme = snapshot.data!;
 
         return FutureBuilder<PlaylistDetails>(
-          future: context.read<MusicInfoProvider>().playlistTracks(widget.playlist),
+          future: context.read<MusicInfoProvider>().playlistTracks(widget.playlist.id),
           builder: (context, snapshot) {
             return Theme(
               data: theme,
@@ -229,8 +229,8 @@ class _PlaylistViewState extends State<PlaylistView> {
                                         child: FloatingActionButton(
                                           child: const Icon(Icons.play_arrow),
                                           onPressed: () {
-                                      context.read<UserProvider>().queuePlaylist(widget.playlist);
-                                    },
+                                            context.read<UserProvider>().newQueue(PlayerInfoSourceType.playlist, id: widget.playlist.id);
+                                          },
                                         ),
                                       ),
                                       Row(

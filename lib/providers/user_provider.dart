@@ -223,7 +223,7 @@ class UserProvider extends ChangeNotifier {
     log("[Player] matchPlayerInfo all queued tracks: ${getAllTracks()}");
 
     // caching tracks
-    await _musicInfoProvider.batchTracks(getAllTracks());
+    //await _musicInfoProvider.batchTracks(getAllTracks());
 
     final playerVersion = await _api.getPlayerVersion();
 
@@ -262,6 +262,20 @@ class UserProvider extends ChangeNotifier {
       }
     }
 
+    /*switch (playerInfo.queueSource.type) {
+      case PlayerInfoSourceType.playlist:
+        // caching tracks
+        await _musicInfoProvider.playlistTracks(playerInfo.queueSource.id!);
+        break;
+      case PlayerInfoSourceType.album:
+        await _musicInfoProvider.albumTracks(playerInfo.queueSource.id!);
+        break;
+      case PlayerInfoSourceType.artist:
+        break;
+      case PlayerInfoSourceType.radio:
+        break;
+    }*/
+
     log("[Player] matched info: ${playerInfo.encode()}");
   }
 
@@ -272,6 +286,8 @@ class UserProvider extends ChangeNotifier {
     playerInfo.version = newVersion;
     log("[Player] operation version is: ${playerInfo.operationsVersion} - new version is: $newVersion");
     playerInfo.operations.add(body);
+
+    _store.put("player_info", jsonEncode(playerInfo.encode()));
 
     //log("[Player] starting operations sync timer with operations: ${playerInfo.operations}");
 
@@ -354,29 +370,42 @@ class UserProvider extends ChangeNotifier {
       {PlayerInfoReorderMoveType moveFrom = PlayerInfoReorderMoveType.normal, PlayerInfoReorderMoveType moveTo = PlayerInfoReorderMoveType.normal}) {
     String moveId;
 
+    log("trying moveto ${moveFrom.name}($fromIndex) - ${moveTo.name}($toIndex)");
+
     if (moveFrom == PlayerInfoReorderMoveType.primary) {
-      if (checkCorrectIndex(0, fromIndex, playerInfo.primaryQueue)) return;
+      if (!checkCorrectIndex(0, fromIndex, playerInfo.primaryQueue)) {
+        log("[Queue Reorder] incorrect index movefrom primary: $fromIndex");
+        return;
+      }
 
       moveId = playerInfo.primaryQueue[fromIndex];
       playerInfo.primaryQueue.removeAt(fromIndex);
     } else {
-      if (checkCorrectIndex(0, fromIndex, playerInfo.normalQueue)) return;
+      if (!checkCorrectIndex(0, fromIndex, playerInfo.normalQueue)) {
+        log("[Queue Reorder] incorrect index movefrom normal: $fromIndex - ${playerInfo.normalQueue.length}");
+        return;
+      }
 
       moveId = playerInfo.normalQueue[fromIndex];
       playerInfo.normalQueue.removeAt(fromIndex);
     }
 
     if (moveTo == PlayerInfoReorderMoveType.primary) {
-      if (checkCorrectIndex(1, toIndex, playerInfo.primaryQueue)) return;
+      if (!checkCorrectIndex(1, toIndex, playerInfo.primaryQueue)) {
+        log("[Queue Reorder] incorrect index moveto primary: $toIndex");
+        return;
+      }
 
       playerInfo.primaryQueue.insert(toIndex, moveId);
     } else {
-      if (checkCorrectIndex(1, toIndex, playerInfo.normalQueue)) return;
-
+      if (!checkCorrectIndex(1, toIndex, playerInfo.normalQueue)) {
+        log("[Queue Reorder] incorrect index moveto normal: $toIndex");
+        return;
+      }
       playerInfo.normalQueue.insert(toIndex, moveId);
     }
 
-    final body = {"type": "reorder", "from_index": fromIndex, "to_index": toIndex, "move_from": moveFrom, "move_to": moveTo};
+    final body = {"type": "reorder", "from_index": fromIndex, "to_index": toIndex, "move_from": moveFrom.name, "move_to": moveTo.name};
     _stackPlayerOperation(body, newVersion);
   }
 
@@ -422,40 +451,42 @@ class UserProvider extends ChangeNotifier {
   void postSource(String id, int seed, PlayerInfoSourceType type, List<MusicTrack> tracks, int newVersion) {
     final body = {"type": "source", "id": id, "seed": seed, "source_type": type.name, "tracks": tracks.map((e) => e.id).toList()};
 
-    switch (type) {
-      case PlayerInfoSourceType.playlist:
-        playerInfo.currentMusic = QueueItem(id: tracks[0].id, fromPrimary: false);
-        playerInfo.normalQueue = tracks.map((e) => e.id).toList();
-        playerInfo.normalQueue.removeAt(0);
-        playerInfo.queueHistory = [];
-
-        _currentMusicProvider.playTrack(tracks[0]);
-        break;
-      case PlayerInfoSourceType.album:
-        break;
-      case PlayerInfoSourceType.artist:
-        break;
-      case PlayerInfoSourceType.radio:
-        break;
+    if (type == PlayerInfoSourceType.radio) {
+    } else {
+      _currentMusicProvider.playTrack(tracks[0]);
+      playerInfo.currentMusic = QueueItem(id: tracks[0].id, fromPrimary: false);
+      playerInfo.normalQueue = tracks.map((e) => e.id).toList();
+      playerInfo.normalQueue.removeAt(0);
+      playerInfo.queueHistory = [];
     }
 
     _stackPlayerOperation(body, newVersion);
   }
 
-  Future<void> queuePlaylist(MusicPlaylist playlist) async {
+  Future<void> newQueue(PlayerInfoSourceType type, {String? id}) async {
     final seed = randomBetween(10000, 99999);
 
-    final playlistDetails = await _musicInfoProvider.playlistTracks(playlist);
+    List<MusicTrack> tracks = [];
 
-    playlistDetails.tracks.shuffle(math.Random(seed));
+    if (type == PlayerInfoSourceType.playlist) {
+      tracks = (await _musicInfoProvider.playlistTracks(id!)).tracks;
+    } else if (type == PlayerInfoSourceType.album) {
+      tracks = (await _musicInfoProvider.albumTracks(id!));
+    } else if (type == PlayerInfoSourceType.radio) {
+      return;
+    }
+
+    log("new queue: ${tracks.map((e) => e.name)}");
+
+    tracks.shuffle(math.Random(seed));
 
     // TODO: queue source is radio if length < 50
 
-    final queueTracks = playlistDetails.tracks.sublist(0, playlistDetails.tracks.length.clamp(0, 50));
+    final queueTracks = tracks.sublist(0, tracks.length.clamp(0, 50));
 
     playerInfo.normalQueue = queueTracks.map((e) => e.id).toList();
 
-    postSource(playlist.id, seed, PlayerInfoSourceType.playlist, queueTracks, DateTime.now().millisecondsSinceEpoch);
+    postSource(id!, seed, type, queueTracks, DateTime.now().millisecondsSinceEpoch);
   }
 
   bool skipToPrev() {
@@ -468,20 +499,19 @@ class UserProvider extends ChangeNotifier {
     if (playerInfo.queueHistory.isNotEmpty) {
       nextToPlay = queueHistory.last;
 
-      final currentMusic = playerInfo.currentMusic!;
+      //final currentMusic = playerInfo.currentMusic!;
 
       postRemove(queueHistory.length - 1, newVersion, removeFrom: PlayerInfoPostType.history);
-      postAdd(currentMusic.id, newVersion,
-          whereTo: currentMusic.fromPrimary ? PlayerInfoPostType.primary : PlayerInfoPostType.normal, toStart: true);
+      postAdd(playerInfo.currentMusic!.id, newVersion,
+          whereTo: playerInfo.currentMusic!.fromPrimary ? PlayerInfoPostType.primary : PlayerInfoPostType.normal, toStart: true);
+      //postAdd(currentMusic.id, newVersion, whereTo: currentMusic.fromPrimary ? PlayerInfoPostType.primary : PlayerInfoPostType.normal, toStart: true);
 
       // if we want "skip" and "prev" track always be the same, we need to add the track to primary:
-      // postAdd(currentMusic.id, newVersion,
-      //     whereTo: PlayerInfoPostType.primary, toStart: true);
     } else {
       return false;
     }
 
-    postCurrentMusic(nextToPlay.id, DateTime.now().millisecondsSinceEpoch, fromPrimary: true);
+    postCurrentMusic(nextToPlay.id, DateTime.now().millisecondsSinceEpoch, fromPrimary: nextToPlay.fromPrimary);
 
     log("[Player State] next to play from history: $nextToPlay");
 
@@ -504,7 +534,7 @@ class UserProvider extends ChangeNotifier {
     if (primaryQueue.isNotEmpty) {
       nextToPlay = primaryQueue.first;
 
-      postAdd(currentMusicId, newVersion, whereTo: PlayerInfoPostType.history, fromPrimary: true);
+      postAdd(currentMusicId, newVersion, whereTo: PlayerInfoPostType.history, fromPrimary: fromPrimary);
       postRemove(0, newVersion, removeFrom: PlayerInfoPostType.primary);
     } else if (normalQueue.isNotEmpty) {
       nextToPlay = normalQueue.first;
@@ -517,7 +547,7 @@ class UserProvider extends ChangeNotifier {
       return false;
     }
 
-    postCurrentMusic(nextToPlay, DateTime.now().millisecondsSinceEpoch, fromPrimary: true);
+    postCurrentMusic(nextToPlay, DateTime.now().millisecondsSinceEpoch, fromPrimary: fromPrimary);
 
     log("[Player State] next to play from queue: $nextToPlay");
 
@@ -527,12 +557,19 @@ class UserProvider extends ChangeNotifier {
   }
 
   void playTrackById(String id, bool fromPrimary) {
+    if (_currentMusicProvider.player.playing) _currentMusicProvider.stop();
     _currentMusicProvider.seek(Duration.zero);
 
     final playTrack = _musicInfoProvider.batchTracks([id]);
     playTrack.then((value) {
       _currentMusicProvider.playTrack(value.first, fromPrimary: fromPrimary);
     });
+  }
+
+  String? nextInQueue() {
+    final fullQueue = [...playerInfo.primaryQueue, ...playerInfo.normalQueue];
+
+    return fullQueue.isNotEmpty ? fullQueue.first : null;
   }
 }
 

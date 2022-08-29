@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/cupertino.dart';
@@ -10,6 +11,7 @@ import 'package:provider/provider.dart';
 import 'package:tearmusic/models/library.dart';
 import 'package:tearmusic/models/music/album.dart';
 import 'package:tearmusic/models/music/track.dart';
+import 'package:tearmusic/models/player_info.dart';
 import 'package:tearmusic/providers/music_info_provider.dart';
 import 'package:tearmusic/providers/navigator_provider.dart';
 import 'package:tearmusic/providers/theme_provider.dart';
@@ -89,7 +91,7 @@ class _AlbumViewState extends State<AlbumView> {
         final theme = snapshot.data!;
 
         return FutureBuilder<List<MusicTrack>>(
-          future: context.read<MusicInfoProvider>().albumTracks(widget.album),
+          future: context.read<MusicInfoProvider>().albumTracks(widget.album.id),
           builder: (context, snapshot) {
             return Theme(
               data: theme,
@@ -190,7 +192,9 @@ class _AlbumViewState extends State<AlbumView> {
                                         ),
                                         child: FloatingActionButton(
                                           child: const Icon(Icons.play_arrow),
-                                          onPressed: () {},
+                                          onPressed: () {
+                                            context.read<UserProvider>().newQueue(PlayerInfoSourceType.album, id: widget.album.id);
+                                          },
                                         ),
                                       ),
                                       Row(

@@ -21,6 +21,8 @@ import 'package:tearmusic/providers/music_info_provider.dart';
 import 'package:tearmusic/providers/theme_provider.dart';
 import 'package:tearmusic/providers/user_provider.dart';
 import 'package:tearmusic/providers/will_pop_provider.dart';
+import 'package:tearmusic/ui/common/image_color.dart';
+import 'package:tearmusic/ui/mobile/common/cached_image.dart';
 import 'package:tearmusic/ui/mobile/common/player/lyrics_view.dart';
 import 'package:tearmusic/ui/mobile/common/player/queue_view.dart';
 import 'package:tearmusic/ui/mobile/common/player/waveform_slider.dart';
@@ -31,6 +33,8 @@ import 'package:tearmusic/ui/mobile/common/views/album_view/album_view.dart';
 import 'package:tearmusic/utils.dart';
 
 enum PlayerState { mini, expanded, queue }
+
+bool isMoving = false;
 
 class Player extends StatefulWidget {
   const Player({Key? key, required this.animation}) : super(key: key);
@@ -75,6 +79,8 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
 
   MusicTrack? nextItem;
   MusicTrack? lastItem;
+  MusicTrack? currentItem;
+  int currentVersion = 0;
 
   List<MusicTrack> playerNormalQueue = [];
   List<MusicTrack> playerPrimaryQueue = [];
@@ -176,26 +182,33 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
     if (haptic && (prevOffset - offset).abs() > actuationOffset) HapticFeedback.lightImpact();
   }
 
-  void snapToPrev(BuildContext context) {
-    final canPrev = context.read<UserProvider>().skipToPrev();
+  void snapToPrev(BuildContext context, {byPress = false}) {
+    final userProvider = context.read<UserProvider>();
+    final canPrev = userProvider.skipToPrev();
 
     if (!canPrev) return;
-
-    _queueItemsNeedRefresh = true;
-
-    final checkCurrentMusic = context.read<CurrentMusicProvider>().playing!.id;
+    final musicInfoProvider = context.read<MusicInfoProvider>();
 
     sOffset = -sMaxOffset;
     sAnim
         .animateTo(
       -1.0,
       curve: bouncingCurve,
-      duration: const Duration(milliseconds: 300),
+      duration: Duration(milliseconds: byPress ? 0 : 100),
     )
-        .then((_) {
-      if (checkCurrentMusic == context.read<CurrentMusicProvider>().playing!.id) {
-        _queueItemsNeedRefresh = true;
-      }
+        .then((_) async {
+      sOffset = 0;
+      sAnim.animateTo(0.0, duration: Duration.zero);
+
+      await readQueueItems();
+
+      final item = await musicInfoProvider.batchTracks([userProvider.playerInfo.currentMusic!.id]);
+
+      CachedImage(item.first.album!.images!).getImage(const Size(64, 64)).then((value) {
+        final colors = generateColorPalette(value);
+        final theme = context.read<ThemeProvider>();
+        if (context.read<CurrentMusicProvider>().playing == currentItem && theme.key != colors[1]) theme.setThemeKey(colors[1]);
+      });
     });
     if ((sPrevOffset - sOffset).abs() > actuationOffset) HapticFeedback.lightImpact();
   }
@@ -205,58 +218,70 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
     sAnim.animateTo(
       0.0,
       curve: bouncingCurve,
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 100),
     );
     if ((sPrevOffset - sOffset).abs() > actuationOffset) HapticFeedback.lightImpact();
   }
 
-  void snapToNext(BuildContext context) async {
+  void snapToNext(BuildContext context, {byPress = false}) {
+    final userProvider = context.read<UserProvider>();
     final canSkip = context.read<UserProvider>().skipToNext();
 
     if (!canSkip) return;
-
-    _queueItemsNeedRefresh = true;
-    final checkCurrentMusic = context.read<CurrentMusicProvider>().playing!.id;
+    final musicInfoProvider = context.read<MusicInfoProvider>();
 
     sOffset = sMaxOffset;
     sAnim
         .animateTo(
       1.0,
       curve: bouncingCurve,
-      duration: const Duration(milliseconds: 300),
+      duration: Duration(milliseconds: byPress ? 0 : 100),
     )
-        .then((_) {
-      if (checkCurrentMusic == context.read<CurrentMusicProvider>().playing!.id) {
-        _queueItemsNeedRefresh = true;
-      }
+        .then((_) async {
+      sOffset = 0;
+      sAnim.animateTo(0.0, duration: Duration.zero);
+
+      await readQueueItems();
+
+      final item = await musicInfoProvider.batchTracks([userProvider.playerInfo.currentMusic!.id]);
+
+      CachedImage(item.first.album!.images!).getImage(const Size(64, 64)).then((value) {
+        final colors = generateColorPalette(value);
+        final theme = context.read<ThemeProvider>();
+        if (context.read<CurrentMusicProvider>().playing == currentItem && theme.key != colors[1]) theme.setThemeKey(colors[1]);
+      });
     });
     if ((sPrevOffset - sOffset).abs() > actuationOffset) HapticFeedback.lightImpact();
   }
 
   Future<void> readQueueItems() async {
+    currentItem = context.read<CurrentMusicProvider>().playing;
+
     final userProvider = context.read<UserProvider>();
 
-    if (_queueItemsNeedRefresh) {
-      final items = await context.read<MusicInfoProvider>().batchTracks(userProvider.getAllTracks());
+    currentVersion = userProvider.playerInfo.version;
 
-      final historyIds = userProvider.playerInfo.queueHistory.map((e) => e.id);
-      playerNormalQueue = items.where((element) => userProvider.playerInfo.normalQueue.contains(element.id)).toList();
-      playerPrimaryQueue = items.where((element) => userProvider.playerInfo.primaryQueue.contains(element.id)).toList();
-      playerQueueHistory = items.where((element) => historyIds.contains(element.id)).toList();
-      fullQueue = [...playerPrimaryQueue, ...playerNormalQueue];
+    //if (userProvider.playerInfo.currentMusic?.id != currentItem?.id) {
 
-      sOffset = 0;
-      sAnim.animateTo(0.0, duration: Duration.zero);
+    final items = await context.read<MusicInfoProvider>().batchTracks(userProvider.getAllTracks());
 
-      _queueItemsNeedRefresh = false;
-    }
+    final historyIds = userProvider.playerInfo.queueHistory.map((e) => e.id);
+    playerNormalQueue = items.where((element) => userProvider.playerInfo.normalQueue.contains(element.id)).toList();
+    playerPrimaryQueue = items.where((element) => userProvider.playerInfo.primaryQueue.contains(element.id)).toList();
+    playerQueueHistory = items.where((element) => historyIds.contains(element.id)).toList();
+    fullQueue = [...playerPrimaryQueue, ...playerNormalQueue];
+
+    //setState(() {});
+    //}
   }
 
   @override
   Widget build(BuildContext context) {
     final currentMusic = context.watch<CurrentMusicProvider>();
 
-    log("[Player State] rebuild player");
+    if (currentItem != currentMusic.playing || currentVersion != context.read<UserProvider>().playerInfo.version) {
+      readQueueItems();
+    }
 
     return Consumer<WillPopProvider>(
       builder: (context, willPop, child) {
@@ -291,6 +316,7 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
 
           if (offset <= maxOffset) return;
           if (scrollController.positions.isNotEmpty && scrollController.positions.first.pixels > 0.0 && offset >= maxOffset * 2) return;
+          if (isMoving) return;
 
           offset -= event.delta.dy;
           offset = offset.clamp(-headRoom, maxOffset * 2);
@@ -302,6 +328,7 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
         onPointerUp: (event) {
           if (offset <= maxOffset) return;
           if (scrollController.positions.isNotEmpty && scrollController.positions.first.pixels > 0.0 && offset >= maxOffset * 2) return;
+          if (isMoving) return;
 
           setState(() => queueScrollable = true);
           verticalSnapping();
@@ -597,12 +624,12 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                                         IconButton(
                                           iconSize: 40.0,
                                           icon: Icon(Icons.skip_previous, color: onSecondary),
-                                          onPressed: () => snapToPrev(context),
+                                          onPressed: () => snapToPrev(context, byPress: true),
                                         ),
                                         IconButton(
                                           iconSize: 40.0,
                                           icon: Icon(Icons.skip_next, color: onSecondary),
-                                          onPressed: () => snapToNext(context),
+                                          onPressed: () => snapToNext(context, byPress: true),
                                         ),
                                       ],
                                     ),
@@ -818,137 +845,127 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                     ),
 
                   /// Track Info
-                  FutureBuilder(
-                    future: readQueueItems(),
-                    builder: (context, snapshot) {
-                      return Material(
-                        type: MaterialType.transparency,
-                        child: AnimatedBuilder(
-                          animation: sAnim,
-                          builder: (context, child) {
-                            return Stack(
-                              children: [
-                                if (playerQueueHistory.isNotEmpty)
-                                  Opacity(
-                                    opacity: -sAnim.value.clamp(-1.0, 0.0),
-                                    child: Transform.translate(
-                                      offset: Offset(-sAnim.value * sMaxOffset / stParallax - sMaxOffset / stParallax, 0),
-                                      child: TrackInfo(
-                                          artist: playerQueueHistory.last.artists.map((e) => e.name).join(", "),
-                                          title: playerQueueHistory.last.name,
-                                          cp: cp,
-                                          p: p,
-                                          bottomOffset: bottomOffset,
-                                          maxOffset: maxOffset,
-                                          screenSize: screenSize),
-                                    ),
-                                  ),
-                                Opacity(
-                                  opacity: 1 - sAnim.value.abs(),
-                                  child: Transform.translate(
-                                    offset: Offset(
-                                        -sAnim.value * sMaxOffset / stParallax + (12.0 * qp),
-                                        (-maxOffset + topInset + 102.0) *
-                                            (!bounceUp
-                                                ? !bounceDown
-                                                    ? qp
-                                                    : (1 - bp)
-                                                : 0.0)),
-                                    child: TrackInfo(
-                                      artist: currentMusic.playing?.artistsLabel ?? "?",
-                                      title: currentMusic.playing?.name ?? "?",
-                                      p: bp,
-                                      cp: bcp,
+                  Material(
+                    type: MaterialType.transparency,
+                    child: AnimatedBuilder(
+                      animation: sAnim,
+                      builder: (context, child) {
+                        return Stack(
+                          children: [
+                            if (playerQueueHistory.isNotEmpty)
+                              Opacity(
+                                opacity: -sAnim.value.clamp(-1.0, 0.0),
+                                child: Transform.translate(
+                                  offset: Offset(-sAnim.value * sMaxOffset / stParallax - sMaxOffset / stParallax, 0),
+                                  child: TrackInfo(
+                                      artist: playerQueueHistory.last.artists.map((e) => e.name).join(", "),
+                                      title: playerQueueHistory.last.name,
+                                      cp: cp,
+                                      p: p,
                                       bottomOffset: bottomOffset,
                                       maxOffset: maxOffset,
-                                      screenSize: screenSize,
-                                    ),
-                                  ),
+                                      screenSize: screenSize),
                                 ),
-                                if (fullQueue.isNotEmpty)
-                                  Opacity(
-                                    opacity: sAnim.value.clamp(0.0, 1.0),
-                                    child: Transform.translate(
-                                      offset: Offset(-sAnim.value * sMaxOffset / stParallax + sMaxOffset / stParallax, 0),
-                                      child: TrackInfo(
-                                          artist: fullQueue.first.artists.map((e) => e.name).join(", "),
-                                          title: fullQueue.first.name,
-                                          cp: cp,
-                                          p: p,
-                                          bottomOffset: bottomOffset,
-                                          maxOffset: maxOffset,
-                                          screenSize: screenSize),
-                                    ),
-                                  ),
-                              ],
-                            );
-                          },
-                        ),
-                      );
-                    },
+                              ),
+                            Opacity(
+                              opacity: 1 - sAnim.value.abs(),
+                              child: Transform.translate(
+                                offset: Offset(
+                                    -sAnim.value * sMaxOffset / stParallax + (12.0 * qp),
+                                    (-maxOffset + topInset + 102.0) *
+                                        (!bounceUp
+                                            ? !bounceDown
+                                                ? qp
+                                                : (1 - bp)
+                                            : 0.0)),
+                                child: TrackInfo(
+                                  artist: currentMusic.playing?.artistsLabel ?? "?",
+                                  title: currentMusic.playing?.name ?? "?",
+                                  p: bp,
+                                  cp: bcp,
+                                  bottomOffset: bottomOffset,
+                                  maxOffset: maxOffset,
+                                  screenSize: screenSize,
+                                ),
+                              ),
+                            ),
+                            if (fullQueue.isNotEmpty)
+                              Opacity(
+                                opacity: sAnim.value.clamp(0.0, 1.0),
+                                child: Transform.translate(
+                                  offset: Offset(-sAnim.value * sMaxOffset / stParallax + sMaxOffset / stParallax, 0),
+                                  child: TrackInfo(
+                                      artist: fullQueue.first.artists.map((e) => e.name).join(", "),
+                                      title: fullQueue.first.name,
+                                      cp: cp,
+                                      p: p,
+                                      bottomOffset: bottomOffset,
+                                      maxOffset: maxOffset,
+                                      screenSize: screenSize),
+                                ),
+                              ),
+                          ],
+                        );
+                      },
+                    ),
                   ),
 
                   /// Track Image
 
-                  FutureBuilder(
-                    future: readQueueItems(),
-                    builder: (context, snapshot) {
-                      return AnimatedBuilder(
-                        animation: sAnim,
-                        builder: (context, child) {
-                          return Stack(
-                            children: [
-                              if (playerQueueHistory.isNotEmpty)
-                                Opacity(
-                                  opacity: -sAnim.value.clamp(-1.0, 0.0),
-                                  child: Transform.translate(
-                                    offset: Offset(-sAnim.value * sMaxOffset / siParallax - sMaxOffset / siParallax, 0),
-                                    child: TrackImage(
-                                      images: playerQueueHistory.last.album?.images,
-                                      large: true,
-                                      p: p,
-                                      cp: cp,
-                                      screenSize: screenSize,
-                                      bottomOffset: bottomOffset,
-                                      maxOffset: maxOffset,
-                                    ),
-                                  ),
-                                ),
-                              Opacity(
-                                opacity: 1 - sAnim.value.abs(),
-                                child: Transform.translate(
-                                  offset: Offset(-sAnim.value * sMaxOffset / siParallax,
-                                      !bounceUp ? (-maxOffset + topInset + 108.0) * (!bounceDown ? qp : (1 - bp)) : 0.0),
-                                  child: TrackImage(
-                                    images: currentMusic.playing?.album?.images,
-                                    p: bp,
-                                    cp: bcp,
-                                    width: vp(a: 82.0, b: 92.0, c: qp),
-                                    screenSize: screenSize,
-                                    bottomOffset: bottomOffset,
-                                    maxOffset: maxOffset,
-                                  ),
+                  AnimatedBuilder(
+                    animation: sAnim,
+                    builder: (context, child) {
+                      return Stack(
+                        children: [
+                          if (playerQueueHistory.isNotEmpty)
+                            Opacity(
+                              opacity: -sAnim.value.clamp(-1.0, 0.0),
+                              child: Transform.translate(
+                                offset: Offset(-sAnim.value * sMaxOffset / siParallax - sMaxOffset / siParallax, 0),
+                                child: TrackImage(
+                                  images: playerQueueHistory.last.album?.images,
+                                  large: true,
+                                  p: p,
+                                  cp: cp,
+                                  screenSize: screenSize,
+                                  bottomOffset: bottomOffset,
+                                  maxOffset: maxOffset,
                                 ),
                               ),
-                              if (fullQueue.isNotEmpty)
-                                Opacity(
-                                  opacity: sAnim.value.clamp(0.0, 1.0),
-                                  child: Transform.translate(
-                                    offset: Offset(-sAnim.value * sMaxOffset / siParallax + sMaxOffset / siParallax, 0),
-                                    child: TrackImage(
-                                      images: fullQueue.first.album?.images,
-                                      large: true,
-                                      p: p,
-                                      cp: cp,
-                                      screenSize: screenSize,
-                                      bottomOffset: bottomOffset,
-                                      maxOffset: maxOffset,
-                                    ),
-                                  ),
+                            ),
+                          Opacity(
+                            opacity: 1 - sAnim.value.abs(),
+                            child: Transform.translate(
+                              offset: Offset(-sAnim.value * sMaxOffset / siParallax,
+                                  !bounceUp ? (-maxOffset + topInset + 108.0) * (!bounceDown ? qp : (1 - bp)) : 0.0),
+                              child: TrackImage(
+                                images: currentMusic.playing?.album?.images,
+                                p: bp,
+                                cp: bcp,
+                                width: vp(a: 82.0, b: 92.0, c: qp),
+                                screenSize: screenSize,
+                                bottomOffset: bottomOffset,
+                                maxOffset: maxOffset,
+                              ),
+                            ),
+                          ),
+                          if (fullQueue.isNotEmpty)
+                            Opacity(
+                              opacity: sAnim.value.clamp(0.0, 1.0),
+                              child: Transform.translate(
+                                offset: Offset(-sAnim.value * sMaxOffset / siParallax + sMaxOffset / siParallax, 0),
+                                child: TrackImage(
+                                  images: fullQueue.first.album?.images,
+                                  large: true,
+                                  p: p,
+                                  cp: cp,
+                                  screenSize: screenSize,
+                                  bottomOffset: bottomOffset,
+                                  maxOffset: maxOffset,
                                 ),
-                            ],
-                          );
-                        },
+                              ),
+                            ),
+                        ],
                       );
                     },
                   ),
@@ -1028,7 +1045,12 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                         offset: Offset(0, (1 - queueOffset) * maxOffset),
                         child: IgnorePointer(
                           ignoring: !queueScrollable,
-                          child: QueueView(controller: scrollController, normalQueue: playerNormalQueue, primaryQueue: playerPrimaryQueue),
+                          child: QueueView(
+                            onReorder: () {
+                              setState(() {});
+                            },
+                            controller: scrollController,
+                          ),
                         ),
                       ),
                     ),

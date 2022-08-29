@@ -122,7 +122,7 @@ class CurrentMusicProvider extends BaseAudioHandler with ChangeNotifier {
 
   // ! POC only
   Future<void> playTrack(MusicTrack track, {bool fromPrimary = true, bool startInstant = true, bool clearHistory = false}) async {
-    player.stop();
+    if (player.playing) player.stop();
 
     if (clearHistory) {
       _userApi.postClear(PlayerInfoPostType.history, DateTime.now().millisecondsSinceEpoch);
@@ -131,6 +131,8 @@ class CurrentMusicProvider extends BaseAudioHandler with ChangeNotifier {
     if (_userApi.playerInfo.currentMusic == null || _userApi.playerInfo.currentMusic!.id != track.id) {
       _userApi.postCurrentMusic(track.id, DateTime.now().millisecondsSinceEpoch, fromPrimary: fromPrimary);
     }
+
+    notifyListeners();
 
     playing = track;
     liked = (await _userApi.getLibrary()).liked_tracks.contains(track.id);

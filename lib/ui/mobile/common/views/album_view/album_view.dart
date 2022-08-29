@@ -27,8 +27,14 @@ class AlbumView extends StatefulWidget {
 
   final MusicAlbum album;
 
-  static Future<void> view(MusicAlbum value, {required BuildContext context}) =>
-      context.read<NavigatorProvider>().pushModal(builder: (context) => AlbumView(value), uri: value.uri);
+  static Future<void> view(MusicAlbum value, {required BuildContext context}) {
+    final nav = context.read<NavigatorProvider>();
+    final theme = context.read<ThemeProvider>();
+    return nav.pushModal(builder: (context) => AlbumView(value), uri: value.uri).then((value) {
+      theme.resetTheme();
+      return value;
+    });
+  }
 
   @override
   State<AlbumView> createState() => _AlbumViewState();

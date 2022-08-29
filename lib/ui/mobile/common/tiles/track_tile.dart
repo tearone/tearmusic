@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:animations/animations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:provider/provider.dart';
 import 'package:tearmusic/models/music/track.dart';
 import 'package:tearmusic/models/player_info.dart';
@@ -12,19 +13,24 @@ import 'package:tearmusic/providers/navigator_provider.dart';
 import 'package:tearmusic/providers/theme_provider.dart';
 import 'package:tearmusic/providers/user_provider.dart';
 import 'package:tearmusic/ui/common/image_color.dart';
+import 'package:tearmusic/ui/mobile/common/bottom_sheet.dart';
 import 'package:tearmusic/ui/mobile/common/cached_image.dart';
 import 'package:tearmusic/ui/common/format.dart';
+import 'package:tearmusic/ui/mobile/common/menu_button.dart';
 import 'package:tearmusic/ui/mobile/common/tiles/track_tile_preview.dart';
 import 'package:tearmusic/ui/mobile/common/views/album_view/album_view.dart';
 import 'package:tearmusic/ui/mobile/common/views/artist_view.dart';
 import 'package:tearmusic/ui/mobile/common/views/manual_match_view.dart';
 
 class TrackTile extends StatelessWidget {
-  const TrackTile(this.track, {Key? key, this.leadingTrackNumber = false, this.trailingDuration = false}) : super(key: key);
+  const TrackTile(this.track, {Key? key, this.leadingTrackNumber = false, this.trailingDuration = false, this.onPressed, this.onLongPressed})
+      : super(key: key);
 
   final MusicTrack track;
   final bool leadingTrackNumber;
   final bool trailingDuration;
+  final Function()? onPressed;
+  final Function()? onLongPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -170,18 +176,83 @@ class TrackTile extends StatelessWidget {
               ),
               trailing: trailingDuration ? Text(track.duration.shortFormat()) : null,
               visualDensity: VisualDensity.compact,
-              onTap: () {
-                FocusScope.of(context).requestFocus(FocusNode());
-                final currentMusic = context.read<CurrentMusicProvider>();
-                if (track.album?.images != null) {
-                  CachedImage(track.album!.images!).getImage(const Size(64, 64)).then((value) {
-                    final colors = generateColorPalette(value);
-                    final theme = context.read<ThemeProvider>();
-                    if (theme.key != colors[1]) theme.setThemeKey(colors[1]);
-                    currentMusic.playTrack(track, clearHistory: true);
-                  });
-                }
-              },
+              onTap: onPressed ??
+                  () {
+                    FocusScope.of(context).requestFocus(FocusNode());
+                    final currentMusic = context.read<CurrentMusicProvider>();
+                    if (track.album?.images != null) {
+                      CachedImage(track.album!.images!).getImage(const Size(64, 64)).then((value) {
+                        final colors = generateColorPalette(value);
+                        final theme = context.read<ThemeProvider>();
+                        if (theme.key != colors[1]) theme.setThemeKey(colors[1]);
+                        currentMusic.playTrack(track, clearHistory: true);
+                      });
+                    }
+                  },
+              onLongPress: onLongPressed ??
+                  () {
+                    showMaterialModalBottomSheet(
+                      context: context,
+                      animationCurve: Curves.fastLinearToSlowEaseIn,
+                      duration: const Duration(milliseconds: 300),
+                      useRootNavigator: true,
+                      backgroundColor: Colors.transparent,
+                      builder: (context) => BottomSheetContainer(
+                        topRadius: const Radius.circular(16.0),
+                        child: SafeArea(
+                          top: false,
+                          child: Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                  child: TrackTilePreview(track),
+                                ),
+                                MenuButton(
+                                  icon: const Icon(CupertinoIcons.person),
+                                  child: const Text("View Artist"),
+                                  onPressed: () {
+                                    ArtistView.view(track.artists.first, context: context);
+                                    Navigator.of(context, rootNavigator: true).pop();
+                                  },
+                                ),
+                                if (track.album != null)
+                                  MenuButton(
+                                    icon: const Icon(CupertinoIcons.music_albums),
+                                    child: const Text("View Album"),
+                                    onPressed: () {
+                                      AlbumView.view(track.album!, context: context);
+                                      Navigator.of(context, rootNavigator: true).pop();
+                                    },
+                                  ),
+                                MenuButton(
+                                  icon: const Icon(CupertinoIcons.trash),
+                                  child: const Text("Purge Cache"),
+                                  onPressed: () {
+                                    Navigator.of(context, rootNavigator: true).pop();
+                                    context.read<MusicInfoProvider>().purgeCache(track);
+                                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                                      context.read<NavigatorProvider>().showSnackBar(const SnackBar(content: Text("Track cache deleted")));
+                                    });
+                                  },
+                                ),
+                                MenuButton(
+                                  icon: const Icon(CupertinoIcons.search),
+                                  child: const Text("Manual Match"),
+                                  onPressed: () {
+                                    ManualMatchView.view(track, context: context);
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
             ),
           );
         },

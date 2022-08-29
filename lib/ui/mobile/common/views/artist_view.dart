@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -30,8 +29,14 @@ class ArtistView extends StatefulWidget {
 
   final MusicArtist artist;
 
-  static Future<void> view(MusicArtist value, {required BuildContext context}) =>
-      context.read<NavigatorProvider>().pushModal(builder: (context) => ArtistView(value), uri: value.uri);
+  static Future<void> view(MusicArtist value, {required BuildContext context}) {
+    final nav = context.read<NavigatorProvider>();
+    final theme = context.read<ThemeProvider>();
+    return nav.pushModal(builder: (context) => ArtistView(value), uri: value.uri).then((value) {
+      theme.resetTheme();
+      return value;
+    });
+  }
 
   @override
   State<ArtistView> createState() => _ArtistViewState();

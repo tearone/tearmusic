@@ -1,6 +1,7 @@
 // Feed your own stream of bytes into the player
 import 'dart:async';
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:just_audio/just_audio.dart';
 import 'package:tearmusic/models/music/track.dart';
@@ -45,7 +46,7 @@ class TearMusicAudioSource extends StreamAudioSource {
         contentLength: int.tryParse(res.headers['content-length'] ?? "") ?? 0,
         offset: start,
         stream: res.stream,
-        contentType: 'audio/mp4',
+        contentType: Platform.isIOS ? 'audio/mp3' : 'audio/mp4',
       );
     }
 
@@ -58,7 +59,7 @@ class TearMusicAudioSource extends StreamAudioSource {
       contentLength: end - start,
       offset: start,
       stream: Stream.value(partial),
-      contentType: 'audio/mp4',
+      contentType: Platform.isIOS ? 'audio/mp3' : 'audio/mp4',
     );
   }
 

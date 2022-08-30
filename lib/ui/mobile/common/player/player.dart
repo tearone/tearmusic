@@ -1,5 +1,6 @@
 // ignore_for_file: dead_code
 
+import 'dart:developer';
 import 'dart:ui';
 
 import 'package:animated_flip_counter/animated_flip_counter.dart';
@@ -251,6 +252,8 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
   }
 
   Future<void> readQueueItems() async {
+    log("[RQI] read queue items");
+
     currentItem = context.read<CurrentMusicProvider>().playing;
 
     final userProvider = context.read<UserProvider>();
@@ -268,25 +271,18 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
     playerQueueHistory = historyIds.map((e) => items.firstWhere((element) => element.id == e)).toList();
     fullQueue = [...playerPrimaryQueue, ...playerNormalQueue];
 
-    final primaryItems = playerPrimaryQueue
+    queueViewItems = fullQueue
         .asMap()
         .entries
-        .map((entry) => TrackData(
-              track: entry.value,
-              itemIndex: entry.key,
-              isPrimary: true,
-            ))
+        .map((entry) =>
+            TrackData(track: entry.value, itemIndex: entry.key, isPrimary: entry.key < playerPrimaryQueue.length, itemKey: ValueKey(entry.key)))
         .toList();
-    final normalItems =
-        playerNormalQueue.asMap().entries.map((entry) => TrackData(track: entry.value, itemIndex: playerPrimaryQueue.length + entry.key)).toList();
-
-    queueViewItems = [...primaryItems, ...normalItems];
 
     if (playerPrimaryQueue.isNotEmpty) {
       queueViewItems.insert(
         playerPrimaryQueue.length,
         TrackData(
-          itemIndex: -2,
+          itemKey: const ValueKey("primary-separator"),
           item: Container(
             margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 54),
             width: double.infinity,
@@ -304,7 +300,7 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
     queueViewItems.insert(
       0,
       const TrackData(
-        itemIndex: -3,
+        itemKey: ValueKey("queue-text"),
         item: Padding(
           padding: EdgeInsets.only(left: 24.0, top: 16.0, bottom: 12.0),
           child: Text(
@@ -320,7 +316,7 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
       ),
     );
 
-    //setState(() {});
+    setState(() {});
     //}
   }
 
@@ -1106,6 +1102,16 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                         child: IgnorePointer(
                           ignoring: !queueScrollable,
                           child: QueueView(
+                            onReorder: (/*fromReal, toReal, from, to*/) {
+                              /*final removed = queueViewItems.removeAt(fromReal);
+                              queueViewItems.insert(toReal, removed);
+
+                              final removedQueue = fullQueue.removeAt(from);
+                              fullQueue.insert(to, removedQueue);*/
+
+                              readQueueItems();
+                            },
+                            primaryLength: playerPrimaryQueue.length,
                             queueItems: queueViewItems,
                             controller: scrollController,
                           ),

@@ -16,7 +16,8 @@ int moveFromIndex = -1;
 class TrackData extends StatelessWidget {
   const TrackData({
     Key? key,
-    required this.itemIndex,
+    this.itemIndex,
+    required this.itemKey,
     this.track,
     this.item,
     this.canMove = true,
@@ -26,7 +27,8 @@ class TrackData extends StatelessWidget {
   final bool canMove;
   final Widget? item;
   final MusicTrack? track;
-  final int itemIndex;
+  final int? itemIndex;
+  final Key itemKey;
   final bool isPrimary;
 
   Widget _buildChild(BuildContext context, ReorderableItemState state) {
@@ -56,7 +58,7 @@ class TrackData extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                Expanded(child: QueueTile(track!, itemIndex, isPrimary)),
+                Expanded(child: QueueTile(track!, itemIndex!, isPrimary)),
                 // Triggers the reordering
                 ReorderableListener(
                   canStart: () {
@@ -81,7 +83,7 @@ class TrackData extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ReorderableItem(
-        key: ValueKey(itemIndex), //
+        key: itemKey, //
         childBuilder: _buildChild);
   }
 }
@@ -96,20 +98,21 @@ class QueueView extends StatefulWidget {
     Key? key,
     this.controller,
     required this.queueItems,
+    required this.onReorder,
+    required this.primaryLength,
   }) : super(key: key);
 
   final ScrollController? controller;
   final List<TrackData> queueItems;
+  final int primaryLength;
+  final Function(/*int, int, int, int*/) onReorder;
 
   @override
   State<QueueView> createState() => _QueueViewState();
 }
 
 class _QueueViewState extends State<QueueView> {
-  List<MusicTrack> normalQueue = [];
-  List<MusicTrack> primaryQueue = [];
-
-  int lastVersion = 0;
+  //int lastVersion = 0;
 
   @override
   void initState() {
@@ -120,7 +123,7 @@ class _QueueViewState extends State<QueueView> {
 
   // Returns index of item with given key
   int _indexOfKey(Key key) {
-    return widget.queueItems.indexWhere((TrackData t) => ValueKey(t.itemIndex) == key);
+    return widget.queueItems.indexWhere((TrackData t) => t.itemKey == key);
   }
 
   bool _reorderCallback(Key item, Key newPosition, BuildContext context) {
@@ -136,7 +139,7 @@ class _QueueViewState extends State<QueueView> {
     if (!draggedItem.canMove) return false;
 
     setState(() {
-      debugPrint("[Queue View] Reordering $item -> $newPosition");
+      log("[Queue View] Reordering $item -> $newPosition");
 
       widget.queueItems.removeAt(draggingIndex);
       widget.queueItems.insert(newPositionIndex, draggedItem);
@@ -165,26 +168,27 @@ class _QueueViewState extends State<QueueView> {
       moveToIndex = 0;
     }
 
-    if (primaryQueue.isNotEmpty) {
-      if (moveFromIndex >= primaryQueue.length) {
-        moveFromIndex -= primaryQueue.length + (moveFromIndex != primaryQueue.length ? 1 : 0);
+    if (widget.primaryLength != 0) {
+      if (moveFromIndex >= widget.primaryLength) {
+        moveFromIndex -= widget.primaryLength + (moveFromIndex != widget.primaryLength ? 1 : 0);
       } else {
         moveFrom = PlayerInfoReorderMoveType.primary;
       }
 
-      if (moveToIndex >= primaryQueue.length + (moveFrom == PlayerInfoReorderMoveType.normal ? 1 : 0) &&
+      if (moveToIndex >= widget.primaryLength + (moveFrom == PlayerInfoReorderMoveType.normal ? 1 : 0) &&
           moveTo != PlayerInfoReorderMoveType.primary) {
-        moveToIndex -= primaryQueue.length + (moveFrom == PlayerInfoReorderMoveType.normal ? 1 : 0);
+        moveToIndex -= widget.primaryLength + (moveFrom == PlayerInfoReorderMoveType.normal ? 1 : 0);
       } else {
         moveTo = PlayerInfoReorderMoveType.primary;
       }
     }
 
-    log("[Queue Reorder] ${moveFrom.name} $moveFromIndex ($realMoveFromIndex) --> ${moveTo.name} $moveToIndex ($realMoveToIndex)");
+    log("[Queue View] ${moveFrom.name} $moveFromIndex ($realMoveFromIndex) --> ${moveTo.name} $moveToIndex ($realMoveToIndex)");
 
     context.read<UserProvider>().postReorder(moveFromIndex, moveToIndex, DateTime.now().millisecondsSinceEpoch, moveFrom: moveFrom, moveTo: moveTo);
-    //buildQueue();
+    widget.onReorder(/*realMoveFromIndex, realMoveToIndex, moveFromIndex, moveToIndex*/);
     //setState(() {});
+    //buildQueue();
 
     moveFromIndex = -1;
   }

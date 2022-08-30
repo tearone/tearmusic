@@ -185,7 +185,11 @@ class TrackTile extends StatelessWidget {
                         final colors = generateColorPalette(value);
                         final theme = context.read<ThemeProvider>();
                         if (theme.key != colors[1]) theme.setThemeKey(colors[1]);
-                        if (currentMusic.playing != null) context.read<UserProvider>().postAdd(currentMusic.playing!.id, DateTime.now().millisecondsSinceEpoch, whereTo: PlayerInfoPostType.history);
+                        if (currentMusic.playing != null) {
+                          context
+                              .read<UserProvider>()
+                              .postAdd(currentMusic.playing!.id, DateTime.now().millisecondsSinceEpoch, whereTo: PlayerInfoPostType.history);
+                        }
                         currentMusic.playTrack(track);
                       });
                     }

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:tearmusic/api/base_api.dart';
@@ -124,9 +125,11 @@ class MusicInfoProvider {
     if (cache != null) {
       final json = jsonDecode(cache) as Map;
       List<Map> tracks = (json['tracks'] as List).map((id) => jsonDecode(_store.get("tracks_$id"))).toList().cast();
+      log("[PQ] track cache found, fetched: ${tracks.map((e) => e['name'])}");
       data = PlaylistDetails.decode({'tracks': tracks, 'followers': json['followers']});
     } else {
       data = await _api.playlistTracks(playlistId);
+      log("[PQ] track cache not found, fetched: ${data.tracks.map((e) => e.name)}");
       _store.put(cacheKey, jsonEncode({'tracks': Model.encodeIdList(data.tracks), 'followers': data.followers}));
       for (final e in data.tracks) {
         _store.put("tracks_$e", jsonEncode(e.encode()));

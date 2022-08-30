@@ -268,13 +268,25 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
     playerQueueHistory = historyIds.map((e) => items.firstWhere((element) => element.id == e)).toList();
     fullQueue = [...playerPrimaryQueue, ...playerNormalQueue];
 
-    queueViewItems = fullQueue.asMap().entries.map((entry) => TrackData(track: entry.value, itemKey: ValueKey(entry.key))).toList();
+    final primaryItems = playerPrimaryQueue
+        .asMap()
+        .entries
+        .map((entry) => TrackData(
+              track: entry.value,
+              itemIndex: entry.key,
+              isPrimary: true,
+            ))
+        .toList();
+    final normalItems =
+        playerNormalQueue.asMap().entries.map((entry) => TrackData(track: entry.value, itemIndex: playerPrimaryQueue.length + entry.key)).toList();
+
+    queueViewItems = [...primaryItems, ...normalItems];
 
     if (playerPrimaryQueue.isNotEmpty) {
       queueViewItems.insert(
         playerPrimaryQueue.length,
         TrackData(
-          itemKey: const ValueKey("primary-separator"),
+          itemIndex: -2,
           item: Container(
             margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 54),
             width: double.infinity,
@@ -292,7 +304,7 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
     queueViewItems.insert(
       0,
       const TrackData(
-        itemKey: ValueKey("queue-text"),
+        itemIndex: -3,
         item: Padding(
           padding: EdgeInsets.only(left: 24.0, top: 16.0, bottom: 12.0),
           child: Text(
@@ -638,8 +650,19 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                                       children: [
                                         IconButton(
                                           iconSize: 28.0,
-                                          icon: Icon(CupertinoIcons.shuffle, color: onSecondary),
-                                          onPressed: () {},
+                                          icon: Icon(CupertinoIcons.shuffle,
+                                              color: context.read<UserProvider>().playerInfo.queueSource.seed != null
+                                                  ? onSecondary
+                                                  : onSecondary.withOpacity(.3)),
+                                          onPressed: () {
+                                            final userProvider = context.read<UserProvider>();
+                                            final qs = userProvider.playerInfo.queueSource;
+                                            final shuffled = qs.seed != null;
+
+                                            userProvider
+                                                .newQueue(qs.type, id: qs.id, wantSeed: !shuffled, playFirst: false)
+                                                .then((value) => setState(() {}));
+                                          },
                                         ),
                                         IconButton(
                                           iconSize: 28.0,

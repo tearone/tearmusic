@@ -347,13 +347,17 @@ class UserProvider extends ChangeNotifier {
     _stackPlayerOperation(body, newVersion);
   }
 
-  void postRemove(int index, int newVersion, {PlayerInfoPostType removeFrom = PlayerInfoPostType.normal}) {
+  void postRemove(int index, int newVersion, {int? endIndex, PlayerInfoPostType removeFrom = PlayerInfoPostType.normal}) {
     switch (removeFrom) {
       case PlayerInfoPostType.primary:
-        if (checkCorrectIndex(0, index, playerInfo.primaryQueue)) playerInfo.primaryQueue.removeAt(index);
+        if (checkCorrectIndex(0, index, playerInfo.primaryQueue)) {
+          endIndex == null ? playerInfo.primaryQueue.removeAt(index) : playerInfo.primaryQueue.removeRange(index, endIndex + 1);
+        }
         break;
       case PlayerInfoPostType.normal:
-        if (checkCorrectIndex(0, index, playerInfo.normalQueue)) playerInfo.normalQueue.removeAt(index);
+        if (checkCorrectIndex(0, index, playerInfo.normalQueue)) {
+          endIndex == null ? playerInfo.normalQueue.removeAt(index) : playerInfo.normalQueue.removeRange(index, endIndex + 1);
+        }
         break;
       case PlayerInfoPostType.history:
         if (checkCorrectIndex(0, index, playerInfo.queueHistory)) playerInfo.queueHistory.removeAt(index);
@@ -361,7 +365,7 @@ class UserProvider extends ChangeNotifier {
       case PlayerInfoPostType.current:
         break;
     }
-    final body = {"type": "remove", "index": index, "remove_from": removeFrom.name};
+    final body = {"type": "remove", "index": index, "remove_from": removeFrom.name, "end_index": endIndex};
     _stackPlayerOperation(body, newVersion);
   }
 
@@ -447,23 +451,29 @@ class UserProvider extends ChangeNotifier {
     _stackPlayerOperation(body, newVersion);
   }
 
-  void postSource(String id, int seed, PlayerInfoSourceType type, List<MusicTrack> tracks, int newVersion) {
+  void postSource(String id, int? seed, PlayerInfoSourceType type, List<MusicTrack> tracks, bool playFirst, int newVersion) {
     final body = {"type": "source", "id": id, "seed": seed, "source_type": type.name, "tracks": tracks.map((e) => e.id).toList()};
 
     if (type == PlayerInfoSourceType.radio) {
     } else {
-      _currentMusicProvider.playTrack(tracks[0]);
+      if (playFirst) _currentMusicProvider.playTrack(tracks[0]);
       playerInfo.currentMusic = QueueItem(id: tracks[0].id, fromPrimary: false);
       playerInfo.normalQueue = tracks.map((e) => e.id).toList();
       playerInfo.normalQueue.removeAt(0);
       playerInfo.queueHistory = [];
     }
 
+    playerInfo.queueSource.id = id;
+    playerInfo.queueSource.seed = seed;
+    playerInfo.queueSource.type = type;
+    playerInfo.queueSource.index = 0;
+
     _stackPlayerOperation(body, newVersion);
   }
 
-  Future<void> newQueue(PlayerInfoSourceType type, {String? id}) async {
-    final seed = randomBetween(10000, 99999);
+  Future<void> newQueue(PlayerInfoSourceType type, {String? id, bool wantSeed = true, playFirst = true}) async {
+    int? seed;
+    if (wantSeed) seed = randomBetween(10000, 99999);
 
     List<MusicTrack> tracks = [];
 
@@ -475,9 +485,7 @@ class UserProvider extends ChangeNotifier {
       return;
     }
 
-    log("new queue: ${tracks.map((e) => e.name)}");
-
-    tracks.shuffle(math.Random(seed));
+    if (seed != null) tracks.shuffle(math.Random(seed));
 
     // TODO: queue source is radio if length < 50
 
@@ -485,7 +493,7 @@ class UserProvider extends ChangeNotifier {
 
     playerInfo.normalQueue = queueTracks.map((e) => e.id).toList();
 
-    postSource(id!, seed, type, queueTracks, DateTime.now().millisecondsSinceEpoch);
+    postSource(id!, seed, type, queueTracks, playFirst, DateTime.now().millisecondsSinceEpoch);
   }
 
   bool skipToPrev() {

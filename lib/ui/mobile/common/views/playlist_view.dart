@@ -228,7 +228,8 @@ class _PlaylistViewState extends State<PlaylistView> {
                                         child: FloatingActionButton(
                                           child: const Icon(Icons.play_arrow),
                                           onPressed: () {
-                                            context.read<UserProvider>().newQueue(PlayerInfoSourceType.playlist, id: widget.playlist.id);
+                                            context.read<UserProvider>().newQueue(PlayerInfoSourceType.playlist,
+                                                id: widget.playlist.id, wantSeed: context.read<UserProvider>().playerInfo.queueSource.seed != null);
                                           },
                                         ),
                                       ),

@@ -8,6 +8,7 @@ import 'package:tearmusic/providers/music_info_provider.dart';
 import 'package:tearmusic/providers/user_provider.dart';
 import 'package:tearmusic/ui/mobile/common/player/player.dart';
 import 'package:tearmusic/ui/mobile/common/player/reorderable_list.dart';
+import 'package:tearmusic/ui/mobile/common/tiles/queue_tile.dart';
 import 'package:tearmusic/ui/mobile/common/tiles/track_tile.dart';
 
 int moveFromIndex = -1;
@@ -15,16 +16,18 @@ int moveFromIndex = -1;
 class TrackData extends StatelessWidget {
   const TrackData({
     Key? key,
-    required this.itemKey,
+    required this.itemIndex,
     this.track,
     this.item,
     this.canMove = true,
+    this.isPrimary = false,
   }) : super(key: key);
 
   final bool canMove;
   final Widget? item;
   final MusicTrack? track;
-  final Key itemKey;
+  final int itemIndex;
+  final bool isPrimary;
 
   Widget _buildChild(BuildContext context, ReorderableItemState state) {
     BoxDecoration decoration;
@@ -53,7 +56,7 @@ class TrackData extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                Expanded(child: TrackTile(track!)),
+                Expanded(child: QueueTile(track!, itemIndex, isPrimary)),
                 // Triggers the reordering
                 ReorderableListener(
                   canStart: () {
@@ -78,7 +81,7 @@ class TrackData extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ReorderableItem(
-        key: itemKey, //
+        key: ValueKey(itemIndex), //
         childBuilder: _buildChild);
   }
 }
@@ -117,7 +120,7 @@ class _QueueViewState extends State<QueueView> {
 
   // Returns index of item with given key
   int _indexOfKey(Key key) {
-    return widget.queueItems.indexWhere((TrackData t) => t.itemKey == key);
+    return widget.queueItems.indexWhere((TrackData t) => ValueKey(t.itemIndex) == key);
   }
 
   bool _reorderCallback(Key item, Key newPosition, BuildContext context) {

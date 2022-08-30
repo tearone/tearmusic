@@ -92,19 +92,17 @@ class QueueView extends StatefulWidget {
   const QueueView({
     Key? key,
     this.controller,
-    required this.onReorder,
+    required this.queueItems,
   }) : super(key: key);
 
   final ScrollController? controller;
-  final Function() onReorder;
+  final List<TrackData> queueItems;
 
   @override
   State<QueueView> createState() => _QueueViewState();
 }
 
 class _QueueViewState extends State<QueueView> {
-  List<TrackData> fullQueue = [];
-
   List<MusicTrack> normalQueue = [];
   List<MusicTrack> primaryQueue = [];
 
@@ -114,67 +112,12 @@ class _QueueViewState extends State<QueueView> {
   void initState() {
     super.initState();
     log("[Queue View] init");
-    buildQueue();
-  }
-
-  void buildQueue() async {
-    final userProvider = context.read<UserProvider>();
-
-    lastVersion = userProvider.playerInfo.version;
-
-    final items = await context.read<MusicInfoProvider>().batchTracks(userProvider.getAllTracks(includeHistory: false, includeCurrent: false));
-
-    normalQueue = userProvider.playerInfo.normalQueue.map((e) => items.firstWhere((element) => element.id == e)).toList();
-    primaryQueue = userProvider.playerInfo.primaryQueue.map((e) => items.firstWhere((element) => element.id == e)).toList();
-
-    log("[Queue View] build queue: $primaryQueue - ${userProvider.playerInfo.primaryQueue}");
-    final entireQueue = [...primaryQueue, ...normalQueue];
-    fullQueue = entireQueue.asMap().entries.map((entry) => TrackData(track: entry.value, itemKey: ValueKey(entry.key))).toList();
-
-    if (primaryQueue.isNotEmpty) {
-      fullQueue.insert(
-        primaryQueue.length,
-        TrackData(
-          itemKey: const ValueKey("primary-separator"),
-          item: Container(
-            margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 54),
-            width: double.infinity,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(24),
-              color: Colors.grey.withOpacity(.5),
-            ),
-            height: 4,
-          ),
-          canMove: false,
-        ),
-      );
-    }
-
-    fullQueue.insert(
-      0,
-      const TrackData(
-        itemKey: ValueKey("queue-text"),
-        item: Padding(
-          padding: EdgeInsets.only(left: 24.0, top: 16.0, bottom: 12.0),
-          child: Text(
-            "Queue",
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 24.0,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-        canMove: false,
-      ),
-    );
-
-    setState(() {});
+    //buildQueue();
   }
 
   // Returns index of item with given key
   int _indexOfKey(Key key) {
-    return fullQueue.indexWhere((TrackData t) => t.itemKey == key);
+    return widget.queueItems.indexWhere((TrackData t) => t.itemKey == key);
   }
 
   bool _reorderCallback(Key item, Key newPosition, BuildContext context) {
@@ -185,15 +128,15 @@ class _QueueViewState extends State<QueueView> {
 
     log("[Queue View] reorder callback: $draggingIndex - $newPositionIndex");
 
-    final draggedItem = fullQueue[draggingIndex];
+    final draggedItem = widget.queueItems[draggingIndex];
 
     if (!draggedItem.canMove) return false;
 
     setState(() {
       debugPrint("[Queue View] Reordering $item -> $newPosition");
 
-      fullQueue.removeAt(draggingIndex);
-      fullQueue.insert(newPositionIndex, draggedItem);
+      widget.queueItems.removeAt(draggingIndex);
+      widget.queueItems.insert(newPositionIndex, draggedItem);
     });
     return true;
   }
@@ -237,8 +180,7 @@ class _QueueViewState extends State<QueueView> {
     log("[Queue Reorder] ${moveFrom.name} $moveFromIndex ($realMoveFromIndex) --> ${moveTo.name} $moveToIndex ($realMoveToIndex)");
 
     context.read<UserProvider>().postReorder(moveFromIndex, moveToIndex, DateTime.now().millisecondsSinceEpoch, moveFrom: moveFrom, moveTo: moveTo);
-    widget.onReorder();
-    buildQueue();
+    //buildQueue();
     //setState(() {});
 
     moveFromIndex = -1;
@@ -246,9 +188,9 @@ class _QueueViewState extends State<QueueView> {
 
   @override
   Widget build(BuildContext context) {
-    log("[Queue View] rebuild");
+    //log("[Queue View] rebuild");
 
-    if (context.read<UserProvider>().playerInfo.version != lastVersion) buildQueue();
+    //if (context.read<UserProvider>().playerInfo.version != lastVersion) buildQueue();
 
     return SafeArea(
       bottom: false,
@@ -266,9 +208,9 @@ class _QueueViewState extends State<QueueView> {
                 SliverList(
                   delegate: SliverChildBuilderDelegate(
                     (BuildContext context, int index) {
-                      return fullQueue[index];
+                      return widget.queueItems[index];
                     },
-                    childCount: fullQueue.length,
+                    childCount: widget.queueItems.length,
                   ),
                 ),
                 /*SliverPadding(

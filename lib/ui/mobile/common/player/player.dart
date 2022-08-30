@@ -80,6 +80,7 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
   List<MusicTrack> playerPrimaryQueue = [];
   List<MusicTrack> playerQueueHistory = [];
   List<MusicTrack> fullQueue = []; // primary + normal
+  List<TrackData> queueViewItems = []; // primary + normal
 
   @override
   void initState() {
@@ -101,6 +102,7 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
       duration: const Duration(milliseconds: 500),
     );
     scrollController = ScrollController();
+    readQueueItems();
   }
 
   @override
@@ -265,6 +267,46 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
     playerPrimaryQueue = userProvider.playerInfo.primaryQueue.map((e) => items.firstWhere((element) => element.id == e)).toList();
     playerQueueHistory = historyIds.map((e) => items.firstWhere((element) => element.id == e)).toList();
     fullQueue = [...playerPrimaryQueue, ...playerNormalQueue];
+
+    queueViewItems = fullQueue.asMap().entries.map((entry) => TrackData(track: entry.value, itemKey: ValueKey(entry.key))).toList();
+
+    if (playerPrimaryQueue.isNotEmpty) {
+      queueViewItems.insert(
+        playerPrimaryQueue.length,
+        TrackData(
+          itemKey: const ValueKey("primary-separator"),
+          item: Container(
+            margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 54),
+            width: double.infinity,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(24),
+              color: Colors.grey.withOpacity(.5),
+            ),
+            height: 4,
+          ),
+          canMove: false,
+        ),
+      );
+    }
+
+    queueViewItems.insert(
+      0,
+      const TrackData(
+        itemKey: ValueKey("queue-text"),
+        item: Padding(
+          padding: EdgeInsets.only(left: 24.0, top: 16.0, bottom: 12.0),
+          child: Text(
+            "Queue",
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 24.0,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        canMove: false,
+      ),
+    );
 
     //setState(() {});
     //}
@@ -1041,9 +1083,7 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                         child: IgnorePointer(
                           ignoring: !queueScrollable,
                           child: QueueView(
-                            onReorder: () {
-                              setState(() {});
-                            },
+                            queueItems: queueViewItems,
                             controller: scrollController,
                           ),
                         ),

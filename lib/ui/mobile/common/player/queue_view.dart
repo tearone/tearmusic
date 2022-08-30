@@ -118,17 +118,16 @@ class _QueueViewState extends State<QueueView> {
   }
 
   void buildQueue() async {
-    log("[Queue View] build queue");
-
     final userProvider = context.read<UserProvider>();
 
     lastVersion = userProvider.playerInfo.version;
 
     final items = await context.read<MusicInfoProvider>().batchTracks(userProvider.getAllTracks(includeHistory: false, includeCurrent: false));
 
-    normalQueue = items.where((element) => userProvider.playerInfo.normalQueue.contains(element.id)).toList();
-    primaryQueue = items.where((element) => userProvider.playerInfo.primaryQueue.contains(element.id)).toList();
+    normalQueue = userProvider.playerInfo.normalQueue.map((e) => items.firstWhere((element) => element.id == e)).toList();
+    primaryQueue = userProvider.playerInfo.primaryQueue.map((e) => items.firstWhere((element) => element.id == e)).toList();
 
+    log("[Queue View] build queue: $primaryQueue - ${userProvider.playerInfo.primaryQueue}");
     final entireQueue = [...primaryQueue, ...normalQueue];
     fullQueue = entireQueue.asMap().entries.map((entry) => TrackData(track: entry.value, itemKey: ValueKey(entry.key))).toList();
 

@@ -260,9 +260,10 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
     final items = await context.read<MusicInfoProvider>().batchTracks(userProvider.getAllTracks());
 
     final historyIds = userProvider.playerInfo.queueHistory.map((e) => e.id);
-    playerNormalQueue = items.where((element) => userProvider.playerInfo.normalQueue.contains(element.id)).toList();
-    playerPrimaryQueue = items.where((element) => userProvider.playerInfo.primaryQueue.contains(element.id)).toList();
-    playerQueueHistory = items.where((element) => historyIds.contains(element.id)).toList();
+
+    playerNormalQueue = userProvider.playerInfo.normalQueue.map((e) => items.firstWhere((element) => element.id == e)).toList();
+    playerPrimaryQueue = userProvider.playerInfo.primaryQueue.map((e) => items.firstWhere((element) => element.id == e)).toList();
+    playerQueueHistory = historyIds.map((e) => items.firstWhere((element) => element.id == e)).toList();
     fullQueue = [...playerPrimaryQueue, ...playerNormalQueue];
 
     //setState(() {});

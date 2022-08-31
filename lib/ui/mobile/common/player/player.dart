@@ -81,7 +81,6 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
   List<MusicTrack> playerPrimaryQueue = [];
   List<MusicTrack> playerQueueHistory = [];
   List<MusicTrack> fullQueue = []; // primary + normal
-  List<TrackData> queueViewItems = []; // primary + normal
 
   @override
   void initState() {
@@ -252,13 +251,10 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
   }
 
   Future<void> readQueueItems() async {
-    log("[RQI] read queue items");
-
     currentItem = context.read<CurrentMusicProvider>().playing;
-
     final userProvider = context.read<UserProvider>();
 
-    currentVersion = userProvider.playerInfo.version;
+    log("[RQI] read queue items");
 
     //if (userProvider.playerInfo.currentMusic?.id != currentItem?.id) {
 
@@ -271,52 +267,9 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
     playerQueueHistory = historyIds.map((e) => items.firstWhere((element) => element.id == e)).toList();
     fullQueue = [...playerPrimaryQueue, ...playerNormalQueue];
 
-    queueViewItems = fullQueue
-        .asMap()
-        .entries
-        .map((entry) =>
-            TrackData(track: entry.value, itemIndex: entry.key, isPrimary: entry.key < playerPrimaryQueue.length, itemKey: ValueKey(entry.key)))
-        .toList();
+    currentVersion = userProvider.playerInfo.version;
+    //if(mounted) setState(() {});
 
-    if (playerPrimaryQueue.isNotEmpty) {
-      queueViewItems.insert(
-        playerPrimaryQueue.length,
-        TrackData(
-          itemKey: const ValueKey("primary-separator"),
-          item: Container(
-            margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 54),
-            width: double.infinity,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(24),
-              color: Colors.grey.withOpacity(.5),
-            ),
-            height: 4,
-          ),
-          canMove: false,
-        ),
-      );
-    }
-
-    queueViewItems.insert(
-      0,
-      const TrackData(
-        itemKey: ValueKey("queue-text"),
-        item: Padding(
-          padding: EdgeInsets.only(left: 24.0, top: 16.0, bottom: 12.0),
-          child: Text(
-            "Queue",
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 24.0,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-        canMove: false,
-      ),
-    );
-
-    setState(() {});
     //}
   }
 
@@ -1094,30 +1047,16 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                       ),
                     ),
 
-                  if (queueOpacity > 0.0)
-                    Opacity(
-                      opacity: queueOpacity,
-                      child: Transform.translate(
-                        offset: Offset(0, (1 - queueOffset) * maxOffset),
-                        child: IgnorePointer(
-                          ignoring: !queueScrollable,
-                          child: QueueView(
-                            onReorder: (/*fromReal, toReal, from, to*/) {
-                              /*final removed = queueViewItems.removeAt(fromReal);
-                              queueViewItems.insert(toReal, removed);
-
-                              final removedQueue = fullQueue.removeAt(from);
-                              fullQueue.insert(to, removedQueue);*/
-
-                              readQueueItems();
-                            },
-                            primaryLength: playerPrimaryQueue.length,
-                            queueItems: queueViewItems,
-                            controller: scrollController,
-                          ),
-                        ),
+                  //if (queueOpacity > 0.0)
+                  Transform.translate(
+                    offset: Offset(0, (1 - queueOffset) * maxOffset),
+                    child: IgnorePointer(
+                      ignoring: !queueScrollable,
+                      child: QueueView(
+                        controller: scrollController,
                       ),
                     ),
+                  ),
 
                   // Container(
                   //   color: Colors.red,

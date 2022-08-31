@@ -9,7 +9,6 @@ import 'package:tearmusic/providers/user_provider.dart';
 import 'package:tearmusic/ui/mobile/common/player/player.dart';
 import 'package:tearmusic/ui/mobile/common/player/reorderable_list.dart';
 import 'package:tearmusic/ui/mobile/common/tiles/queue_tile.dart';
-import 'package:tearmusic/ui/mobile/common/tiles/track_tile.dart';
 
 int moveFromIndex = -1;
 
@@ -20,11 +19,9 @@ class TrackData extends StatelessWidget {
     required this.itemKey,
     this.track,
     this.item,
-    this.canMove = true,
     this.isPrimary = false,
   }) : super(key: key);
 
-  final bool canMove;
   final Widget? item;
   final MusicTrack? track;
   final int? itemIndex;
@@ -83,7 +80,7 @@ class TrackData extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ReorderableItem(
-        key: itemKey, //
+        key: itemKey,
         childBuilder: _buildChild);
   }
 }
@@ -97,22 +94,18 @@ class QueueView extends StatefulWidget {
   const QueueView({
     Key? key,
     this.controller,
-    required this.queueItems,
-    required this.onReorder,
-    required this.primaryLength,
   }) : super(key: key);
 
   final ScrollController? controller;
-  final List<TrackData> queueItems;
-  final int primaryLength;
-  final Function(/*int, int, int, int*/) onReorder;
 
   @override
   State<QueueView> createState() => _QueueViewState();
 }
 
 class _QueueViewState extends State<QueueView> {
-  //int lastVersion = 0;
+  int lastVersion = 0;
+  List<TrackData> queueViewItems = [];
+  int primaryQueueLength = 0;
 
   @override
   void initState() {
@@ -121,9 +114,70 @@ class _QueueViewState extends State<QueueView> {
     //buildQueue();
   }
 
+  void buildQueue() async {
+    log("buildqueue");
+
+    final userProvider = context.read<UserProvider>();
+
+    final items = await context.read<MusicInfoProvider>().batchTracks(userProvider.getAllTracks());
+
+    final playerNormalQueue = userProvider.playerInfo.normalQueue.map((e) => items.firstWhere((element) => element.id == e)).toList();
+    final playerPrimaryQueue = userProvider.playerInfo.primaryQueue.map((e) => items.firstWhere((element) => element.id == e)).toList();
+    final fullQueue = [...playerPrimaryQueue, ...playerNormalQueue];
+
+    primaryQueueLength = playerPrimaryQueue.length;
+
+    queueViewItems = fullQueue
+        .asMap()
+        .entries
+        .map((entry) =>
+            TrackData(track: entry.value, itemIndex: entry.key, isPrimary: entry.key < playerPrimaryQueue.length, itemKey: ValueKey(entry.key)))
+        .toList();
+
+    if (primaryQueueLength != 0) {
+      queueViewItems.insert(
+        primaryQueueLength,
+        TrackData(
+          itemKey: const ValueKey("primary-separator"),
+          item: Container(
+            margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 54),
+            width: double.infinity,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(24),
+              color: Colors.grey.withOpacity(.5),
+            ),
+            height: 4,
+          ),
+        ),
+      );
+    }
+
+    queueViewItems.insert(
+      0,
+      const TrackData(
+        itemKey: ValueKey("queue-text"),
+        item: Padding(
+          padding: EdgeInsets.only(left: 24.0, top: 16.0, bottom: 12.0),
+          child: Text(
+            "Queue",
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 24.0,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    lastVersion = userProvider.playerInfo.version;
+
+    setState(() {});
+  }
+
   // Returns index of item with given key
   int _indexOfKey(Key key) {
-    return widget.queueItems.indexWhere((TrackData t) => t.itemKey == key);
+    return queueViewItems.indexWhere((TrackData t) => t.itemKey == key);
   }
 
   bool _reorderCallback(Key item, Key newPosition, BuildContext context) {
@@ -134,15 +188,15 @@ class _QueueViewState extends State<QueueView> {
 
     log("[Queue View] reorder callback: $draggingIndex - $newPositionIndex");
 
-    final draggedItem = widget.queueItems[draggingIndex];
+    final draggedItem = queueViewItems[draggingIndex];
 
-    if (!draggedItem.canMove) return false;
+    if (draggedItem.track == null) return false;
 
     setState(() {
-      log("[Queue View] Reordering $item -> $newPosition");
+      debugPrint("[Queue View] Reordering $item -> $newPosition");
 
-      widget.queueItems.removeAt(draggingIndex);
-      widget.queueItems.insert(newPositionIndex, draggedItem);
+      queueViewItems.removeAt(draggingIndex);
+      queueViewItems.insert(newPositionIndex, draggedItem);
     });
     return true;
   }
@@ -168,27 +222,25 @@ class _QueueViewState extends State<QueueView> {
       moveToIndex = 0;
     }
 
-    if (widget.primaryLength != 0) {
-      if (moveFromIndex >= widget.primaryLength) {
-        moveFromIndex -= widget.primaryLength + (moveFromIndex != widget.primaryLength ? 1 : 0);
+    if (primaryQueueLength != 0) {
+      if (moveFromIndex >= primaryQueueLength) {
+        moveFromIndex -= primaryQueueLength + (moveFromIndex != primaryQueueLength ? 1 : 0);
       } else {
         moveFrom = PlayerInfoReorderMoveType.primary;
       }
 
-      if (moveToIndex >= widget.primaryLength + (moveFrom == PlayerInfoReorderMoveType.normal ? 1 : 0) &&
-          moveTo != PlayerInfoReorderMoveType.primary) {
-        moveToIndex -= widget.primaryLength + (moveFrom == PlayerInfoReorderMoveType.normal ? 1 : 0);
+      if (moveToIndex >= primaryQueueLength + (moveFrom == PlayerInfoReorderMoveType.normal ? 1 : 0) && moveTo != PlayerInfoReorderMoveType.primary) {
+        moveToIndex -= primaryQueueLength + (moveFrom == PlayerInfoReorderMoveType.normal ? 1 : 0);
       } else {
         moveTo = PlayerInfoReorderMoveType.primary;
       }
     }
 
-    log("[Queue View] ${moveFrom.name} $moveFromIndex ($realMoveFromIndex) --> ${moveTo.name} $moveToIndex ($realMoveToIndex)");
+    log("[Queue Reorder] ${moveFrom.name} $moveFromIndex ($realMoveFromIndex) --> ${moveTo.name} $moveToIndex ($realMoveToIndex)");
 
     context.read<UserProvider>().postReorder(moveFromIndex, moveToIndex, DateTime.now().millisecondsSinceEpoch, moveFrom: moveFrom, moveTo: moveTo);
-    widget.onReorder(/*realMoveFromIndex, realMoveToIndex, moveFromIndex, moveToIndex*/);
+    buildQueue();
     //setState(() {});
-    //buildQueue();
 
     moveFromIndex = -1;
   }
@@ -197,7 +249,7 @@ class _QueueViewState extends State<QueueView> {
   Widget build(BuildContext context) {
     //log("[Queue View] rebuild");
 
-    //if (context.read<UserProvider>().playerInfo.version != lastVersion) buildQueue();
+    if (context.read<UserProvider>().playerInfo.version != lastVersion) buildQueue();
 
     return SafeArea(
       bottom: false,
@@ -215,9 +267,9 @@ class _QueueViewState extends State<QueueView> {
                 SliverList(
                   delegate: SliverChildBuilderDelegate(
                     (BuildContext context, int index) {
-                      return widget.queueItems[index];
+                      return queueViewItems[index];
                     },
-                    childCount: widget.queueItems.length,
+                    childCount: queueViewItems.length,
                   ),
                 ),
                 /*SliverPadding(

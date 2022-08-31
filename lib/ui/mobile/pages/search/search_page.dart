@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 import 'dart:math' as math;
 
 import 'package:animations/animations.dart';
@@ -149,13 +150,15 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
 
   void onSubmitHandler(String input, {bool finalize = true}) {
     if (input == lastSearchTerm) {
+      //log("[S] input and last is same");
       if (results == null) {
+        //log("[S] results are null");
         setState(() => result = SearchResult.loading);
       } else if (finalize) {
         finalizeSearch();
       }
 
-      return;
+      //return;
     }
     lastSearchTerm = input;
 
@@ -181,6 +184,7 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
   }
 
   void finalizeSearch() {
+    log("[S] finalizeSearch");
     if (results?.isEmpty ?? true) {
       setState(() => result = SearchResult.empty);
     } else {

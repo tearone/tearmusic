@@ -427,7 +427,7 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                 panelHeight = vp(a: panelHeight, b: maxOffset / 1.6 - 100.0 - topInset, c: qcp);
               }
 
-              final double queueOpacity = ((p.clamp(1.0, 3.0) - 1).clamp(0.0, 1.0) * 4 - 3).clamp(0, 1);
+              // final double queueOpacity = ((p.clamp(1.0, 3.0) - 1).clamp(0.0, 1.0) * 4 - 3).clamp(0, 1);
               final double queueOffset = qp;
 
               return Stack(

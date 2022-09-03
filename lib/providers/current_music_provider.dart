@@ -18,7 +18,7 @@ enum AudioLoadingState { ready, loading, error }
 enum PlayingFrom { none, album, playlist }
 
 class CurrentMusicProvider extends BaseAudioHandler with ChangeNotifier {
-  final UserProvider _userApi;
+  final UserProvider _userProvider;
   final MusicInfoProvider _musicApi;
 
   final player = AudioPlayer(handleInterruptions: false);
@@ -34,7 +34,7 @@ class CurrentMusicProvider extends BaseAudioHandler with ChangeNotifier {
 
   CurrentMusicProvider({required MusicInfoProvider musicApi, required UserProvider userApi})
       : _musicApi = musicApi,
-        _userApi = userApi;
+        _userProvider = userApi;
 
   Future<void> init() async {
     final session = await AudioSession.instance;
@@ -76,7 +76,7 @@ class CurrentMusicProvider extends BaseAudioHandler with ChangeNotifier {
 
     player.playerStateStream.listen((event) {
       if (event.processingState == ProcessingState.completed) {
-        _userApi.skipToNext();
+        _userProvider.skipToNext();
       }
     });
 
@@ -117,7 +117,7 @@ class CurrentMusicProvider extends BaseAudioHandler with ChangeNotifier {
   }
 
   bool checkThisTrackIsPlaying(MusicTrack track) {
-    return _userApi.playerInfo.currentMusic!.id == track.id;
+    return _userProvider.playerInfo.currentMusic!.id == track.id;
   }
 
   // ! POC only
@@ -126,17 +126,17 @@ class CurrentMusicProvider extends BaseAudioHandler with ChangeNotifier {
 
     // not being used
     //if (clearHistory) {
-    //  _userApi.postClear(PlayerInfoPostType.history, DateTime.now().millisecondsSinceEpoch);
+    //  _userProvider.postClear(PlayerInfoPostType.history, DateTime.now().millisecondsSinceEpoch);
     //}
 
-    if (_userApi.playerInfo.currentMusic == null || _userApi.playerInfo.currentMusic!.id != track.id) {
-      _userApi.postCurrentMusic(track.id, DateTime.now().millisecondsSinceEpoch, fromPrimary: fromPrimary);
+    if (_userProvider.playerInfo.currentMusic == null || _userProvider.playerInfo.currentMusic?.id != track.id) {
+      _userProvider.postCurrentMusic(track.id, DateTime.now().millisecondsSinceEpoch, fromPrimary: fromPrimary);
     }
 
     notifyListeners();
 
     playing = track;
-    liked = (await _userApi.getLibrary()).liked_tracks.contains(track.id);
+    liked = (await _userProvider.getLibrary()).liked_tracks.contains(track.id);
     final imageUrl = track.album?.images?.forSize(const Size(200, 200));
     mediaItem.add(MediaItem(
       id: track.id,
@@ -162,7 +162,7 @@ class CurrentMusicProvider extends BaseAudioHandler with ChangeNotifier {
     } else {
       if (checkThisTrackIsPlaying(track)) {
         audioLoading = AudioLoadingState.error;
-        _userApi.skipToNext();
+        _userProvider.skipToNext();
       }
       notifyListeners();
       return;
@@ -186,7 +186,7 @@ class CurrentMusicProvider extends BaseAudioHandler with ChangeNotifier {
 
     if (startInstant) player.play();
 
-    _userApi.putLibrary(playing!, LibraryType.track_history);
+    _userProvider.putLibrary(playing!, LibraryType.track_history);
 
     if (!checkThisTrackIsPlaying(track)) {
       return;
@@ -212,12 +212,12 @@ class CurrentMusicProvider extends BaseAudioHandler with ChangeNotifier {
 
   @override
   Future<void> skipToNext() async {
-    _userApi.skipToNext();
+    _userProvider.skipToNext();
   }
 
   @override
   Future<void> skipToPrevious() async {
-    _userApi.skipToPrev();
+    _userProvider.skipToPrev();
   }
 
   @override
@@ -226,9 +226,9 @@ class CurrentMusicProvider extends BaseAudioHandler with ChangeNotifier {
     mediaItem.add(mediaItem.value!.copyWith(rating: Rating.newHeartRating(liked)));
     if (playing != null) {
       if (rating.hasHeart()) {
-        await _userApi.putLibrary(playing!, LibraryType.liked_tracks);
+        await _userProvider.putLibrary(playing!, LibraryType.liked_tracks);
       } else {
-        await _userApi.deleteLibrary(playing!, LibraryType.liked_tracks);
+        await _userProvider.deleteLibrary(playing!, LibraryType.liked_tracks);
       }
     }
     player.setSpeed(1.0); // trigger playback event and update notification

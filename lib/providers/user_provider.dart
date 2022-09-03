@@ -456,6 +456,8 @@ class UserProvider extends ChangeNotifier {
 
     if (type == PlayerInfoSourceType.radio) {
     } else {
+      if (_currentMusicProvider.player.playing) _currentMusicProvider.stop();
+      _currentMusicProvider.seek(Duration.zero);
       if (playFirst) _currentMusicProvider.playTrack(tracks[0]);
       playerInfo.currentMusic = QueueItem(id: tracks[0].id, fromPrimary: false);
       playerInfo.normalQueue = tracks.map((e) => e.id).toList();
@@ -497,6 +499,9 @@ class UserProvider extends ChangeNotifier {
   }
 
   bool skipToPrev() {
+    if (_currentMusicProvider.player.playing) _currentMusicProvider.stop();
+    _currentMusicProvider.seek(Duration.zero);
+
     final queueHistory = playerInfo.queueHistory;
 
     final newVersion = DateTime.now().millisecondsSinceEpoch;
@@ -513,21 +518,22 @@ class UserProvider extends ChangeNotifier {
           whereTo: playerInfo.currentMusic!.fromPrimary ? PlayerInfoPostType.primary : PlayerInfoPostType.normal, toStart: true);
       //postAdd(currentMusic.id, newVersion, whereTo: currentMusic.fromPrimary ? PlayerInfoPostType.primary : PlayerInfoPostType.normal, toStart: true);
 
+      //postCurrentMusic(nextToPlay.id, DateTime.now().millisecondsSinceEpoch, fromPrimary: nextToPlay.fromPrimary);
+
+      playTrackById(nextToPlay.id, nextToPlay.fromPrimary);
+
+      return true;
+
       // if we want "skip" and "prev" track always be the same, we need to add the track to primary:
-    } else {
-      return false;
     }
 
-    postCurrentMusic(nextToPlay.id, DateTime.now().millisecondsSinceEpoch, fromPrimary: nextToPlay.fromPrimary);
-
-    log("[Player State] next to play from history: $nextToPlay");
-
-    playTrackById(nextToPlay.id, nextToPlay.fromPrimary);
-
-    return true;
+    return false;
   }
 
   bool skipToNext() {
+    if (_currentMusicProvider.player.playing) _currentMusicProvider.stop();
+    _currentMusicProvider.seek(Duration.zero);
+
     final primaryQueue = playerInfo.primaryQueue;
     final normalQueue = playerInfo.normalQueue;
 
@@ -554,7 +560,7 @@ class UserProvider extends ChangeNotifier {
       return false;
     }
 
-    postCurrentMusic(nextToPlay, DateTime.now().millisecondsSinceEpoch, fromPrimary: fromPrimary);
+    //postCurrentMusic(nextToPlay, DateTime.now().millisecondsSinceEpoch, fromPrimary: fromPrimary);
 
     log("[Player State] next to play from queue: $nextToPlay");
 
@@ -564,9 +570,6 @@ class UserProvider extends ChangeNotifier {
   }
 
   void playTrackById(String id, bool fromPrimary) {
-    if (_currentMusicProvider.player.playing) _currentMusicProvider.stop();
-    _currentMusicProvider.seek(Duration.zero);
-
     final playTrack = _musicInfoProvider.batchTracks([id]);
     playTrack.then((value) {
       _currentMusicProvider.playTrack(value.first, fromPrimary: fromPrimary);

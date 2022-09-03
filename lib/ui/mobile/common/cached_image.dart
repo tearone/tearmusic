@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:animations/animations.dart';
 import 'package:async/async.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -35,51 +36,43 @@ class CachedImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
-      return FutureBuilder<Uint8List>(
-        future: getImage(Size(constraints.maxWidth, constraints.maxHeight)),
-        builder: (context, snapshot) {
-          switch (snapshot.connectionState) {
-            case ConnectionState.waiting:
-            case ConnectionState.done:
-              return ClipRRect(
-                borderRadius: BorderRadius.circular(borderRadius),
-                child: SizedBox(
-                  width: constraints.maxWidth,
-                  height: constraints.maxHeight,
-                  child: snapshot.hasData
-                      ? Transform.scale(
-                          scale: 1.05,
-                          child: Image.memory(
-                            snapshot.data!,
-                            width: constraints.maxWidth,
-                            height: constraints.maxHeight,
-                            fit: BoxFit.cover,
-                          ),
-                        )
-                      : SizedBox(
-                          width: constraints.maxWidth,
-                          height: constraints.maxHeight,
-                          child: Card(
-                            elevation: 0,
-                            margin: EdgeInsets.zero,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(borderRadius)),
-                            color: Theme.of(context).colorScheme.secondaryContainer,
-                            child: Icon(
-                              CupertinoIcons.music_note,
-                              size: sqrt(constraints.maxWidth * constraints.maxHeight) / 2,
-                              color: Theme.of(context).colorScheme.secondary,
-                            ),
-                          ),
-                        ),
-                ),
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(borderRadius),
+        child: SizedBox(
+          width: constraints.maxWidth,
+          height: constraints.maxHeight,
+          child: PageTransitionSwitcher(
+            transitionBuilder: (child, primaryAnimation, secondaryAnimation) {
+              return FadeThroughTransition(
+                fillColor: Colors.transparent,
+                animation: primaryAnimation,
+                secondaryAnimation: secondaryAnimation,
+                child: child,
               );
-            default:
-              return SizedBox(
+            },
+            child: CachedNetworkImage(
+              imageUrl: images.forSize(size ?? (Size(constraints.maxWidth, constraints.maxHeight))),
+              placeholder: (context, url) => SizedBox(
                 width: constraints.maxWidth,
                 height: constraints.maxHeight,
-              );
-          }
-        },
+                child: Card(
+                  elevation: 0,
+                  margin: EdgeInsets.zero,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(borderRadius)),
+                  color: Theme.of(context).colorScheme.secondaryContainer,
+                  child: Icon(
+                    CupertinoIcons.music_note,
+                    size: sqrt(constraints.maxWidth * constraints.maxHeight) / 2,
+                    color: Theme.of(context).colorScheme.secondary,
+                  ),
+                ),
+              ),
+              fadeInDuration: const Duration(milliseconds: 50),
+              fadeOutDuration: const Duration(milliseconds: 50),
+              placeholderFadeInDuration: const Duration(milliseconds: 50),
+            ),
+          ),
+        ),
       );
     });
   }

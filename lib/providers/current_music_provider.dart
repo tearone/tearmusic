@@ -7,7 +7,6 @@ import 'package:just_audio/just_audio.dart';
 import 'package:tearmusic/models/library.dart';
 import 'package:tearmusic/models/music/playlist.dart';
 import 'package:tearmusic/models/music/track.dart';
-import 'package:tearmusic/models/player_info.dart';
 import 'package:tearmusic/player/audio_source.dart';
 import 'package:tearmusic/player/media_control.dart';
 import 'package:tearmusic/providers/music_info_provider.dart';

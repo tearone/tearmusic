@@ -456,8 +456,6 @@ class UserProvider extends ChangeNotifier {
 
     if (type == PlayerInfoSourceType.radio) {
     } else {
-      if (_currentMusicProvider.player.playing) _currentMusicProvider.stop();
-      _currentMusicProvider.seek(Duration.zero);
       if (playFirst) _currentMusicProvider.playTrack(tracks[0]);
       playerInfo.currentMusic = QueueItem(id: tracks[0].id, fromPrimary: false);
       playerInfo.normalQueue = tracks.map((e) => e.id).toList();
@@ -499,9 +497,6 @@ class UserProvider extends ChangeNotifier {
   }
 
   bool skipToPrev() {
-    if (_currentMusicProvider.player.playing) _currentMusicProvider.stop();
-    _currentMusicProvider.seek(Duration.zero);
-
     final queueHistory = playerInfo.queueHistory;
 
     final newVersion = DateTime.now().millisecondsSinceEpoch;
@@ -531,9 +526,6 @@ class UserProvider extends ChangeNotifier {
   }
 
   bool skipToNext() {
-    if (_currentMusicProvider.player.playing) _currentMusicProvider.stop();
-    _currentMusicProvider.seek(Duration.zero);
-
     final primaryQueue = playerInfo.primaryQueue;
     final normalQueue = playerInfo.normalQueue;
 
@@ -562,7 +554,7 @@ class UserProvider extends ChangeNotifier {
 
     //postCurrentMusic(nextToPlay, DateTime.now().millisecondsSinceEpoch, fromPrimary: fromPrimary);
 
-    log("[Player State] next to play from queue: $nextToPlay");
+    debugPrint("[Player State] next to play from queue: $nextToPlay");
 
     playTrackById(nextToPlay, fromPrimary);
 

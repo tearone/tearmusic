@@ -73,7 +73,7 @@ class CurrentMusicProvider extends BaseAudioHandler with ChangeNotifier {
       log('Devices removed: ${event.devicesRemoved}');
     });
 
-    player.playerStateStream.listen((event) {
+    player.playbackEventStream.listen((event) {
       if (event.processingState == ProcessingState.completed) {
         _userProvider.skipToNext();
       }

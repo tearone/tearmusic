@@ -20,7 +20,7 @@ import 'package:tearmusic/ui/mobile/common/tiles/artist_artist_tile.dart';
 import 'package:tearmusic/ui/mobile/common/tiles/artist_track_tile.dart';
 import 'package:tearmusic/ui/mobile/common/cached_image.dart';
 import 'package:tearmusic/ui/mobile/common/view_menu_button.dart';
-import 'package:tearmusic/ui/mobile/common/views/album_view/latest_release.dart';
+import 'package:tearmusic/ui/mobile/common/views/artist_view/latest_release.dart';
 import 'package:tearmusic/ui/mobile/common/views/artist_view/artist_header_button.dart';
 import 'package:tearmusic/ui/mobile/common/views/content_list_view.dart';
 import 'package:tearmusic/ui/mobile/pages/library/track_loading_tile.dart';

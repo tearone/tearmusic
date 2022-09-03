@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tearmusic/models/music/album.dart';
 import 'package:tearmusic/ui/mobile/common/cached_image.dart';
-import 'package:tearmusic/ui/mobile/common/views/album_view/album_view.dart';
+import 'package:tearmusic/ui/mobile/common/views/album_view.dart';
 
 class ArtistAlbumTile extends StatelessWidget {
   const ArtistAlbumTile(this.album, {Key? key, this.then, this.size = 130}) : super(key: key);

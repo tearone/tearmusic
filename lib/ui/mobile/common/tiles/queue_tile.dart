@@ -14,7 +14,7 @@ import 'package:tearmusic/ui/mobile/common/bottom_sheet.dart';
 import 'package:tearmusic/ui/mobile/common/cached_image.dart';
 import 'package:tearmusic/ui/mobile/common/menu_button.dart';
 import 'package:tearmusic/ui/mobile/common/tiles/track_tile_preview.dart';
-import 'package:tearmusic/ui/mobile/common/views/album_view/album_view.dart';
+import 'package:tearmusic/ui/mobile/common/views/album_view.dart';
 import 'package:tearmusic/ui/mobile/common/views/artist_view.dart';
 import 'package:tearmusic/ui/mobile/common/views/manual_match_view.dart';
 

@@ -1,14 +1,17 @@
-class AuthException implements Exception {
+class BaseRequestException {
   String cause;
-  AuthException(this.cause);
+
+  BaseRequestException(this.cause);
 }
 
-class NotFoundException implements Exception {
-  String cause;
-  NotFoundException(this.cause);
+class AuthException extends BaseRequestException {
+  AuthException(String cause) : super(cause);
 }
 
-class UnknownRequestException implements Exception {
-  String cause;
-  UnknownRequestException(this.cause);
+class NotFoundException extends BaseRequestException {
+  NotFoundException(String cause) : super(cause);
+}
+
+class UnknownRequestException extends BaseRequestException {
+  UnknownRequestException(String cause) : super(cause);
 }

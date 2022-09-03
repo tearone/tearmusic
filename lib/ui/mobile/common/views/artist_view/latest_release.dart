@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tearmusic/models/music/album.dart';
-import 'package:tearmusic/ui/mobile/common/views/album_view/album_view.dart';
+import 'package:tearmusic/ui/mobile/common/views/album_view.dart';
 import 'package:tearmusic/ui/mobile/common/cached_image.dart';
 
 class LatestRelease extends StatelessWidget {

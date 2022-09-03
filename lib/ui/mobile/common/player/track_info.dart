@@ -8,7 +8,7 @@ import 'package:tearmusic/providers/current_music_provider.dart';
 import 'package:tearmusic/providers/theme_provider.dart';
 import 'package:tearmusic/providers/user_provider.dart';
 import 'package:tearmusic/providers/will_pop_provider.dart';
-import 'package:tearmusic/ui/mobile/common/views/artist_view.dart';
+import 'package:tearmusic/ui/mobile/common/views/artist_view/artist_view.dart';
 import 'package:tearmusic/utils.dart';
 
 class TrackInfo extends StatelessWidget {

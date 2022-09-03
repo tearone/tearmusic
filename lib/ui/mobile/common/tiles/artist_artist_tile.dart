@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tearmusic/models/music/artist.dart';
 import 'package:tearmusic/ui/mobile/common/cached_image.dart';
-import 'package:tearmusic/ui/mobile/common/views/artist_view.dart';
+import 'package:tearmusic/ui/mobile/common/views/artist_view/artist_view.dart';
 
 class ArtistArtistTile extends StatelessWidget {
   const ArtistArtistTile(this.artist, {Key? key, this.then}) : super(key: key);

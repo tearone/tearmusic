@@ -11,8 +11,8 @@ import 'package:tearmusic/ui/common/image_color.dart';
 import 'package:tearmusic/ui/mobile/common/cached_image.dart';
 import 'package:tearmusic/ui/common/format.dart';
 import 'package:tearmusic/ui/mobile/common/tiles/track_tile_preview.dart';
-import 'package:tearmusic/ui/mobile/common/views/album_view/album_view.dart';
-import 'package:tearmusic/ui/mobile/common/views/artist_view.dart';
+import 'package:tearmusic/ui/mobile/common/views/album_view.dart';
+import 'package:tearmusic/ui/mobile/common/views/artist_view/artist_view.dart';
 import 'package:tearmusic/ui/mobile/common/views/manual_match_view.dart';
 
 class TrackTile extends StatelessWidget {

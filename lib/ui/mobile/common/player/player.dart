@@ -20,7 +20,7 @@ import 'package:tearmusic/ui/mobile/common/player/waveform_slider.dart';
 import 'package:tearmusic/ui/mobile/common/player/track_image.dart';
 import 'package:tearmusic/ui/mobile/common/player/track_info.dart';
 import 'package:tearmusic/ui/common/format.dart';
-import 'package:tearmusic/ui/mobile/common/views/album_view/album_view.dart';
+import 'package:tearmusic/ui/mobile/common/views/album_view.dart';
 import 'package:tearmusic/utils.dart';
 
 enum PlayerState { mini, expanded, queue }

@@ -261,7 +261,7 @@ class UserProvider extends ChangeNotifier {
       }
     }
 
-    /*switch (playerInfo.queueSource.type) {
+    switch (playerInfo.queueSource.type) {
       case PlayerInfoSourceType.playlist:
         // caching tracks
         await _musicInfoProvider.playlistTracks(playerInfo.queueSource.id!);
@@ -273,7 +273,7 @@ class UserProvider extends ChangeNotifier {
         break;
       case PlayerInfoSourceType.radio:
         break;
-    }*/
+    }
 
     log("[Player] matched info: ${playerInfo.encode()}");
   }

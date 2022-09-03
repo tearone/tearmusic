@@ -119,17 +119,17 @@ class QueueTile extends StatelessWidget {
             ),
             visualDensity: VisualDensity.compact,
             onTap: () {
+              context.read<UserProvider>().postRemove(
+                  0,
+                  endIndex: itemIndex,
+                  DateTime.now().millisecondsSinceEpoch,
+                  removeFrom: isPrimary ? PlayerInfoPostType.primary : PlayerInfoPostType.normal);
               FocusScope.of(context).requestFocus(FocusNode());
               if (track.album?.images != null) {
                 CachedImage(track.album!.images!).getImage(const Size(64, 64)).then((value) {
                   final colors = generateColorPalette(value);
                   final theme = context.read<ThemeProvider>();
                   if (theme.key != colors[1]) theme.setThemeKey(colors[1]);
-                  context.read<UserProvider>().postRemove(
-                      0,
-                      endIndex: itemIndex,
-                      DateTime.now().millisecondsSinceEpoch,
-                      removeFrom: isPrimary ? PlayerInfoPostType.primary : PlayerInfoPostType.normal);
                   context.read<CurrentMusicProvider>().playTrack(track);
                   /*if (currentMusic.playing != null)
                     context

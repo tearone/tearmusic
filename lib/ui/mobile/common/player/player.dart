@@ -1,5 +1,6 @@
 // ignore_for_file: dead_code
 
+import 'dart:developer';
 import 'dart:ui';
 
 import 'package:animated_flip_counter/animated_flip_counter.dart';
@@ -80,7 +81,6 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
   List<MusicTrack> playerPrimaryQueue = [];
   List<MusicTrack> playerQueueHistory = [];
   List<MusicTrack> fullQueue = []; // primary + normal
-  List<TrackData> queueViewItems = []; // primary + normal
 
   @override
   void initState() {
@@ -252,10 +252,9 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
 
   Future<void> readQueueItems() async {
     currentItem = context.read<CurrentMusicProvider>().playing;
-
     final userProvider = context.read<UserProvider>();
 
-    currentVersion = userProvider.playerInfo.version;
+    log("[RQI] read queue items");
 
     //if (userProvider.playerInfo.currentMusic?.id != currentItem?.id) {
 
@@ -268,59 +267,9 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
     playerQueueHistory = historyIds.map((e) => items.firstWhere((element) => element.id == e)).toList();
     fullQueue = [...playerPrimaryQueue, ...playerNormalQueue];
 
-    final primaryItems = playerPrimaryQueue
-        .asMap()
-        .entries
-        .map((entry) => TrackData(
-              track: entry.value,
-              itemIndex: entry.key,
-              isPrimary: true,
-            ))
-        .toList();
-    final normalItems =
-        playerNormalQueue.asMap().entries.map((entry) => TrackData(track: entry.value, itemIndex: playerPrimaryQueue.length + entry.key)).toList();
+    currentVersion = userProvider.playerInfo.version;
+    //if(mounted) setState(() {});
 
-    queueViewItems = [...primaryItems, ...normalItems];
-
-    if (playerPrimaryQueue.isNotEmpty) {
-      queueViewItems.insert(
-        playerPrimaryQueue.length,
-        TrackData(
-          itemIndex: -2,
-          item: Container(
-            margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 54),
-            width: double.infinity,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(24),
-              color: Colors.grey.withOpacity(.5),
-            ),
-            height: 4,
-          ),
-          canMove: false,
-        ),
-      );
-    }
-
-    queueViewItems.insert(
-      0,
-      const TrackData(
-        itemIndex: -3,
-        item: Padding(
-          padding: EdgeInsets.only(left: 24.0, top: 16.0, bottom: 12.0),
-          child: Text(
-            "Queue",
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 24.0,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-        canMove: false,
-      ),
-    );
-
-    //setState(() {});
     //}
   }
 
@@ -1098,20 +1047,16 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                       ),
                     ),
 
-                  if (queueOpacity > 0.0)
-                    Opacity(
-                      opacity: queueOpacity,
-                      child: Transform.translate(
-                        offset: Offset(0, (1 - queueOffset) * maxOffset),
-                        child: IgnorePointer(
-                          ignoring: !queueScrollable,
-                          child: QueueView(
-                            queueItems: queueViewItems,
-                            controller: scrollController,
-                          ),
-                        ),
+                  //if (queueOpacity > 0.0)
+                  Transform.translate(
+                    offset: Offset(0, (1 - queueOffset) * maxOffset),
+                    child: IgnorePointer(
+                      ignoring: !queueScrollable,
+                      child: QueueView(
+                        controller: scrollController,
                       ),
                     ),
+                  ),
 
                   // Container(
                   //   color: Colors.red,

@@ -7,12 +7,13 @@ import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
+import 'package:tearmusic/api/base_api.dart';
 import 'package:tearmusic/providers/user_provider.dart';
 import 'package:tearmusic/ui/mobile/navigator.dart';
 import 'package:uni_links/uni_links.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-const discordLoginUrl = "https://api.tear.one/oauth/discord/redirect";
+const discordLoginUrl = "${BaseApi.url}/oauth/discord/redirect";
 
 enum LoginState { none, progress, success, failed }
 

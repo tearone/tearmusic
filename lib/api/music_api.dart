@@ -22,6 +22,8 @@ class MusicApi {
 
   BaseApi base;
 
+  static const baseUrl = "https://music.tear.one/api";
+
   void _reschk(http.Response res, String cause) {
     cause = "MusicApi.$cause";
     if (res.statusCode == 401) {
@@ -38,7 +40,7 @@ class MusicApi {
 
   Future<List<SearchSuggestion>> searchSuggest(String query) async {
     final res = await http.get(
-      Uri.parse("${BaseApi.url}/music/search-suggest?query=${Uri.encodeComponent(query)}"),
+      Uri.parse("$baseUrl/music/search-suggest?query=${Uri.encodeComponent(query)}"),
       headers: {"authorization": await base.getToken()},
     );
 
@@ -50,7 +52,7 @@ class MusicApi {
 
   Future<SearchResults> search(String query) async {
     final res = await http.get(
-      Uri.parse("${BaseApi.url}/music/search?query=${Uri.encodeComponent(query)}"),
+      Uri.parse("$baseUrl/music/search?query=${Uri.encodeComponent(query)}"),
       headers: {"authorization": await base.getToken()},
     );
 
@@ -60,7 +62,7 @@ class MusicApi {
 
   Future<PlaylistDetails> playlistTracks(MusicPlaylist playlist) async {
     final res = await http.get(
-      Uri.parse("${BaseApi.url}/music/playlist-tracks?id=${Uri.encodeComponent(playlist.id)}"),
+      Uri.parse("$baseUrl/music/playlist-tracks?id=${Uri.encodeComponent(playlist.id)}"),
       headers: {"authorization": await base.getToken()},
     );
 
@@ -70,7 +72,7 @@ class MusicApi {
 
   Future<List<MusicTrack>> albumTracks(MusicAlbum album) async {
     final res = await http.get(
-      Uri.parse("${BaseApi.url}/music/album-tracks?id=${Uri.encodeComponent(album.id)}"),
+      Uri.parse("$baseUrl/music/album-tracks?id=${Uri.encodeComponent(album.id)}"),
       headers: {"authorization": await base.getToken()},
     );
 
@@ -82,7 +84,7 @@ class MusicApi {
 
   Future<List<MusicAlbum>> newReleases() async {
     final res = await http.get(
-      Uri.parse("${BaseApi.url}/music/new-releases"),
+      Uri.parse("$baseUrl/music/new-releases"),
       headers: {"authorization": await base.getToken()},
     );
 
@@ -94,7 +96,7 @@ class MusicApi {
 
   Future<List<MusicAlbum>> artistAlbums(MusicArtist artist) async {
     final res = await http.get(
-      Uri.parse("${BaseApi.url}/music/artist-albums?id=${Uri.encodeComponent(artist.id)}"),
+      Uri.parse("$baseUrl/music/artist-albums?id=${Uri.encodeComponent(artist.id)}"),
       headers: {"authorization": await base.getToken()},
     );
 
@@ -106,7 +108,7 @@ class MusicApi {
 
   Future<List<MusicTrack>> artistTracks(MusicArtist artist) async {
     final res = await http.get(
-      Uri.parse("${BaseApi.url}/music/artist-tracks?id=${Uri.encodeComponent(artist.id)}"),
+      Uri.parse("$baseUrl/music/artist-tracks?id=${Uri.encodeComponent(artist.id)}"),
       headers: {"authorization": await base.getToken()},
     );
 
@@ -118,7 +120,7 @@ class MusicApi {
 
   Future<List<MusicArtist>> artistRelated(MusicArtist artist) async {
     final res = await http.get(
-      Uri.parse("${BaseApi.url}/music/artist-related?id=${Uri.encodeComponent(artist.id)}"),
+      Uri.parse("$baseUrl/music/artist-related?id=${Uri.encodeComponent(artist.id)}"),
       headers: {"authorization": await base.getToken()},
     );
 
@@ -130,7 +132,7 @@ class MusicApi {
 
   Future<ArtistDetails> artistDetails(MusicArtist artist) async {
     final res = await http.get(
-      Uri.parse("${BaseApi.url}/music/artist?id=${Uri.encodeComponent(artist.id)}"),
+      Uri.parse("$baseUrl/music/artist?id=${Uri.encodeComponent(artist.id)}"),
       headers: {"authorization": await base.getToken()},
     );
 
@@ -155,7 +157,7 @@ class MusicApi {
 
   Future<MusicLyrics> lyrics(MusicTrack track) async {
     final res = await http.get(
-      Uri.parse("${BaseApi.url}/music/lyrics"
+      Uri.parse("$baseUrl/music/lyrics"
           "?artist=${Uri.encodeComponent(track.artists.first.name)}"
           "&track=${Uri.encodeComponent(track.name)}"
           "&duration=${track.duration.inSeconds}"),
@@ -170,7 +172,7 @@ class MusicApi {
   }
 
   Future<PlaybackHead> playbackHead(MusicTrack track) async {
-    String url = "${BaseApi.url}/music/playback";
+    String url = "$baseUrl/music/playback";
     url += "?id=${Uri.encodeComponent(track.id)}";
     url += "&artists=${Uri.encodeComponent(jsonEncode(track.artists.map((e) => e.name).toList()))}";
     url += "&track=${Uri.encodeComponent(track.name)}";
@@ -190,7 +192,7 @@ class MusicApi {
   }
 
   Future<Playback> playback(MusicTrack track) async {
-    String url = "${BaseApi.url}/music/playback";
+    String url = "$baseUrl/music/playback";
     url += "?id=${Uri.encodeComponent(track.id)}";
     url += "&artists=${Uri.encodeComponent(jsonEncode(track.artists.map((e) => e.name).toList()))}";
     url += "&track=${Uri.encodeComponent(track.name)}";
@@ -211,7 +213,7 @@ class MusicApi {
 
   Future<void> purgeCache(MusicTrack track) async {
     final res = await http.delete(
-      Uri.parse("${BaseApi.url}/music/playback?id=${Uri.encodeComponent(track.id)}"),
+      Uri.parse("$baseUrl/music/playback?id=${Uri.encodeComponent(track.id)}"),
       headers: {"authorization": await base.getToken()},
     );
 
@@ -220,7 +222,7 @@ class MusicApi {
 
   Future<List<ManualMatch>> manualMatches(MusicTrack track) async {
     final res = await http.get(
-      Uri.parse("${BaseApi.url}/music/manual-matches?id=${Uri.encodeComponent(track.id)}"),
+      Uri.parse("$baseUrl/music/manual-matches?id=${Uri.encodeComponent(track.id)}"),
       headers: {"authorization": await base.getToken()},
     );
 
@@ -232,7 +234,7 @@ class MusicApi {
 
   Future<void> matchManual(MusicTrack track, String videoId) async {
     final res = await http.post(
-      Uri.parse("${BaseApi.url}/music/manual-matches?id=${Uri.encodeComponent(track.id)}&video_id=${Uri.encodeComponent(videoId)}"),
+      Uri.parse("$baseUrl/music/manual-matches?id=${Uri.encodeComponent(track.id)}&video_id=${Uri.encodeComponent(videoId)}"),
       headers: {"authorization": await base.getToken()},
     );
 
@@ -241,7 +243,7 @@ class MusicApi {
 
   Future<BatchLibrary> libraryBatch(LibraryType type, {int limit = 10, int offset = 0}) async {
     final res = await http.get(
-      Uri.parse("${BaseApi.url}/music/batch-library?limit=$limit&offset=$offset&type=${Uri.encodeComponent(type.name)}"),
+      Uri.parse("$baseUrl/music/batch-library?limit=$limit&offset=$offset&type=${Uri.encodeComponent(type.name)}"),
       headers: {"authorization": await base.getToken()},
     );
 

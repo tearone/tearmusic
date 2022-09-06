@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class BaseApi {
-  static const url = "https://api.tear.one";
+  static const url = "https://api.tear.one/api";
 
   String? _accessToken;
   String? _refreshToken;

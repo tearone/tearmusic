@@ -40,7 +40,6 @@ class CachedImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
-      if (constraints.maxHeight == 300) print("biggest: ${constraints.biggest}");
       return FutureBuilder<Uint8List?>(
           future: getImage(size ?? (Size(constraints.maxWidth, constraints.maxHeight))).then((value) {
             _data.complete(value);

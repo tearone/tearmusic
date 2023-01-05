@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:tearmusic/api/base_api.dart';
@@ -117,16 +118,18 @@ class MusicInfoProvider {
     return data;
   }
 
-  Future<PlaylistDetails> playlistTracks(MusicPlaylist playlist) async {
+  Future<PlaylistDetails> playlistTracks(String playlistId) async {
     PlaylistDetails data;
-    final cacheKey = "playlist_tracks_$playlist";
+    final cacheKey = "playlist_tracks_$playlistId";
     final String? cache = _store.get(cacheKey);
     if (cache != null) {
       final json = jsonDecode(cache) as Map;
       List<Map> tracks = (json['tracks'] as List).map((id) => jsonDecode(_store.get("tracks_$id"))).toList().cast();
+      log("[PQ] track cache found, fetched: ${tracks.map((e) => e['name'])}");
       data = PlaylistDetails.decode({'tracks': tracks, 'followers': json['followers']});
     } else {
-      data = await _api.playlistTracks(playlist);
+      data = await _api.playlistTracks(playlistId);
+      log("[PQ] track cache not found, fetched: ${data.tracks.map((e) => e.name)}");
       _store.put(cacheKey, jsonEncode({'tracks': Model.encodeIdList(data.tracks), 'followers': data.followers}));
       for (final e in data.tracks) {
         _store.put("tracks_$e", jsonEncode(e.encode()));
@@ -135,15 +138,15 @@ class MusicInfoProvider {
     return data;
   }
 
-  Future<List<MusicTrack>> albumTracks(MusicAlbum album) async {
+  Future<List<MusicTrack>> albumTracks(String albumId) async {
     List<MusicTrack> data = [];
-    final cacheKey = "album_tracks_$album";
+    final cacheKey = "album_tracks_$albumId";
     final String? cache = _store.get(cacheKey);
     if (cache != null) {
       final json = jsonDecode(cache) as List;
       data = MusicTrack.decodeList(json.map((id) => jsonDecode(_store.get("tracks_$id"))).toList().cast());
     } else {
-      data = await _api.albumTracks(album);
+      data = await _api.albumTracks(albumId);
       _store.put(cacheKey, jsonEncode(Model.encodeIdList(data)));
       for (final e in data) {
         _store.put("tracks_$e", jsonEncode(e.encode()));
@@ -256,6 +259,43 @@ class MusicInfoProvider {
 
   Future<void> matchManual(MusicTrack track, String videoId) async {
     await _api.matchManual(track, videoId);
+  }
+
+  Future<List<MusicTrack>> batchTracks(List<String> idList) async {
+    //log("[Queue] fetching batch tracks: $idList");
+
+    List<MusicTrack> tracks = [];
+
+    List<String> needToFetch = [];
+    for (var t in idList) {
+      //log("[Queue] checking: $t");
+
+      final cacheKey = "tracks_$t";
+      final String? cache = _store.get(cacheKey);
+      if (cache != null) {
+        try {
+          tracks.add(MusicTrack.decode(jsonDecode(cache)));
+        } catch (e) {
+          //log("[Queue] cant decode $t");
+          needToFetch.add(t);
+        }
+      } else {
+        needToFetch.add(t);
+      }
+    }
+
+    //log("[Queue] batch tracks need to fetch: $needToFetch");
+
+    if (needToFetch.isNotEmpty) {
+      final data = await _api.batchTracks(needToFetch);
+
+      for (final t in data) {
+        tracks.add(t);
+        _store.put("tracks_$t", jsonEncode(t.encode()));
+      }
+    }
+
+    return tracks;
   }
 
   Future<BatchLibrary> libraryBatch(LibraryType type, {int limit = 10, int offset = 0}) async {

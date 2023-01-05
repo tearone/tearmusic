@@ -17,7 +17,7 @@ enum AudioLoadingState { ready, loading, error }
 enum PlayingFrom { none, album, playlist }
 
 class CurrentMusicProvider extends BaseAudioHandler with ChangeNotifier {
-  final UserProvider _userApi;
+  final UserProvider _userProvider;
   final MusicInfoProvider _musicApi;
 
   var player = AudioPlayer(handleInterruptions: false);
@@ -33,7 +33,7 @@ class CurrentMusicProvider extends BaseAudioHandler with ChangeNotifier {
 
   CurrentMusicProvider({required MusicInfoProvider musicApi, required UserProvider userApi})
       : _musicApi = musicApi,
-        _userApi = userApi;
+        _userProvider = userApi;
 
   Future<void> init() async {
     final session = await AudioSession.instance;
@@ -73,6 +73,12 @@ class CurrentMusicProvider extends BaseAudioHandler with ChangeNotifier {
       log('Devices removed: ${event.devicesRemoved}');
     });
 
+    player.playbackEventStream.listen((event) {
+      if (event.processingState == ProcessingState.completed) {
+        _userProvider.skipToNext();
+      }
+    });
+
     player.playbackEventStream.map(_transformEvent).pipe(playbackState);
   }
 
@@ -109,12 +115,27 @@ class CurrentMusicProvider extends BaseAudioHandler with ChangeNotifier {
     );
   }
 
+  bool checkThisTrackIsPlaying(MusicTrack track) {
+    return _userProvider.playerInfo.currentMusic!.id == track.id;
+  }
+
   // ! POC only
-  Future<void> playTrack(MusicTrack track) async {
-    player.stop();
+  Future<void> playTrack(MusicTrack track, {bool fromPrimary = true, bool startInstant = true, bool clearHistory = false}) async {
+    if (player.playing) player.stop();
+
+    // not being used
+    //if (clearHistory) {
+    //  _userProvider.postClear(PlayerInfoPostType.history, DateTime.now().millisecondsSinceEpoch);
+    //}
+
+    // if (_userProvider.playerInfo.currentMusic == null || _userProvider.playerInfo.currentMusic?.id != track.id) {
+    //   _userProvider.postCurrentMusic(track.id, DateTime.now().millisecondsSinceEpoch, fromPrimary: fromPrimary);
+    // }
+
+    notifyListeners();
 
     playing = track;
-    liked = (await _userApi.getLibrary()).liked_tracks.contains(track.id);
+    liked = (await _userProvider.getLibrary()).liked_tracks.contains(track.id);
     final imageUrl = track.album?.images?.forSize(const Size(200, 200));
     mediaItem.add(MediaItem(
       id: track.id,
@@ -128,15 +149,28 @@ class CurrentMusicProvider extends BaseAudioHandler with ChangeNotifier {
     audioLoading = AudioLoadingState.loading;
     notifyListeners();
 
+    if (!checkThisTrackIsPlaying(track)) {
+      return;
+    }
+
     tma = TearMusicAudioSource(track, api: _musicApi);
     final result = await tma!.head();
 
     if (result) {
       audioLoading = AudioLoadingState.ready;
     } else {
-      audioLoading = AudioLoadingState.error;
+      if (checkThisTrackIsPlaying(track)) {
+        audioLoading = AudioLoadingState.error;
+        _userProvider.skipToNext();
+      }
+      notifyListeners();
+      return;
     }
     notifyListeners();
+
+    if (!checkThisTrackIsPlaying(track)) {
+      return;
+    }
 
     await player.setAudioSource(tma!);
     final silence = await tma!.silence();
@@ -149,9 +183,13 @@ class CurrentMusicProvider extends BaseAudioHandler with ChangeNotifier {
       }
     }
 
-    player.play();
+    if (startInstant) player.play();
 
-    _userApi.putLibrary(playing!, LibraryType.track_history);
+    // _userProvider.putLibrary(playing!, LibraryType.track_history);
+
+    if (!checkThisTrackIsPlaying(track)) {
+      return;
+    }
 
     if (!tma!.playback.isCompleted) await tma!.body();
   }
@@ -172,14 +210,24 @@ class CurrentMusicProvider extends BaseAudioHandler with ChangeNotifier {
   }
 
   @override
+  Future<void> skipToNext() async {
+    _userProvider.skipToNext();
+  }
+
+  @override
+  Future<void> skipToPrevious() async {
+    _userProvider.skipToPrev();
+  }
+
+  @override
   Future<void> setRating(Rating rating, [Map<String, dynamic>? extras]) async {
     liked = rating.hasHeart();
     mediaItem.add(mediaItem.value!.copyWith(rating: Rating.newHeartRating(liked)));
     if (playing != null) {
       if (rating.hasHeart()) {
-        await _userApi.putLibrary(playing!, LibraryType.liked_tracks);
+        await _userProvider.putLibrary(playing!, LibraryType.liked_tracks);
       } else {
-        await _userApi.deleteLibrary(playing!, LibraryType.liked_tracks);
+        await _userProvider.deleteLibrary(playing!, LibraryType.liked_tracks);
       }
     }
     player.setSpeed(1.0); // trigger playback event and update notification

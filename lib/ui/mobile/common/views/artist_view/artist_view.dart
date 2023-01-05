@@ -21,6 +21,7 @@ import 'package:tearmusic/ui/mobile/common/tiles/artist_track_tile.dart';
 import 'package:tearmusic/ui/mobile/common/cached_image.dart';
 import 'package:tearmusic/ui/mobile/common/view_menu_button.dart';
 import 'package:tearmusic/ui/mobile/common/views/artist_view/latest_release.dart';
+import 'package:tearmusic/ui/mobile/common/views/artist_view/artist_header_button.dart';
 import 'package:tearmusic/ui/mobile/common/views/content_list_view.dart';
 import 'package:tearmusic/ui/mobile/pages/library/track_loading_tile.dart';
 
@@ -29,8 +30,14 @@ class ArtistView extends StatefulWidget {
 
   final MusicArtist artist;
 
-  static Future<void> view(MusicArtist value, {required BuildContext context}) =>
-      context.read<NavigatorProvider>().pushModal(builder: (context) => ArtistView(value), uri: value.uri);
+  static Future<void> view(MusicArtist value, {required BuildContext context}) {
+    final nav = context.read<NavigatorProvider>();
+    final theme = context.read<ThemeProvider>();
+    return nav.pushModal(builder: (context) => ArtistView(value), uri: value.uri).then((value) {
+      theme.resetTheme();
+      return value;
+    });
+  }
 
   @override
   State<ArtistView> createState() => _ArtistViewState();
@@ -177,9 +184,34 @@ class _ArtistViewState extends State<ArtistView> {
                       //     ),
                       //   ),
                       if (snapshot.hasData && details.albums.isNotEmpty)
-                        SliverToBoxAdapter(
-                          child: Padding(
-                            padding: const EdgeInsets.all(12.0).add(const EdgeInsets.only(top: 8.0)),
+                        SliverPadding(
+                          padding: const EdgeInsets.only(top: 12.0, left: 16.0, right: 16.0),
+                          sliver: SliverToBoxAdapter(
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: ArtistHeaderButton(
+                                    onPressed: () {},
+                                    icon: const Icon(CupertinoIcons.heart),
+                                    child: Text("Follow".toUpperCase()),
+                                  ),
+                                ),
+                                const SizedBox(width: 12.0),
+                                Expanded(
+                                  child: ArtistHeaderButton(
+                                    onPressed: () {},
+                                    icon: const Icon(CupertinoIcons.shuffle),
+                                    child: Text("Shuffle".toUpperCase()),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      if (snapshot.hasData && details.albums.isNotEmpty)
+                        SliverPadding(
+                          padding: const EdgeInsets.all(12.0),
+                          sliver: SliverToBoxAdapter(
                             child: LatestRelease(
                               details.albums.first,
                               then: () {
@@ -230,7 +262,7 @@ class _ArtistViewState extends State<ArtistView> {
                                       ],
                                     ),
                                   ),
-                                  ...details.tracks.sublist(0, math.min(details.tracks.length, 3)).map((e) => ArtistTrackTile(e)),
+                                  ...details.tracks.sublist(0, math.min(details.tracks.length, 5)).map((e) => ArtistTrackTile(e)),
                                 ],
                               ),
                             ),

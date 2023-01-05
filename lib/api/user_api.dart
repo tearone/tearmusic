@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:tearmusic/api/base_api.dart';
 import 'package:http/http.dart' as http;
+import 'package:tearmusic/api/music_api.dart';
 import 'package:tearmusic/exceptionts.dart';
 import 'package:tearmusic/models/library.dart';
 import 'package:tearmusic/models/player_info.dart';
@@ -40,7 +41,7 @@ class UserApi {
 
   Future<UserLibrary> getLibrary() async {
     final res = await http.get(
-      Uri.parse("${BaseApi.url}/user/music-library"),
+      Uri.parse("${MusicApi.baseUrl}/user/music-library"),
       headers: {"authorization": await base.getToken()},
     );
 
@@ -50,7 +51,7 @@ class UserApi {
   }
 
   Future<void> putLibrary(String id, LibraryType type, {String? from, String? fromType}) async {
-    final res = await http.put(Uri.parse("${BaseApi.url}/user/music-library"),
+    final res = await http.put(Uri.parse("${MusicApi.baseUrl}/user/music-library"),
         headers: {"authorization": await base.getToken(), "content-type": "application/json"},
         body: jsonEncode({
           "id": id,
@@ -63,7 +64,7 @@ class UserApi {
   }
 
   Future<void> deleteLibrary(String id, LibraryType type) async {
-    final res = await http.delete(Uri.parse("${BaseApi.url}/user/music-library"),
+    final res = await http.delete(Uri.parse("${MusicApi.baseUrl}/user/music-library"),
         headers: {"authorization": await base.getToken(), "content-type": "application/json"}, body: jsonEncode({"id": id, "type": type.name}));
 
     _reschk(res, "deleteLibrary");
@@ -73,7 +74,7 @@ class UserApi {
 
   Future<PlayerInfo> getPlayerInfo() async {
     final res = await http.get(
-      Uri.parse("${BaseApi.url}/user/player-info"),
+      Uri.parse("${MusicApi.baseUrl}/user/player-info"),
       headers: {"authorization": await base.getToken()},
     );
 
@@ -82,25 +83,28 @@ class UserApi {
     return PlayerInfo.decode(jsonDecode(res.body));
   }
 
-  Future<bool> isPlayerSynced(PlayerInfo playerInfo) async {
+  Future<int> getPlayerVersion() async {
     final res = await http.head(
-      Uri.parse("${BaseApi.url}/user/player-info?version=${playerInfo.version}"),
+      Uri.parse("${MusicApi.baseUrl}/user/player-info"),
       headers: {"authorization": await base.getToken()},
     );
 
-    _reschk(res, "isPlayerSynced");
+    _reschk(res, "getPlayerVersion");
 
-    return res.statusCode == 202;
+    return int.tryParse(res.headers["x-tmc-version"]!) ?? 0;
   }
 
   Future<bool> syncPlayerOperations(PlayerInfo playerInfo) async {
     final res = await http.post(
-      Uri.parse("${BaseApi.url}/user/player-info?${playerInfo.version}"),
+      Uri.parse("${MusicApi.baseUrl}/user/player-info?version=${playerInfo.version}&operations_version=${playerInfo.operationsVersion}"),
       headers: {"authorization": await base.getToken()},
-      body: {"operations": playerInfo.operations},
+      body: {"operations": jsonEncode(playerInfo.operations)},
     );
 
-    _reschk(res, "syncPlayerOperations");
+    log("syncPlayerOperations tried to sync: ${playerInfo.operations}");
+    log("syncPlayerOperations code: ${res.statusCode}");
+
+    //_reschk(res, "syncPlayerOperations");
 
     // return success or not
     return res.statusCode == 200;

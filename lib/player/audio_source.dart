@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:just_audio/just_audio.dart';
+import 'package:tearmusic/exceptionts.dart';
 import 'package:tearmusic/models/music/track.dart';
 import 'package:tearmusic/models/playback.dart';
 import 'package:tearmusic/models/segmented.dart';
@@ -35,31 +36,41 @@ class TearMusicAudioSource extends StreamAudioSource {
   }
 
   @override
-  Future<StreamAudioResponse> request([int? start, int? end]) async {
-    log("StreamAudioRequest($start-$end)");
+  Future<StreamAudioResponse> request([int? start, int? end, int tries = 0]) async {
+    log("[A] StreamAudioRequest($start-$end)");
     start ??= 0;
 
     await cached.future;
-    if (start >= bytes.length) await playback.future;
-    // if (playback.isCompleted || start >= bytes.length) {
-    //   final pb = await playback.future;
-    //   end ??= sourceLength;
+    if (playback.isCompleted || start >= bytes.length) {
+      log("[A] not completed");
 
-    //   var req = http.Request('GET', Uri.parse(pb.streamUrl));
-    //   req.headers['range'] = 'bytes=$start-$end';
+      try {
+        log("[A] trying audio range");
 
-    //   final res = await req.send();
+        final pb = await playback.future;
+        end ??= sourceLength;
 
-    //   log("SENT");
+        var req = http.Request('GET', Uri.parse(pb.streamUrl));
+        req.headers['range'] = 'bytes=$start-$end';
 
-    //   return StreamAudioResponse(
-    //     sourceLength: sourceLength,
-    //     contentLength: int.tryParse(res.headers['content-length'] ?? "") ?? 0,
-    //     offset: start,
-    //     stream: res.stream,
-    //     contentType: 'audio/mp3',
-    //   );
-    // }
+        final res = await req.send();
+        return StreamAudioResponse(
+          sourceLength: sourceLength,
+          contentLength: int.tryParse(res.headers['content-length'] ?? "") ?? 0,
+          offset: start,
+          stream: res.stream,
+          contentType: Platform.isIOS ? 'audio/mp3' : 'audio/mp4',
+        );
+      } catch (e) {
+        log("[A] audio range got error, retry");
+
+        if (tries >= 5) {
+          throw UnknownRequestException("network problem while trying to get range");
+        }
+
+        return await Future.delayed(const Duration(seconds: 1), () async => await request(start, end, tries + 1));
+      }
+    }
 
     end ??= sourceLength;
 
@@ -72,7 +83,7 @@ class TearMusicAudioSource extends StreamAudioSource {
       contentLength: end - start,
       offset: start,
       stream: Stream.value(partial),
-      contentType: contentType,
+      contentType: Platform.isIOS ? 'audio/mp3' : 'audio/mp4',
     );
   }
 
@@ -102,7 +113,14 @@ class TearMusicAudioSource extends StreamAudioSource {
       return true;
     } catch (err) {
       log(err.toString());
+
       return false;
+
+      //if (tries >= 3) return false;
+
+      //log("[R] retry body: $tries");
+
+      //return await Future.delayed(const Duration(seconds: 3), () async => await body(tries: tries + 1));
     }
   }
 }

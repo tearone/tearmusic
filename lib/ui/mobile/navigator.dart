@@ -9,6 +9,8 @@ import 'package:tearmusic/providers/navigator_provider.dart';
 import 'package:tearmusic/providers/theme_provider.dart';
 import 'package:tearmusic/providers/user_provider.dart';
 import 'package:tearmusic/providers/will_pop_provider.dart';
+import 'package:tearmusic/ui/common/image_color.dart';
+import 'package:tearmusic/ui/mobile/common/cached_image.dart';
 import 'package:tearmusic/ui/mobile/common/player/player.dart';
 import 'package:tearmusic/ui/mobile/common/wallpaper.dart';
 import 'package:tearmusic/ui/mobile/pages/home/home_page.dart';
@@ -35,6 +37,8 @@ class _NavigationScreenState extends State<NavigationScreen> with SingleTickerPr
   final _homeNavigatorState = GlobalKey<NavigatorState>();
   final _searchNavigatorState = GlobalKey<NavigatorState>();
   final _libraryNavigatorState = GlobalKey<NavigatorState>();
+
+  int lastVersion = 0;
 
   @override
   void initState() {
@@ -68,9 +72,24 @@ class _NavigationScreenState extends State<NavigationScreen> with SingleTickerPr
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       log("App resumed");
+      final currentMusic = context.read<CurrentMusicProvider>();
+      if (lastVersion != context.read<UserProvider>().playerInfo.version) {
+        if (currentMusic.playing != null) {
+          CachedImage(currentMusic.playing!.album!.images!).getImage(const Size(64, 64)).then((value) {
+            final colors = generateColorPalette(value);
+            final theme = context.read<ThemeProvider>();
+            if (theme.key != colors[1]) theme.setThemeKey(colors[1]);
+
+            lastVersion = context.read<UserProvider>().playerInfo.version;
+          });
+        }
+      }
+
       setSystemChrome();
     } else if (state == AppLifecycleState.paused) {
       log("App paused");
+
+      lastVersion = context.read<UserProvider>().playerInfo.version;
     }
   }
 

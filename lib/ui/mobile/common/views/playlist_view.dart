@@ -10,6 +10,7 @@ import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:provider/provider.dart';
 import 'package:tearmusic/models/library.dart';
 import 'package:tearmusic/models/music/playlist.dart';
+// import 'package:tearmusic/models/player_info.dart';
 import 'package:tearmusic/providers/music_info_provider.dart';
 import 'package:tearmusic/providers/navigator_provider.dart';
 import 'package:tearmusic/providers/theme_provider.dart';
@@ -91,7 +92,7 @@ class _PlaylistViewState extends State<PlaylistView> {
         final theme = snapshot.data!;
 
         return FutureBuilder<PlaylistDetails>(
-          future: context.read<MusicInfoProvider>().playlistTracks(widget.playlist),
+          future: context.read<MusicInfoProvider>().playlistTracks(widget.playlist.id),
           builder: (context, snapshot) {
             return Theme(
               data: theme,
@@ -227,7 +228,11 @@ class _PlaylistViewState extends State<PlaylistView> {
                                         ),
                                         child: FloatingActionButton(
                                           child: const Icon(Icons.play_arrow),
-                                          onPressed: () {},
+                                          onPressed: () {
+                                            // TODO: refactor
+                                            // context.read<UserProvider>().newQueue(PlayerInfoSourceType.playlist,
+                                            //     id: widget.playlist.id, wantSeed: context.read<UserProvider>().playerInfo.queueSource.seed != null);
+                                          },
                                         ),
                                       ),
                                       Row(

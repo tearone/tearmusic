@@ -60,9 +60,9 @@ class MusicApi {
     return SearchResults.decode(jsonDecode(res.body));
   }
 
-  Future<PlaylistDetails> playlistTracks(MusicPlaylist playlist) async {
+  Future<PlaylistDetails> playlistTracks(String playlistId) async {
     final res = await http.get(
-      Uri.parse("$baseUrl/music/playlist-tracks?id=${Uri.encodeComponent(playlist.id)}"),
+      Uri.parse("$baseUrl/music/playlist-tracks?id=${Uri.encodeComponent(playlistId)}"),
       headers: {"authorization": await base.getToken()},
     );
 
@@ -70,16 +70,18 @@ class MusicApi {
     return PlaylistDetails.decode(jsonDecode(res.body));
   }
 
-  Future<List<MusicTrack>> albumTracks(MusicAlbum album) async {
+  Future<List<MusicTrack>> albumTracks(String albumId, {MusicAlbum? album}) async {
     final res = await http.get(
-      Uri.parse("$baseUrl/music/album-tracks?id=${Uri.encodeComponent(album.id)}"),
+      Uri.parse("$baseUrl/music/album-tracks?id=${Uri.encodeComponent(albumId)}${album == null ? '&fetchAlbum' : ''}"),
       headers: {"authorization": await base.getToken()},
     );
 
     _reschk(res, "albumTracks");
 
-    final json = (jsonDecode(res.body)['tracks'] as List).cast<Map>();
-    return MusicTrack.decodeList(json, album: album);
+    final bodyJson = jsonDecode(res.body);
+
+    final json = (bodyJson['tracks'] as List).cast<Map>();
+    return MusicTrack.decodeList(json, album: album ?? MusicAlbum.decode(bodyJson["album"]));
   }
 
   Future<List<MusicAlbum>> newReleases() async {
@@ -250,5 +252,18 @@ class MusicApi {
     _reschk(res, "libraryBatch");
 
     return BatchLibrary.decode(jsonDecode(res.body));
+  }
+
+  Future<List<MusicTrack>> batchTracks(List<String> idList) async {
+    log("fetching: $idList");
+
+    final res = await http.get(
+      Uri.parse("$baseUrl/music/batch-tracks?ids=${idList.join(',')}"),
+      headers: {"authorization": await base.getToken()},
+    );
+
+    _reschk(res, "batchTracks");
+
+    return jsonDecode(res.body)["tracks"].map((e) => MusicTrack.decode(e)).toList().cast<MusicTrack>();
   }
 }

@@ -25,8 +25,14 @@ class AlbumView extends StatefulWidget {
 
   final MusicAlbum album;
 
-  static Future<void> view(MusicAlbum value, {required BuildContext context}) =>
-      context.read<NavigatorProvider>().pushModal(builder: (context) => AlbumView(value), uri: value.uri);
+  static Future<void> view(MusicAlbum value, {required BuildContext context}) {
+    final nav = context.read<NavigatorProvider>();
+    final theme = context.read<ThemeProvider>();
+    return nav.pushModal(builder: (context) => AlbumView(value), uri: value.uri).then((value) {
+      theme.resetTheme();
+      return value;
+    });
+  }
 
   @override
   State<AlbumView> createState() => _AlbumViewState();
@@ -89,7 +95,7 @@ class _AlbumViewState extends State<AlbumView> {
         final theme = snapshot.data!;
 
         return FutureBuilder<List<MusicTrack>>(
-          future: context.read<MusicInfoProvider>().albumTracks(widget.album),
+          future: context.read<MusicInfoProvider>().albumTracks(widget.album.id),
           builder: (context, snapshot) {
             return Theme(
               data: theme,
@@ -191,7 +197,10 @@ class _AlbumViewState extends State<AlbumView> {
                                         ),
                                         child: FloatingActionButton(
                                           child: const Icon(Icons.play_arrow),
-                                          onPressed: () {},
+                                          onPressed: () {
+                                            // TODO: refactor
+                                            // context.read<UserProvider>().newQueue(PlayerInfoSourceType.album, id: widget.album.id);
+                                          },
                                         ),
                                       ),
                                       Row(

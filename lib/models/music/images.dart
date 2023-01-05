@@ -23,9 +23,8 @@ class Images {
         orElse: () => _internal.last,
       )
       .url;
-
-  String get maxSize => _internal.last.url;
-  String get minSize => _internal.first.url;
+  InternalImage get maxSize => _internal.last;
+  InternalImage get minSize => _internal.first;
 }
 
 class InternalImage extends Model {

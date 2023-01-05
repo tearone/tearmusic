@@ -10,7 +10,7 @@ import 'package:tearmusic/utils.dart';
 class TrackImage extends StatelessWidget {
   const TrackImage({
     Key? key,
-    this.images,
+    required this.image,
     required this.bottomOffset,
     required this.maxOffset,
     required this.screenSize,
@@ -21,7 +21,7 @@ class TrackImage extends StatelessWidget {
     this.large = false,
   }) : super(key: key);
 
-  final Images? images;
+  final CachedImage image;
   final bool large;
 
   final double width;
@@ -35,9 +35,9 @@ class TrackImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final radius = vp(a: 14.0, b: 32.0, c: cp);
+    final radius = rangeProgress(a: 14.0, b: 32.0, c: cp);
     final borderRadius = SmoothBorderRadius(cornerRadius: radius, cornerSmoothing: 1.0);
-    final size = vp(a: width, b: screenSize.width - 84.0, c: cp);
+    final size = rangeProgress(a: width, b: screenSize.width - 84.0, c: cp);
     const imgSize = Size(400, 400);
 
     return Transform.translate(
@@ -61,7 +61,7 @@ class TrackImage extends StatelessWidget {
                   );
                 },
                 child: Container(
-                  key: Key(images != null ? images!.forSize(imgSize) : "imgcontainer"),
+                  key: const Key("imgcontainer"),
                   decoration: ShapeDecoration(
                     shape: SmoothRectangleBorder(borderRadius: borderRadius),
                     shadows: [
@@ -72,14 +72,7 @@ class TrackImage extends StatelessWidget {
                       ),
                     ],
                   ),
-                  child: images != null
-                      ? CachedImage(
-                          images!,
-                          borderRadius: radius,
-                          setTheme: true,
-                          size: imgSize,
-                        )
-                      : null,
+                  child: ClipRRect(borderRadius: borderRadius, child: image),
                 ),
               ),
             ),

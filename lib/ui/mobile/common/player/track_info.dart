@@ -42,9 +42,9 @@ class TrackInfo extends StatelessWidget {
         child: Align(
           alignment: Alignment.bottomLeft,
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12.0).add(EdgeInsets.only(bottom: vp(a: 0, b: screenSize.width / 9, c: cp))),
+            padding: const EdgeInsets.symmetric(vertical: 12.0).add(EdgeInsets.only(bottom: rangeProgress(a: 0, b: screenSize.width / 9, c: cp))),
             child: SizedBox(
-              height: vp(a: 58.0, b: 82, c: cp),
+              height: rangeProgress(a: 58.0, b: 82, c: cp),
               child: Row(
                 children: [
                   SizedBox(width: 82.0 * (1 - cp)), // Image placeholder
@@ -87,7 +87,7 @@ class TrackInfo extends StatelessWidget {
                                       title,
                                       maxLines: 2,
                                       style: TextStyle(
-                                        fontSize: vp(a: 18.0, b: 24.0, c: p),
+                                        fontSize: rangeProgress(a: 18.0, b: 24.0, c: p),
                                         color: Colors.white.withOpacity(.9),
                                         fontWeight: FontWeight.w600,
                                         height: 1,
@@ -98,7 +98,7 @@ class TrackInfo extends StatelessWidget {
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
-                                        fontSize: vp(a: 15.0, b: 17.0, c: p),
+                                        fontSize: rangeProgress(a: 15.0, b: 17.0, c: p),
                                         color: Colors.white.withOpacity(.5),
                                         fontWeight: FontWeight.w400,
                                       ),

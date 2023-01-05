@@ -128,9 +128,9 @@ class CurrentMusicProvider extends BaseAudioHandler with ChangeNotifier {
     //  _userProvider.postClear(PlayerInfoPostType.history, DateTime.now().millisecondsSinceEpoch);
     //}
 
-    // if (_userProvider.playerInfo.currentMusic == null || _userProvider.playerInfo.currentMusic?.id != track.id) {
-    //   _userProvider.postCurrentMusic(track.id, DateTime.now().millisecondsSinceEpoch, fromPrimary: fromPrimary);
-    // }
+    if (_userProvider.playerInfo.currentMusic == null || _userProvider.playerInfo.currentMusic?.id != track.id) {
+      _userProvider.postCurrentMusic(track.id, DateTime.now().millisecondsSinceEpoch, fromPrimary: fromPrimary);
+    }
 
     notifyListeners();
 

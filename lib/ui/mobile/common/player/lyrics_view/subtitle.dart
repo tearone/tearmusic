@@ -9,8 +9,8 @@ Widget Function(BuildContext, int) subtitleListBuilder(List<TimedSegment> subtit
 
     final subtitleLine = subtitle[index];
     final subtitleNext = subtitle[(index + 1).clamp(0, subtitle.length - 1)];
-    final progress = subtitleLine.offset.inMilliseconds / (currentMusic.player.duration?.inMilliseconds ?? 1);
-    final progressEnd = (subtitleNext.offset.inMilliseconds - 200) / (currentMusic.player.duration?.inMilliseconds ?? 1);
+    final progress = subtitleLine.offset.inMilliseconds / (currentMusic.duration?.inMilliseconds ?? 1);
+    final progressEnd = (subtitleNext.offset.inMilliseconds - 200) / (currentMusic.duration?.inMilliseconds ?? 1);
 
     // if (actives[index][0] != (animation.value > progress)) {
     //   actives[index][0] = animation.value > progress;
@@ -23,10 +23,10 @@ Widget Function(BuildContext, int) subtitleListBuilder(List<TimedSegment> subtit
     }
 
     return StreamBuilder<Duration>(
-      stream: currentMusic.player.positionStream,
+      stream: currentMusic.positionStream,
       builder: (context, snapshot) {
-        final value = snapshot.hasData && currentMusic.player.duration != null
-            ? snapshot.data!.inMilliseconds / (currentMusic.player.duration?.inMilliseconds ?? 1)
+        final value = snapshot.hasData && currentMusic.duration != null
+            ? snapshot.data!.inMilliseconds / (currentMusic.duration?.inMilliseconds ?? 1)
             : 0.0;
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12.0),

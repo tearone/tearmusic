@@ -606,8 +606,8 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                                         key: const Key("ready"),
                                         providers: [
                                           StreamProvider(
-                                              create: (_) => currentMusic.player.positionStream, initialData: currentMusic.player.position),
-                                          StreamProvider(create: (_) => currentMusic.player.playingStream, initialData: currentMusic.player.playing),
+                                              create: (_) => currentMusic.positionStream, initialData: currentMusic.position),
+                                          StreamProvider(create: (_) => currentMusic.isPlayingStream, initialData: currentMusic.isPlaying),
                                         ],
                                         builder: (context, snapshot) => Consumer2<bool, Duration>(
                                           builder: (context, value1, value2, child) {
@@ -626,7 +626,7 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                                                 child: FloatingActionButton(
                                                   heroTag: currentMusic.playing,
                                                   onPressed: () {
-                                                    if (currentMusic.player.playing) {
+                                                    if (currentMusic.playing) {
                                                       currentMusic.pause();
                                                       playPauseAnim.reverse();
                                                     } else {
@@ -908,10 +908,10 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                                 ),
                               ),
                               StreamBuilder(
-                                stream: currentMusic.player.positionStream,
+                                stream: currentMusic.positionStream,
                                 builder: (context, snapshot) {
-                                  final pos = currentMusic.player.position;
-                                  final dHours = (currentMusic.player.duration?.inHours ?? 0) > 0;
+                                  final pos = currentMusic.position;
+                                  final dHours = (currentMusic.duration?.inHours ?? 0) > 0;
 
                                   return Padding(
                                     padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -943,7 +943,7 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                                           ),
                                         ]),
                                         Text(
-                                          currentMusic.player.duration?.shortFormat() ?? "0:00",
+                                          currentMusic.duration?.shortFormat() ?? "0:00",
                                           style: TextStyle(color: onSecondary),
                                         ),
                                       ],

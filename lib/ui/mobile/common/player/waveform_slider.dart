@@ -46,7 +46,7 @@ class _WaveformSliderState extends State<WaveformSlider> {
     final currentMusic = context.read<CurrentMusicProvider>();
 
     progress =
-        currentMusic.player.duration != null ? currentMusic.player.position.inMilliseconds / currentMusic.player.duration!.inMilliseconds : 0.0;
+        currentMusic.duration != null ? currentMusic.position.inMilliseconds / currentMusic.duration!.inMilliseconds : 0.0;
 
     waveform = [];
     cachedWaveform = [];
@@ -102,7 +102,7 @@ class _WaveformSliderState extends State<WaveformSlider> {
           }
 
           return StreamBuilder(
-            stream: currentMusic.player.positionStream,
+            stream: currentMusic.positionStream,
             builder: (context, snapshot) {
               final List<Widget> tickers = [];
 
@@ -135,7 +135,7 @@ class _WaveformSliderState extends State<WaveformSlider> {
                     onTapUp: (details) {
                       progress = details.localPosition.dx / constraints.maxWidth;
                       setProgress();
-                      currentMusic.seek(Duration(milliseconds: ((currentMusic.player.duration?.inMilliseconds ?? 0) * progress).round()));
+                      currentMusic.seek(Duration(milliseconds: ((currentMusic.duration?.inMilliseconds ?? 0) * progress).round()));
                       sliding = false;
                     },
                     onHorizontalDragStart: (details) {
@@ -146,7 +146,7 @@ class _WaveformSliderState extends State<WaveformSlider> {
                       setProgress();
                     },
                     onHorizontalDragEnd: (details) {
-                      currentMusic.seek(Duration(milliseconds: ((currentMusic.player.duration?.inMilliseconds ?? 0) * progress).round()));
+                      currentMusic.seek(Duration(milliseconds: ((currentMusic.duration?.inMilliseconds ?? 0) * progress).round()));
                       sliding = false;
                     },
                     child: Container(

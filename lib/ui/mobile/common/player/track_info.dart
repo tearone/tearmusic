@@ -1,5 +1,4 @@
 import 'package:animations/animations.dart';
-import 'package:audio_service/audio_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:like_button/like_button.dart';
@@ -133,7 +132,7 @@ class TrackInfo extends StatelessWidget {
                                       ? snapshot.data!.liked_tracks.contains(currentMusic.playing!.id)
                                       : false,
                                   onTap: (isLiked) async {
-                                    context.read<CurrentMusicProvider>().setRating(Rating.newHeartRating(!isLiked));
+                                    // context.read<CurrentMusicProvider>().setRating(Rating.newHeartRating(!isLiked));
                                     return !isLiked;
                                   },
                                   likeBuilder: (value) => value

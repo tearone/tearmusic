@@ -180,6 +180,7 @@ class TrackTile extends StatelessWidget {
                   () {
                     FocusScope.of(context).requestFocus(FocusNode());
                     final currentMusic = context.read<CurrentMusicProvider>();
+                    currentMusic.playTrack(track);
                     if (track.album?.images != null) {
                       CachedImage(track.album!.images!).getImage(const Size(64, 64)).then((value) {
                         if (value != null) {
@@ -192,7 +193,6 @@ class TrackTile extends StatelessWidget {
                               .read<UserProvider>()
                               .postAdd(currentMusic.playing!.id, DateTime.now().millisecondsSinceEpoch, whereTo: PlayerInfoPostType.history);
                         }
-                        currentMusic.playTrack(track);
                       });
                     }
                   },

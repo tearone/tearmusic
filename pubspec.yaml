@@ -47,7 +47,6 @@ dependencies:
   wakelock: ^0.6.2
   async: ^2.9.0
   modal_bottom_sheet: ^2.1.0
-  cached_network_image: ^3.2.1
 
 dev_dependencies:
   flutter_test:

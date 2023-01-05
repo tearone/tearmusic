@@ -1,8 +1,8 @@
+import 'dart:async';
 import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:animations/animations.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -10,12 +10,16 @@ import 'package:tearmusic/models/music/images.dart';
 import 'package:http/http.dart' as http;
 
 class CachedImage extends StatelessWidget {
-  const CachedImage(this.images, {Key? key, this.borderRadius = 4.0, this.setTheme = false, this.size}) : super(key: key);
+  CachedImage(this.images, {Key? key, this.borderRadius = 4.0, this.setTheme = false, this.size})
+      : _data = Completer<Uint8List>(),
+        super(key: key);
 
   final Images images;
   final double borderRadius;
   final bool setTheme;
   final Size? size;
+  final Completer<Uint8List> _data;
+  Future<Uint8List> get data => _data.future;
 
   Future<Uint8List> getImage(Size boxSize) async {
     final uri = images.forSize(size ?? boxSize);
@@ -36,7 +40,10 @@ class CachedImage extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
       return FutureBuilder<Uint8List>(
-          future: getImage(size ?? (Size(constraints.maxWidth, constraints.maxHeight))),
+          future: getImage(size ?? (Size(constraints.maxWidth, constraints.maxHeight))).then((value) {
+            _data.complete(value);
+            return value;
+          }),
           builder: (context, snapshot) {
             return ClipRRect(
               borderRadius: BorderRadius.circular(borderRadius),
@@ -53,7 +60,10 @@ class CachedImage extends StatelessWidget {
                     );
                   },
                   child: snapshot.hasData
-                      ? Image.memory(snapshot.data!)
+                      ? Image.memory(
+                          snapshot.data!,
+                          fit: BoxFit.cover,
+                        )
                       : SizedBox(
                           width: constraints.maxWidth,
                           height: constraints.maxHeight,

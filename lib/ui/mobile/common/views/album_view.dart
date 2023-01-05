@@ -43,11 +43,14 @@ class _AlbumViewState extends State<AlbumView> {
 
   bool showTitle = false;
 
-  Future<ThemeData> getTheme(CachedImage image) async {
+  Future<ThemeData?> getTheme(CachedImage image) async {
     final bytes = await image.getImage(const Size.square(imageSize));
 
-    final colors = generateColorPalette(bytes);
-    return ThemeProvider.coloredTheme(colors[1]);
+    if (bytes != null) {
+      final colors = generateColorPalette(bytes);
+      return ThemeProvider.coloredTheme(colors[1]);
+    }
+    return null;
   }
 
   late CachedImage image;
@@ -61,8 +64,10 @@ class _AlbumViewState extends State<AlbumView> {
     image = CachedImage(widget.album.images!);
 
     getTheme(image).then((value) {
-      if (mounted) context.read<ThemeProvider>().tempNavTheme(value);
-      theme.complete(value);
+      if (value != null) {
+        if (mounted) context.read<ThemeProvider>().tempNavTheme(value);
+        theme.complete(value);
+      }
     });
   }
 

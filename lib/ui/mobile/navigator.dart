@@ -76,10 +76,11 @@ class _NavigationScreenState extends State<NavigationScreen> with SingleTickerPr
       if (lastVersion != context.read<UserProvider>().playerInfo.version) {
         if (currentMusic.playing != null) {
           CachedImage(currentMusic.playing!.album!.images!).getImage(const Size(64, 64)).then((value) {
-            final colors = generateColorPalette(value);
-            final theme = context.read<ThemeProvider>();
-            if (theme.key != colors[1]) theme.setThemeKey(colors[1]);
-
+            if (value != null) {
+              final colors = generateColorPalette(value);
+              final theme = context.read<ThemeProvider>();
+              if (theme.key != colors[1]) theme.setThemeKey(colors[1]);
+            }
             lastVersion = context.read<UserProvider>().playerInfo.version;
           });
         }

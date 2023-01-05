@@ -14,15 +14,16 @@ class CachedImage extends StatelessWidget {
       : _data = Completer<Uint8List>(),
         super(key: key);
 
-  final Images images;
+  final Images? images;
   final double borderRadius;
   final bool setTheme;
   final Size? size;
   final Completer<Uint8List> _data;
   Future<Uint8List> get data => _data.future;
 
-  Future<Uint8List> getImage(Size boxSize) async {
-    final uri = images.forSize(size ?? boxSize);
+  Future<Uint8List?> getImage(Size boxSize) async {
+    if (images == null) return null;
+    final uri = images!.forSize(size ?? boxSize);
 
     final box = await Hive.openBox("cached_images");
     Uint8List? bytes = box.get(uri);
@@ -39,7 +40,8 @@ class CachedImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
-      return FutureBuilder<Uint8List>(
+      if (constraints.maxHeight == 300) print("biggest: ${constraints.biggest}");
+      return FutureBuilder<Uint8List?>(
           future: getImage(size ?? (Size(constraints.maxWidth, constraints.maxHeight))).then((value) {
             _data.complete(value);
             return value;
@@ -63,6 +65,8 @@ class CachedImage extends StatelessWidget {
                       ? Image.memory(
                           snapshot.data!,
                           fit: BoxFit.cover,
+                          width: constraints.maxWidth,
+                          height: constraints.maxHeight,
                         )
                       : SizedBox(
                           width: constraints.maxWidth,

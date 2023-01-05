@@ -182,9 +182,11 @@ class TrackTile extends StatelessWidget {
                     final currentMusic = context.read<CurrentMusicProvider>();
                     if (track.album?.images != null) {
                       CachedImage(track.album!.images!).getImage(const Size(64, 64)).then((value) {
-                        final colors = generateColorPalette(value);
-                        final theme = context.read<ThemeProvider>();
-                        if (theme.key != colors[1]) theme.setThemeKey(colors[1]);
+                        if (value != null) {
+                          final colors = generateColorPalette(value);
+                          final theme = context.read<ThemeProvider>();
+                          if (theme.key != colors[1]) theme.setThemeKey(colors[1]);
+                        }
                         if (currentMusic.playing != null) {
                           context
                               .read<UserProvider>()

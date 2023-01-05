@@ -47,20 +47,26 @@ class _ArtistViewState extends State<ArtistView> {
   Future<ArtistDetails> artistDetails(MusicInfoProvider musicInfo) async {
     final details = await musicInfo.artistDetails(widget.artist);
     if (image == null) {
-      image = CachedImage(details.artist.images!);
+      image = CachedImage(details.artist.images);
       getTheme(image!).then((value) {
-        if (mounted) context.read<ThemeProvider>().tempNavTheme(value);
-        theme.complete(value);
+        if (value != null) {
+          if (mounted) context.read<ThemeProvider>().tempNavTheme(value);
+          theme.complete(value);
+        }
       });
     }
     return details;
   }
 
-  Future<ThemeData> getTheme(CachedImage image) async {
+  Future<ThemeData?> getTheme(CachedImage image) async {
     final bytes = await image.getImage(const Size.square(350));
 
-    final colors = generateColorPalette(bytes);
-    return ThemeProvider.coloredTheme(colors[1]);
+    if (bytes != null) {
+      final colors = generateColorPalette(bytes);
+      return ThemeProvider.coloredTheme(colors[1]);
+    }
+
+    return null;
   }
 
   CachedImage? image;
@@ -71,9 +77,11 @@ class _ArtistViewState extends State<ArtistView> {
     super.initState();
 
     if (widget.artist.images != null) {
-      image = CachedImage(widget.artist.images!);
+      image = CachedImage(widget.artist.images);
       getTheme(image!).then((value) {
-        if (mounted) context.read<ThemeProvider>().tempNavTheme(value);
+        if (value != null) {
+          if (mounted) context.read<ThemeProvider>().tempNavTheme(value);
+        }
         theme.complete(value);
       });
     }
@@ -130,7 +138,12 @@ class _ArtistViewState extends State<ArtistView> {
                           background: Stack(
                             alignment: Alignment.bottomCenter,
                             children: [
-                              if (image != null) image!,
+                              LayoutBuilder(builder: (context, size) {
+                                return CachedImage(
+                                  details.artist.images!,
+                                  size: size.biggest,
+                                );
+                              }),
                               Positioned.fill(
                                 child: Transform.scale(
                                   scaleY: 1.001,

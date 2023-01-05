@@ -39,11 +39,14 @@ class _PlaylistViewState extends State<PlaylistView> {
 
   bool showTitle = false;
 
-  Future<ThemeData> getTheme(CachedImage image) async {
+  Future<ThemeData?> getTheme(CachedImage image) async {
     final bytes = await image.getImage(const Size.square(imageSize));
 
-    final colors = generateColorPalette(bytes);
-    return ThemeProvider.coloredTheme(colors[1]);
+    if (bytes != null) {
+      final colors = generateColorPalette(bytes);
+      return ThemeProvider.coloredTheme(colors[1]);
+    }
+    return null;
   }
 
   late CachedImage image;
@@ -58,8 +61,10 @@ class _PlaylistViewState extends State<PlaylistView> {
     image = CachedImage(widget.playlist.images!);
 
     getTheme(image).then((value) {
-      if (mounted) context.read<ThemeProvider>().tempNavTheme(value);
-      theme.complete(value);
+      if (value != null) {
+        if (mounted) context.read<ThemeProvider>().tempNavTheme(value);
+        theme.complete(value);
+      }
     });
   }
 

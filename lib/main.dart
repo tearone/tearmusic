@@ -1,4 +1,3 @@
-import 'package:audio_service/audio_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -30,30 +29,30 @@ void main() async {
   final musicInfoProvider = MusicInfoProvider(base: baseApi);
 
   final userProvider = UserProvider(base: baseApi, musicInfo: musicInfoProvider);
-  final currentMusicProvider = CurrentMusicProvider(musicApi: musicInfoProvider, userApi: userProvider);
+  final currentMusicProvider = CurrentMusicProvider();
   userProvider.setCurrentMusicProvider(currentMusicProvider);
-  
+
   final themeProvider = ThemeProvider();
 
   // Initialize background audio
-  await AudioService.init(
-    builder: () => currentMusicProvider,
-    config: AudioServiceConfig(
-      androidNotificationIcon: "mipmap/ic_splash",
-      androidNotificationChannelId: "one.tear.tearmusic.channel.audio",
-      androidNotificationChannelName: "Music playback",
-      androidNotificationChannelDescription: "Music playback",
-      androidNotificationClickStartsActivity: true,
-      androidNotificationOngoing: false,
-      androidResumeOnClick: true,
-      androidShowNotificationBadge: false,
-      androidStopForegroundOnPause: false,
-      fastForwardInterval: const Duration(seconds: 10),
-      rewindInterval: const Duration(seconds: 10),
-      preloadArtwork: true,
-      notificationColor: Colors.blue.shade900,
-    ),
-  );
+  // await AudioService.init(
+  //   builder: () => currentMusicProvider,
+  //   config: AudioServiceConfig(
+  //     androidNotificationIcon: "mipmap/ic_splash",
+  //     androidNotificationChannelId: "one.tear.tearmusic.channel.audio",
+  //     androidNotificationChannelName: "Music playback",
+  //     androidNotificationChannelDescription: "Music playback",
+  //     androidNotificationClickStartsActivity: true,
+  //     androidNotificationOngoing: false,
+  //     androidResumeOnClick: true,
+  //     androidShowNotificationBadge: false,
+  //     androidStopForegroundOnPause: false,
+  //     fastForwardInterval: const Duration(seconds: 10),
+  //     rewindInterval: const Duration(seconds: 10),
+  //     preloadArtwork: true,
+  //     notificationColor: Colors.blue.shade900,
+  //   ),
+  // );
 
   // Initialize providers
   await userProvider.init();

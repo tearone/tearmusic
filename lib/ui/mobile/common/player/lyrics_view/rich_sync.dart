@@ -9,14 +9,14 @@ Widget Function(BuildContext, int) richSyncListBuilder(List<LyricsLine> richSync
 
     final richSyncLine = richSync[index];
     double progress([Duration? o]) =>
-        (richSyncLine.start + (o ?? Duration.zero)).inMilliseconds / (currentMusic.player.duration?.inMilliseconds ?? 1);
-    double progressEnd() => richSyncLine.end.inMilliseconds / (currentMusic.player.duration?.inMilliseconds ?? 1);
+        (richSyncLine.start + (o ?? Duration.zero)).inMilliseconds / (currentMusic.duration?.inMilliseconds ?? 1);
+    double progressEnd() => richSyncLine.end.inMilliseconds / (currentMusic.duration?.inMilliseconds ?? 1);
 
     return StreamBuilder<Duration>(
-        stream: currentMusic.player.positionStream,
+        stream: currentMusic.positionStream,
         builder: (context, snapshot) {
-          final value = snapshot.hasData && currentMusic.player.duration != null
-              ? snapshot.data!.inMilliseconds / currentMusic.player.duration!.inMilliseconds
+          final value = snapshot.hasData && currentMusic.duration != null
+              ? snapshot.data!.inMilliseconds / currentMusic.duration!.inMilliseconds
               : 0.0;
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12.0),

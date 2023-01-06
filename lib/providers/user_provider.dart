@@ -253,7 +253,8 @@ class UserProvider extends ChangeNotifier {
 
       if (currentTrack.isNotEmpty) {
         log("[Player] Playing current music: ${currentTrack.first}");
-        _currentMusicProvider.playTrack(currentTrack.first, startInstant: false);
+        // TODO: do not start immediately
+        _currentMusicProvider.playTrack(currentTrack.first);
       } else {
         log("[Player] Failed to play current music because is empty");
       }
@@ -562,7 +563,8 @@ class UserProvider extends ChangeNotifier {
   void playTrackById(String id, bool fromPrimary) {
     final playTrack = _musicInfoProvider.batchTracks([id]);
     playTrack.then((value) {
-      _currentMusicProvider.playTrack(value.first, fromPrimary: fromPrimary);
+      // TODO: refactor fromPrimary
+      _currentMusicProvider.playTrack(value.first);
     });
   }
 

@@ -1,4 +1,4 @@
-double vp({
+double rangeProgress({
   required final double a,
   required final double b,
   required final double c,
@@ -6,7 +6,7 @@ double vp({
   return c * (b - a) + a;
 }
 
-double pv({
+double progressValue({
   required final double min,
   required final double max,
   required final double value,

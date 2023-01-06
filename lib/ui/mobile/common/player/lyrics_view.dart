@@ -104,7 +104,7 @@ class _LyricsViewState extends State<LyricsView> with SingleTickerProviderStateM
   void initState() {
     super.initState();
     final currentMusic = context.read<CurrentMusicProvider>();
-    progressSub = currentMusic.player.positionStream.distinct().listen(progressListener);
+    progressSub = currentMusic.positionStream.distinct().listen(progressListener);
 
     Wakelock.enable();
   }

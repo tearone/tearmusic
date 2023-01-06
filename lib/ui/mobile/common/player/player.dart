@@ -14,6 +14,7 @@ import 'package:provider/provider.dart';
 import 'package:tearmusic/providers/current_music_provider.dart';
 import 'package:tearmusic/providers/theme_provider.dart';
 import 'package:tearmusic/providers/will_pop_provider.dart';
+import 'package:tearmusic/ui/mobile/common/cached_image.dart';
 import 'package:tearmusic/ui/mobile/common/player/lyrics_view.dart';
 import 'package:tearmusic/ui/mobile/common/player/queue_view.dart';
 import 'package:tearmusic/ui/mobile/common/player/waveform_slider.dart';
@@ -85,6 +86,8 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
     );
     scrollController = ScrollController();
   }
+
+  WaveformSlider waveFormSliderWidget = const WaveformSlider();
 
   @override
   void dispose() {
@@ -204,6 +207,16 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final currentMusic = context.watch<CurrentMusicProvider>();
+
+    print("[d] reinicialize cached image");
+
+    final cachedImage = CachedImage(
+      currentMusic.playing?.album?.images,
+      setTheme: true,
+      cacheHighest: true,
+    );
+
+    cachedImage.getImage(const Size(400, 400));
 
     return Consumer<WillPopProvider>(
       builder: (context, willPop, child) {
@@ -344,12 +357,13 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                 bottomLeft: Radius.circular(24.0 * (1 - progressValue * 10 + 9).clamp(0, 1)),
                 bottomRight: Radius.circular(24.0 * (1 - progressValue * 10 + 9).clamp(0, 1)),
               );
-              final double bottomOffset = (-80 * inverseClampedProgressValue + progressValue.clamp(-1, 0) * -200) - (bottomInset * inverseClampedProgressValue);
+              final double bottomOffset =
+                  (-80 * inverseClampedProgressValue + progressValue.clamp(-1, 0) * -200) - (bottomInset * inverseClampedProgressValue);
               final double opacity = (bounceClampedProgressValue * 5 - 4).clamp(0, 1);
               final double fastOpacity = (bounceClampedProgressValue * 10 - 9).clamp(0, 1);
               double panelHeight = maxOffset / 1.6;
               if (progressValue > 1.0) {
-                panelHeight = vp(a: panelHeight, b: maxOffset / 1.6 - 100.0 - topInset, c: queueClampedProgressValue);
+                panelHeight = rangeProgress(a: panelHeight, b: maxOffset / 1.6 - 100.0 - topInset, c: queueClampedProgressValue);
               }
 
               // final double queueOpacity = ((p.clamp(1.0, 3.0) - 1).clamp(0.0, 1.0) * 4 - 3).clamp(0, 1);
@@ -367,9 +381,10 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                         child: Container(
                           color: Colors.transparent, // prevents scrolling gap
                           child: Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 12 * (1 - clampedProgressValue * 10 + 9).clamp(0, 1), vertical: 12 * inverseClampedProgressValue),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 12 * (1 - clampedProgressValue * 10 + 9).clamp(0, 1), vertical: 12 * inverseClampedProgressValue),
                             child: Container(
-                              height: vp(a: 82.0, b: panelHeight, c: progressValue.clamp(0, 3)),
+                              height: rangeProgress(a: 82.0, b: panelHeight, c: progressValue.clamp(0, 3)),
                               width: double.infinity,
                               decoration: BoxDecoration(
                                 color: Colors.black,
@@ -389,8 +404,14 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                                     begin: Alignment.topCenter,
                                     end: Alignment.bottomCenter,
                                     colors: [
-                                      Theme.of(context).colorScheme.onSecondary.withOpacity(vp(a: .77, b: .9, c: inverseClampedProgressValue)),
-                                      Theme.of(context).colorScheme.onSecondary.withOpacity(vp(a: .5, b: .9, c: inverseClampedProgressValue)),
+                                      Theme.of(context)
+                                          .colorScheme
+                                          .onSecondary
+                                          .withOpacity(rangeProgress(a: .77, b: .9, c: inverseClampedProgressValue)),
+                                      Theme.of(context)
+                                          .colorScheme
+                                          .onSecondary
+                                          .withOpacity(rangeProgress(a: .5, b: .9, c: inverseClampedProgressValue)),
                                     ],
                                   ),
                                 ),
@@ -562,14 +583,18 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                                 padding: EdgeInsets.all(12.0 * inverseClampedProgressValue).add(EdgeInsets.only(
                                     right: !bounceDown
                                         ? !bounceUp
-                                            ? screenSize.width * reverseClampedProgressValue / 2 - 80 * reverseClampedProgressValue / 2 + (queueProgressValue * 24.0)
+                                            ? screenSize.width * reverseClampedProgressValue / 2 -
+                                                80 * reverseClampedProgressValue / 2 +
+                                                (queueProgressValue * 24.0)
                                             : screenSize.width * clampedProgressValue / 2 - 80 * clampedProgressValue / 2
-                                        : screenSize.width * bounceClampedProgressValue / 2 - 80 * bounceClampedProgressValue / 2 + (queueProgressValue * 24.0))),
+                                        : screenSize.width * bounceClampedProgressValue / 2 -
+                                            80 * bounceClampedProgressValue / 2 +
+                                            (queueProgressValue * 24.0))),
                                 child: Theme(
                                   data: Theme.of(context).copyWith(
                                     floatingActionButtonTheme: FloatingActionButtonThemeData(
-                                      sizeConstraints: BoxConstraints.tight(Size.square(vp(a: 60.0, b: 80.0, c: reverseProgressValue))),
-                                      iconSize: vp(a: 32.0, b: 46.0, c: reverseProgressValue),
+                                      sizeConstraints: BoxConstraints.tight(Size.square(rangeProgress(a: 60.0, b: 80.0, c: reverseProgressValue))),
+                                      iconSize: rangeProgress(a: 32.0, b: 46.0, c: reverseProgressValue),
                                     ),
                                   ),
                                   child: Builder(builder: (context) {
@@ -579,8 +604,8 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                                     if (audioLoading == AudioLoadingState.loading) {
                                       playbackIndicator = SizedBox(
                                         key: const Key("loading"),
-                                        height: vp(a: 60.0, b: 80.0, c: reverseProgressValue),
-                                        width: vp(a: 60.0, b: 80.0, c: reverseProgressValue),
+                                        height: rangeProgress(a: 60.0, b: 80.0, c: reverseProgressValue),
+                                        width: rangeProgress(a: 60.0, b: 80.0, c: reverseProgressValue),
                                         child: Center(
                                           child: LoadingAnimationWidget.staggeredDotsWave(
                                             color: Theme.of(context).colorScheme.secondary,
@@ -591,8 +616,8 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                                     } else if (audioLoading == AudioLoadingState.error) {
                                       playbackIndicator = SizedBox(
                                         key: const Key("error"),
-                                        height: vp(a: 60.0, b: 80.0, c: reverseProgressValue),
-                                        width: vp(a: 60.0, b: 80.0, c: reverseProgressValue),
+                                        height: rangeProgress(a: 60.0, b: 80.0, c: reverseProgressValue),
+                                        width: rangeProgress(a: 60.0, b: 80.0, c: reverseProgressValue),
                                         child: Center(
                                           child: Icon(
                                             Icons.warning,
@@ -606,8 +631,8 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                                         key: const Key("ready"),
                                         providers: [
                                           StreamProvider(
-                                              create: (_) => currentMusic.player.positionStream, initialData: currentMusic.player.position),
-                                          StreamProvider(create: (_) => currentMusic.player.playingStream, initialData: currentMusic.player.playing),
+                                              create: (_) => currentMusic.positionStream, initialData: currentMusic.position),
+                                          StreamProvider(create: (_) => currentMusic.isPlayingStream, initialData: currentMusic.isPlaying),
                                         ],
                                         builder: (context, snapshot) => Consumer2<bool, Duration>(
                                           builder: (context, value1, value2, child) {
@@ -626,7 +651,7 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                                                 child: FloatingActionButton(
                                                   heroTag: currentMusic.playing,
                                                   onPressed: () {
-                                                    if (currentMusic.player.playing) {
+                                                    if (currentMusic.playing) {
                                                       currentMusic.pause();
                                                       playPauseAnim.reverse();
                                                     } else {
@@ -738,8 +763,9 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                     ),
 
                   /// Queue button
-                  if (opacity > 0.0)
-                    Material(
+                  Offstage(
+                    offstage: opacity == 0.0,
+                    child: Material(
                       type: MaterialType.transparency,
                       child: Opacity(
                         opacity: opacity,
@@ -766,6 +792,7 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                         ),
                       ),
                     ),
+                  ),
 
                   /// Track Info
                   Material(
@@ -859,10 +886,10 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                               offset: Offset(-sAnim.value * sMaxOffset / siParallax,
                                   !bounceUp ? (-maxOffset + topInset + 108.0) * (!bounceDown ? queueProgressValue : (1 - bounceProgressValue)) : 0.0),
                               child: TrackImage(
-                                images: currentMusic.playing?.album?.images,
+                                image: cachedImage,
                                 p: bounceProgressValue,
                                 cp: bounceClampedProgressValue,
-                                width: vp(a: 82.0, b: 92.0, c: queueProgressValue),
+                                width: rangeProgress(a: 82.0, b: 92.0, c: queueProgressValue),
                                 screenSize: screenSize,
                                 bottomOffset: bottomOffset,
                                 maxOffset: maxOffset,
@@ -890,8 +917,10 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                   ),
 
                   /// Slider
-                  if (fastOpacity > 0.0)
-                    Opacity(
+
+                  Offstage(
+                    offstage: fastOpacity == 0.0,
+                    child: Opacity(
                       opacity: fastOpacity,
                       child: Transform.translate(
                         offset: Offset(0, bottomOffset + (-maxOffset / 4.0 * progressValue)),
@@ -900,18 +929,18 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const SizedBox(
+                              SizedBox(
                                 height: 65.0,
                                 child: Padding(
                                   padding: EdgeInsets.symmetric(horizontal: 24.0),
-                                  child: WaveformSlider(),
+                                  child: waveFormSliderWidget,
                                 ),
                               ),
                               StreamBuilder(
-                                stream: currentMusic.player.positionStream,
+                                stream: currentMusic.positionStream,
                                 builder: (context, snapshot) {
-                                  final pos = currentMusic.player.position;
-                                  final dHours = (currentMusic.player.duration?.inHours ?? 0) > 0;
+                                  final pos = currentMusic.position;
+                                  final dHours = (currentMusic.duration?.inHours ?? 0) > 0;
 
                                   return Padding(
                                     padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -943,7 +972,7 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                                           ),
                                         ]),
                                         Text(
-                                          currentMusic.player.duration?.shortFormat() ?? "0:00",
+                                          currentMusic.duration?.shortFormat() ?? "0:00",
                                           style: TextStyle(color: onSecondary),
                                         ),
                                       ],
@@ -956,6 +985,7 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                         ),
                       ),
                     ),
+                  ),
 
                   Transform.translate(
                     offset: Offset(0, (1 - queueOffset) * maxOffset),

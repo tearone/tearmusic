@@ -255,7 +255,7 @@ class MusicApi {
   }
 
   Future<List<MusicTrack>> batchTracks(List<String> idList) async {
-    log("fetching: $idList");
+    // log("fetching: $idList");
 
     final res = await http.get(
       Uri.parse("$baseUrl/music/batch-tracks?ids=${idList.join(',')}"),

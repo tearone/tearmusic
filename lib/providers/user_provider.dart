@@ -217,7 +217,7 @@ class UserProvider extends ChangeNotifier {
   }
 
   Future<void> matchPlayerInfo() async {
-    log("[Player] matchPlayerInfo all queued tracks: ${getAllTracks()}");
+    // log("[Player] matchPlayerInfo all queued tracks: ${getAllTracks()}");
 
     // caching tracks
     //await _musicInfoProvider.batchTracks(getAllTracks());
@@ -225,15 +225,15 @@ class UserProvider extends ChangeNotifier {
     final playerVersion = await _api.getPlayerVersion();
 
     if (playerVersion == playerInfo.version) {
-      log("[Player] matchPlayerInfo version match: $playerVersion");
+      // log("[Player] matchPlayerInfo version match: $playerVersion");
       playerInfo.operations.clear();
       playerInfo.operationsVersion = playerVersion;
     } else {
-      log("[Player] matchPlayerInfo version mismatch: $playerVersion - ${playerInfo.version}");
+      // log("[Player] matchPlayerInfo version mismatch: $playerVersion - ${playerInfo.version}");
 
       if (playerVersion < playerInfo.version) {
         if (playerVersion != playerInfo.operationsVersion) {
-          log("[Player] matchPlayerInfo operations version not matches, overwriting");
+          // log("[Player] matchPlayerInfo operations version not matches, overwriting");
 
           playerInfo.operations.clear();
           playerInfo.operationsVersion = playerInfo.version;
@@ -242,7 +242,7 @@ class UserProvider extends ChangeNotifier {
           await syncPlayerOperations();
         }
       } else {
-        log("[Player] matchPlayerInfo cloud version is newer, syncing");
+        // log("[Player] matchPlayerInfo cloud version is newer, syncing");
 
         playerInfo = await _api.getPlayerInfo();
       }
@@ -252,11 +252,11 @@ class UserProvider extends ChangeNotifier {
       final currentTrack = await _musicInfoProvider.batchTracks([playerInfo.currentMusic!.id]);
 
       if (currentTrack.isNotEmpty) {
-        log("[Player] Playing current music: ${currentTrack.first}");
+        // log("[Player] Playing current music: ${currentTrack.first}");
         // TODO: do not start immediately
-        _currentMusicProvider.playTrack(currentTrack.first);
+        // _currentMusicProvider.playTrack(currentTrack.first);
       } else {
-        log("[Player] Failed to play current music because is empty");
+        // log("[Player] Failed to play current music because is empty");
       }
     }
 
@@ -274,7 +274,7 @@ class UserProvider extends ChangeNotifier {
         break;
     }
 
-    log("[Player] matched info: ${playerInfo.encode()}");
+    // log("[Player] matched info: ${playerInfo.encode()}");
   }
 
   void _stackPlayerOperation(Map body, int newVersion) {
@@ -282,7 +282,7 @@ class UserProvider extends ChangeNotifier {
       playerInfo.operationsVersion = playerInfo.version;
     }
     playerInfo.version = newVersion;
-    log("[Player] operation version is: ${playerInfo.operationsVersion} - new version is: $newVersion");
+    // log("[Player] operation version is: ${playerInfo.operationsVersion} - new version is: $newVersion");
     playerInfo.operations.add(body);
 
     _store.put("player_info", jsonEncode(playerInfo.encode()));
@@ -292,7 +292,7 @@ class UserProvider extends ChangeNotifier {
     if (playerSyncTimer.isActive) playerSyncTimer.cancel();
 
     playerSyncTimer = Timer(const Duration(seconds: 3), () {
-      log("[Player] pushing operations to db");
+      // log("[Player] pushing operations to db");
 
       syncPlayerOperations();
 
@@ -303,13 +303,13 @@ class UserProvider extends ChangeNotifier {
   Future<void> syncPlayerOperations() async {
     final isSuccess = await _api.syncPlayerOperations(playerInfo);
 
-    log("[Player] ${isSuccess ? 'Success to' : 'Failed to'} sync player operations: ${playerInfo.operations}");
-    log("[Player] new queue: ${getAllTracks(includeHistory: false)}");
+    // log("[Player] ${isSuccess ? 'Success to' : 'Failed to'} sync player operations: ${playerInfo.operations}");
+    // log("[Player] new queue: ${getAllTracks(includeHistory: false)}");
 
     playerInfo.operations.clear();
     playerInfo.operationsVersion = playerInfo.version;
     if (!isSuccess) {
-      log("[Player] failed to sync, overwriting with version: ${playerInfo.version}");
+      // log("[Player] failed to sync, overwriting with version: ${playerInfo.version}");
 
       postOverwrite(playerInfo.version);
     }
@@ -553,7 +553,7 @@ class UserProvider extends ChangeNotifier {
 
     //postCurrentMusic(nextToPlay, DateTime.now().millisecondsSinceEpoch, fromPrimary: fromPrimary);
 
-    debugPrint("[Player State] next to play from queue: $nextToPlay");
+    // debugPrint("[Player State] next to play from queue: $nextToPlay");
 
     playTrackById(nextToPlay, fromPrimary);
 

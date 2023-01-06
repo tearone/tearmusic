@@ -45,34 +45,33 @@ class _WaveformSliderState extends State<WaveformSlider> {
   void generateWaveform() {
     final currentMusic = context.read<CurrentMusicProvider>();
 
-    progress =
-        currentMusic.duration != null ? currentMusic.position.inMilliseconds / currentMusic.duration!.inMilliseconds : 0.0;
+    progress = currentMusic.duration != null ? currentMusic.position.inMilliseconds / currentMusic.duration!.inMilliseconds : 0.0;
 
     waveform = [];
     cachedWaveform = [];
     actives = List.generate(tickerCount, (i) => tickerCount * progress >= i);
 
-    currentMusic.tma?.playback.future.then((value) {
-      final List<double> effects = [];
-      final List<double> chunks = [];
-      final chunkLen = value.waveform.length / tickerCount;
+    // currentMusic.tma?.playback.future.then((value) {
+    //   final List<double> effects = [];
+    //   final List<double> chunks = [];
+    //   final chunkLen = value.waveform.length / tickerCount;
 
-      final double min = value.waveform.reduce((a, b) => math.min(a.toDouble(), b.toDouble())).toDouble();
-      final double max = value.waveform.reduce((a, b) => math.max(a.toDouble(), b.toDouble())).toDouble();
+    //   final double min = value.waveform.reduce((a, b) => math.min(a.toDouble(), b.toDouble())).toDouble();
+    //   final double max = value.waveform.reduce((a, b) => math.max(a.toDouble(), b.toDouble())).toDouble();
 
-      for (var sample in value.waveform) {
-        chunks.add(sample);
+    //   for (var sample in value.waveform) {
+    //     chunks.add(sample);
 
-        if (chunks.length >= chunkLen) {
-          final double average = chunks.fold<double>(0, (a, b) => a + b) / chunks.length;
-          effects.add(normalizeInRange(average, min, max, 3.0, 40.0));
-          chunks.clear();
-        }
-      }
+    //     if (chunks.length >= chunkLen) {
+    //       final double average = chunks.fold<double>(0, (a, b) => a + b) / chunks.length;
+    //       effects.add(normalizeInRange(average, min, max, 3.0, 40.0));
+    //       chunks.clear();
+    //     }
+    //   }
 
-      waveform = List.castFrom(effects);
-      cachedWaveform = value.waveform;
-    });
+    //   waveform = List.castFrom(effects);
+    //   cachedWaveform = value.waveform;
+    // });
   }
 
   void setProgress() {
@@ -97,7 +96,7 @@ class _WaveformSliderState extends State<WaveformSlider> {
             waveform.clear();
           } else {
             value.future.then((value) {
-              if (value.waveform != cachedWaveform) generateWaveform();
+              // if (value.waveform != cachedWaveform) generateWaveform();
             });
           }
 

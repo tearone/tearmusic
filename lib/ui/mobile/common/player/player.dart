@@ -344,7 +344,8 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                 bottomLeft: Radius.circular(24.0 * (1 - progressValue * 10 + 9).clamp(0, 1)),
                 bottomRight: Radius.circular(24.0 * (1 - progressValue * 10 + 9).clamp(0, 1)),
               );
-              final double bottomOffset = (-80 * inverseClampedProgressValue + progressValue.clamp(-1, 0) * -200) - (bottomInset * inverseClampedProgressValue);
+              final double bottomOffset =
+                  (-80 * inverseClampedProgressValue + progressValue.clamp(-1, 0) * -200) - (bottomInset * inverseClampedProgressValue);
               final double opacity = (bounceClampedProgressValue * 5 - 4).clamp(0, 1);
               final double fastOpacity = (bounceClampedProgressValue * 10 - 9).clamp(0, 1);
               double panelHeight = maxOffset / 1.6;
@@ -367,7 +368,8 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                         child: Container(
                           color: Colors.transparent, // prevents scrolling gap
                           child: Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 12 * (1 - clampedProgressValue * 10 + 9).clamp(0, 1), vertical: 12 * inverseClampedProgressValue),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 12 * (1 - clampedProgressValue * 10 + 9).clamp(0, 1), vertical: 12 * inverseClampedProgressValue),
                             child: Container(
                               height: vp(a: 82.0, b: panelHeight, c: progressValue.clamp(0, 3)),
                               width: double.infinity,
@@ -562,9 +564,13 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                                 padding: EdgeInsets.all(12.0 * inverseClampedProgressValue).add(EdgeInsets.only(
                                     right: !bounceDown
                                         ? !bounceUp
-                                            ? screenSize.width * reverseClampedProgressValue / 2 - 80 * reverseClampedProgressValue / 2 + (queueProgressValue * 24.0)
+                                            ? screenSize.width * reverseClampedProgressValue / 2 -
+                                                80 * reverseClampedProgressValue / 2 +
+                                                (queueProgressValue * 24.0)
                                             : screenSize.width * clampedProgressValue / 2 - 80 * clampedProgressValue / 2
-                                        : screenSize.width * bounceClampedProgressValue / 2 - 80 * bounceClampedProgressValue / 2 + (queueProgressValue * 24.0))),
+                                        : screenSize.width * bounceClampedProgressValue / 2 -
+                                            80 * bounceClampedProgressValue / 2 +
+                                            (queueProgressValue * 24.0))),
                                 child: Theme(
                                   data: Theme.of(context).copyWith(
                                     floatingActionButtonTheme: FloatingActionButtonThemeData(
@@ -605,8 +611,7 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                                       playbackIndicator = MultiProvider(
                                         key: const Key("ready"),
                                         providers: [
-                                          StreamProvider(
-                                              create: (_) => currentMusic.positionStream, initialData: currentMusic.position),
+                                          StreamProvider(create: (_) => currentMusic.positionStream, initialData: currentMusic.position),
                                           StreamProvider(create: (_) => currentMusic.isPlayingStream, initialData: currentMusic.isPlaying),
                                         ],
                                         builder: (context, snapshot) => Consumer2<bool, Duration>(
@@ -626,7 +631,7 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                                                 child: FloatingActionButton(
                                                   heroTag: currentMusic.playing,
                                                   onPressed: () {
-                                                    if (currentMusic.playing) {
+                                                    if (currentMusic.isPlaying) {
                                                       currentMusic.pause();
                                                       playPauseAnim.reverse();
                                                     } else {

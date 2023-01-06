@@ -27,20 +27,20 @@ class PlaybackHead {
 
 class Playback {
   final String streamUrl;
-  final List<double> waveform;
-  final List<Segmented> silence;
+  // final List<double> waveform;
+  // final List<Segmented> silence;
 
   Playback({
     required this.streamUrl,
-    required this.waveform,
-    required this.silence,
+    // required this.waveform,
+    // required this.silence,
   });
 
   factory Playback.decode(Map json) {
     return Playback(
       streamUrl: json['cdn'],
-      waveform: (json['proc']['waveform'] as List).cast<num?>().map((e) => e?.toDouble() ?? 0.0).toList(), // yes this is needed
-      silence: Segmented.decodeList((json['proc']['silence'] as List).cast<Map>()),
+      // waveform: (json['proc']['waveform'] as List).cast<num?>().map((e) => e?.toDouble() ?? 0.0).toList(), // yes this is needed
+      // silence: Segmented.decodeList((json['proc']['silence'] as List).cast<Map>()),
     );
   }
 }

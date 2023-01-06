@@ -47,6 +47,7 @@ dependencies:
   async: ^2.9.0
   modal_bottom_sheet: ^2.1.0
   audioplayers: ^1.2.0
+  just_audio: ^0.9.31
 
 dev_dependencies:
   flutter_test:

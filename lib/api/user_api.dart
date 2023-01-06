@@ -101,8 +101,8 @@ class UserApi {
       body: {"operations": jsonEncode(playerInfo.operations)},
     );
 
-    log("syncPlayerOperations tried to sync: ${playerInfo.operations}");
-    log("syncPlayerOperations code: ${res.statusCode}");
+    // log("syncPlayerOperations tried to sync: ${playerInfo.operations}");
+    // log("syncPlayerOperations code: ${res.statusCode}");
 
     //_reschk(res, "syncPlayerOperations");
 

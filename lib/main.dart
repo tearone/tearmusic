@@ -29,7 +29,7 @@ void main() async {
   final musicInfoProvider = MusicInfoProvider(base: baseApi);
 
   final userProvider = UserProvider(base: baseApi, musicInfo: musicInfoProvider);
-  final currentMusicProvider = CurrentMusicProvider();
+  final currentMusicProvider = CurrentMusicProvider(musicApi: musicInfoProvider);
   userProvider.setCurrentMusicProvider(currentMusicProvider);
 
   final themeProvider = ThemeProvider();

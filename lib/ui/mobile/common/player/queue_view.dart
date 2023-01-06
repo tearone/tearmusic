@@ -109,13 +109,11 @@ class _QueueViewState extends State<QueueView> {
   @override
   void initState() {
     super.initState();
-    log("[Queue View] init");
+    // log("[Queue View] init");
     //buildQueue();
   }
 
   void buildQueue() async {
-    log("buildqueue");
-
     final userProvider = context.read<UserProvider>();
 
     final items = await context.read<MusicInfoProvider>().batchTracks(userProvider.getAllTracks());

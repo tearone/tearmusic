@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:tearmusic/api/base_api.dart';
@@ -241,12 +240,8 @@ class MusicInfoProvider {
     return data;
   }
 
-  Future<Playback> playback(MusicTrack track, {String? videoId}) async {
+  Future<Playback> playback(MusicTrack track) async {
     return await _api.playback(track);
-  }
-
-  Future<PlaybackHead> playbackHead(MusicTrack track) async {
-    return await _api.playbackHead(track);
   }
 
   Future<void> purgeCache(MusicTrack track) async {

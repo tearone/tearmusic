@@ -10,6 +10,7 @@ class MusicTrack extends Model {
   final MusicAlbum? album;
   final List<MusicArtist> artists;
   final String? streamUrl;
+  final List<int>? waveform;
 
   MusicTrack({
     required Map json,
@@ -21,6 +22,7 @@ class MusicTrack extends Model {
     required this.album,
     required this.artists,
     this.streamUrl,
+    this.waveform,
   }) : super(id: id, json: json, key: "$name ${artists.first.name}", type: "track");
 
   factory MusicTrack.decode(Map json, {MusicAlbum? album}) {
@@ -36,6 +38,7 @@ class MusicTrack extends Model {
       album: album ?? (json["album"] != null ? MusicAlbum.decode(json["album"]) : null),
       artists: json["artists"].map((e) => MusicArtist.decode(e)).toList().cast<MusicArtist>(),
       streamUrl: json["streamUrl"],
+      waveform: json["waveform"],
     );
   }
 

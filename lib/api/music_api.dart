@@ -173,26 +173,6 @@ class MusicApi {
     return MusicLyrics.decode(json);
   }
 
-  Future<PlaybackHead> playbackHead(MusicTrack track) async {
-    String url = "$baseUrl/music/playback";
-    url += "?id=${Uri.encodeComponent(track.id)}";
-    url += "&artists=${Uri.encodeComponent(jsonEncode(track.artists.map((e) => e.name).toList()))}";
-    url += "&track=${Uri.encodeComponent(track.name)}";
-    url += "&duration=${track.duration.inSeconds}";
-    url += (track.album != null ? "&album=${Uri.encodeComponent(track.album!.name)}" : "");
-
-    final res = await http.get(
-      Uri.parse(url),
-      headers: {"authorization": await base.getToken()},
-    );
-
-    _reschk(res, "playbackHead");
-
-    final data = cbor.decode(res.bodyBytes);
-
-    return PlaybackHead.decode(data);
-  }
-
   Future<Playback> playback(MusicTrack track) async {
     String url = "$baseUrl/music/playback";
     url += "?id=${Uri.encodeComponent(track.id)}";

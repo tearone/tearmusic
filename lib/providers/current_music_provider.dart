@@ -20,14 +20,14 @@ class CurrentMusicProvider extends ChangeNotifier {
 
   final VirtualPlayer _player;
 
-  MusicTrack? get playing => _playing;
-  MusicTrack? _playing;
+  MusicTrack? get playing => _currentTrack;
+  MusicTrack? _currentTrack;
 
   double get progress => 0.0;
   Duration get position => Duration.zero;
   Stream<Duration> get positionStream => Stream.value(position);
-  bool get isPlaying => false;
-  Stream<bool> get isPlayingStream => Stream.value(isPlaying);
+  bool get isPlaying => _player.isPlaying;
+  Stream<bool> get isPlayingStream => _player.isPlayingStream;
   Duration? get duration => Duration.zero;
   Audio? get tma => Audio(Completer());
   AudioLoadingState get audioLoading => AudioLoadingState.ready;
@@ -36,15 +36,20 @@ class CurrentMusicProvider extends ChangeNotifier {
     await _player.startServer();
   }
 
-  void play() {}
+  void play() {
+    _player.play();
+  }
 
   Future<void> playTrack(MusicTrack track) async {
-    _playing = track;
+    _currentTrack = track;
     log("[CURRENTMUSIC] Playing ${track.name}");
-    await _player.play(track);
+    await _player.playTrack(track);
+    _player.play();
   }
 
   Future<void> seek(Duration position) async {}
 
-  Future<void> pause() async {}
+  void pause() async {
+    _player.pause();
+  }
 }

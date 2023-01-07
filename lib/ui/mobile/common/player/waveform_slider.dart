@@ -36,7 +36,7 @@ class _WaveformSliderState extends State<WaveformSlider> {
       if (waveform.isNotEmpty) return;
 
       setState(() {
-        whereCenter += 0.5;
+        whereCenter += math.sin(whereCenter * whereCenter + 1);
         if (whereCenter > 6) whereCenter = 0;
       });
     });
@@ -117,7 +117,7 @@ class _WaveformSliderState extends State<WaveformSlider> {
                   duration: const Duration(milliseconds: 150),
                   width: 3.0,
                   height: waveform.isEmpty
-                      ? normalizeInRange(math.sin(whereCenter - i * 0.75), -1.0, 1.0, 7.5, 25.0)
+                      ? normalizeInRange(math.sin(whereCenter - i * 0.5), -1.0, 1.0, 7.5, 25.0)
                       : waveform[i].toDouble() * (active ? 1.0 : 0.9),
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.primary.withOpacity(active ? 1.0 : 0.3),

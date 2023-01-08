@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:tearmusic/models/music/track.dart';
 import 'package:tearmusic/models/playback.dart';
 import 'package:tearmusic/providers/current_music_provider.dart';
 import 'dart:math' as math;
@@ -18,7 +19,7 @@ class _WaveformSliderState extends State<WaveformSlider> {
   int get tickerCount => waveform.isNotEmpty ? waveform.length : 50;
   double progress = 0.0;
   late List<double> waveform;
-  late List<double> cachedWaveform;
+  late List<int> cachedWaveform;
   late List<bool> actives;
   bool sliding = false;
 
@@ -51,27 +52,28 @@ class _WaveformSliderState extends State<WaveformSlider> {
     cachedWaveform = [];
     actives = List.generate(tickerCount, (i) => tickerCount * progress >= i);
 
-    // currentMusic.tma?.playback.future.then((value) {
-    //   final List<double> effects = [];
-    //   final List<double> chunks = [];
-    //   final chunkLen = value.waveform.length / tickerCount;
+    if (currentMusic.playing?.waveform != null) {
+      final value = currentMusic.playing!.waveform!;
+      final List<double> effects = [];
+      final List<double> chunks = [];
+      final chunkLen = value.length / tickerCount;
 
-    //   final double min = value.waveform.reduce((a, b) => math.min(a.toDouble(), b.toDouble())).toDouble();
-    //   final double max = value.waveform.reduce((a, b) => math.max(a.toDouble(), b.toDouble())).toDouble();
+      final double min = value.reduce((a, b) => math.min(a, b)).toDouble();
+      final double max = value.reduce((a, b) => math.max(a, b)).toDouble();
 
-    //   for (var sample in value.waveform) {
-    //     chunks.add(sample);
+      for (var sample in value) {
+        chunks.add(sample.toDouble());
 
-    //     if (chunks.length >= chunkLen) {
-    //       final double average = chunks.fold<double>(0, (a, b) => a + b) / chunks.length;
-    //       effects.add(normalizeInRange(average, min, max, 3.0, 40.0));
-    //       chunks.clear();
-    //     }
-    //   }
+        if (chunks.length >= chunkLen) {
+          final double average = chunks.fold<double>(0, (a, b) => a + b) / chunks.length;
+          effects.add(normalizeInRange(average, min, max, 3.0, 40.0));
+          chunks.clear();
+        }
+      }
 
-    //   waveform = List.castFrom(effects);
-    //   cachedWaveform = value.waveform;
-    // });
+      waveform = List.castFrom(effects);
+      cachedWaveform = value;
+    }
   }
 
   void setProgress() {
@@ -89,15 +91,13 @@ class _WaveformSliderState extends State<WaveformSlider> {
   Widget build(BuildContext context) {
     final currentMusic = context.read<CurrentMusicProvider>();
 
-    return Selector<CurrentMusicProvider, Completer<Playback>?>(
-        selector: (_, cmp) => cmp.tma?.playback,
+    return Selector<CurrentMusicProvider, MusicTrack?>(
+        selector: (_, cmp) => cmp.playing,
         builder: (context, value, child) {
-          if (!value!.isCompleted) {
+          if (value?.waveform == null) {
             waveform.clear();
           } else {
-            value.future.then((value) {
-              // if (value.waveform != cachedWaveform) generateWaveform();
-            });
+            if (value!.waveform! != cachedWaveform) generateWaveform();
           }
 
           return StreamBuilder(

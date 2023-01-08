@@ -9,8 +9,8 @@ class MusicTrack extends Model {
   final int trackNumber;
   final MusicAlbum? album;
   final List<MusicArtist> artists;
-  final String? streamUrl;
-  final List<int>? waveform;
+  String? streamUrl;
+  List<int>? waveform;
 
   MusicTrack({
     required Map json,

@@ -21,9 +21,13 @@ class AudioBuffer {
     _currentBuffer.release();
   }
 
-  Stream<List<int>> read() async* {
-    for (final chunk in _buffers) {
-      yield await chunk.read();
+  Stream<List<int>> read({int seek = 0}) async* {
+    final int start = (seek / kAudioChunkSize).floor();
+    final int chunkStart = kAudioChunkSize * start;
+    final int startOffset = seek - chunkStart;
+    for (int chunk = start; chunk < _buffers.length; chunk++) {
+      final data = await _buffers[chunk].read();
+      yield List.from(data.getRange(chunk == start ? startOffset : 0, data.length));
     }
   }
 }

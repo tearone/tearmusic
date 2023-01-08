@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:just_audio/just_audio.dart';
@@ -15,8 +16,13 @@ class VirtualPlayer {
   final AudioPlayer _player;
   final MusicInfoProvider _musicApi;
 
+  Duration get position => _player.position;
+  Stream<Duration> get positionStream => _player.positionStream;
+
   bool get isPlaying => _player.playing;
   Stream<bool> get isPlayingStream => _player.playingStream;
+
+  Duration? get duration => _player.duration;
 
   Future<void> startServer() async {
     await _proxy.start();
@@ -27,11 +33,14 @@ class VirtualPlayer {
     _player.stop();
     String? streamUrl = track.streamUrl;
     if (streamUrl != null) log("[PLAYER] Using cached cdn stream");
-    streamUrl ??= (await _musicApi.playback(track)).streamUrl;
+    final playback = await _musicApi.playback(track);
+    streamUrl ??= playback.streamUrl;
+    track.waveform = playback.waveform;
     _proxy.addStream(track.id, streamUrl);
     await _player.setUrl(_proxy.getStream(track.id));
   }
 
   void pause() => _player.pause();
   void play() => _player.play();
+  Future<void> seek(Duration position) => _player.seek(position);
 }

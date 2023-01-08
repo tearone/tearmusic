@@ -43,8 +43,8 @@ class AudioSource {
     }();
   }
 
-  Stream<List<int>> read() async* {
+  Stream<List<int>> read({int seek = 0}) async* {
     await _ready.future;
-    yield* _buffer.read();
+    yield* _buffer.read(seek: seek);
   }
 }

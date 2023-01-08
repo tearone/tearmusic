@@ -44,7 +44,7 @@ class AudioChunk {
   // Allow reads after the buffer is filled
   Future<List<int>> read() async {
     await _ready.future;
-    return List.from(_buffer);
+    return List.from(_buffer.getRange(0, _cursor));
   }
 
   void release() => _ready.complete();

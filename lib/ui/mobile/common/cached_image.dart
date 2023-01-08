@@ -61,11 +61,14 @@ class CachedImage extends StatelessWidget {
                     );
                   },
                   child: snapshot.hasData
-                      ? Image.memory(
-                          snapshot.data!,
-                          fit: BoxFit.cover,
-                          width: constraints.maxWidth,
-                          height: constraints.maxHeight,
+                      ? Transform.scale(
+                          scale: 1.1,
+                          child: Image.memory(
+                            snapshot.data!,
+                            fit: BoxFit.cover,
+                            width: constraints.maxWidth,
+                            height: constraints.maxHeight,
+                          ),
                         )
                       : SizedBox(
                           width: constraints.maxWidth,

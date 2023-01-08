@@ -81,8 +81,6 @@ class ProxyRequestHandler {
       return;
     }
 
-    print(request.headers);
-
     // Add static response headers
     _addHeaders(request);
 

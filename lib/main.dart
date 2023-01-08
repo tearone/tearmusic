@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -58,6 +61,7 @@ void main() async {
   await userProvider.init();
   await musicInfoProvider.init();
   await currentMusicProvider.init();
+  if (Platform.isAndroid) await FlutterDisplayMode.setHighRefreshRate();
 
   final providers = [
     ChangeNotifierProvider(create: (_) => userProvider),

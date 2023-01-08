@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import 'package:sheet/route.dart';
 import 'package:tearmusic/providers/theme_provider.dart';
 import 'package:tearmusic/ui/mobile/common/bottom_sheet.dart';
 import 'package:tearmusic/ui/mobile/navigator.dart';
@@ -51,19 +51,12 @@ class NavigatorProvider extends ChangeNotifier {
     return _state.push(route);
   }
 
-  static const Radius _kDefaultTopRadius = Radius.circular(12);
-
   Future<T?> pushModal<T>({required Widget Function(BuildContext) builder, String? uri}) {
     return push<T>(
-      CupertinoModalBottomSheetRoute<T>(
+      SheetRoute<T>(
         builder: builder,
-        containerBuilder: (context, _, child) => BottomSheetContainer(
-          topRadius: _kDefaultTopRadius,
-          child: child,
-        ),
-        expanded: false,
-        duration: const Duration(milliseconds: 300),
-        animationCurve: Curves.fastLinearToSlowEaseIn,
+        // duration: const Duration(milliseconds: 300),
+        // animationCurve: Curves.fastLinearToSlowEaseIn,
       ),
       uri: uri,
     ).then((value) {

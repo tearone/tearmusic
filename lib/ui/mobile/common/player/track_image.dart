@@ -3,7 +3,6 @@ import 'dart:typed_data';
 import 'package:animations/animations.dart';
 import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/material.dart';
-import 'package:tearmusic/models/music/images.dart';
 import 'package:tearmusic/ui/mobile/common/cached_image.dart';
 import 'package:tearmusic/utils.dart';
 
@@ -38,7 +37,6 @@ class TrackImage extends StatelessWidget {
     final radius = rangeProgress(a: 14.0, b: 32.0, c: cp);
     final borderRadius = SmoothBorderRadius(cornerRadius: radius, cornerSmoothing: 1.0);
     final size = rangeProgress(a: width, b: screenSize.width - 84.0, c: cp);
-    const imgSize = Size(400, 400);
 
     return Transform.translate(
       offset: Offset(0, bottomOffset + (-maxOffset / 2.15 * p.clamp(0, 2))),

@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:provider/provider.dart';
 import 'package:tearmusic/models/music/track.dart';
 import 'package:tearmusic/models/player_info.dart';
@@ -137,10 +136,8 @@ class QueueTile extends StatelessWidget {
               }
             },
             onLongPress: () {
-              showMaterialModalBottomSheet(
+              showModalBottomSheet(
                 context: context,
-                animationCurve: Curves.fastLinearToSlowEaseIn,
-                duration: const Duration(milliseconds: 300),
                 useRootNavigator: true,
                 backgroundColor: Colors.transparent,
                 builder: (context) => BottomSheetContainer(

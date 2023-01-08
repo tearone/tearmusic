@@ -10,11 +10,13 @@ class BottomSheetContainer extends StatelessWidget {
   final Radius topRadius;
   final BoxShadow? shadow;
 
+  static const Radius _kDefaultTopRadius = Radius.circular(12);
+
   const BottomSheetContainer({
     Key? key,
     required this.child,
     this.backgroundColor,
-    required this.topRadius,
+    this.topRadius = _kDefaultTopRadius,
     this.shadow,
   }) : super(key: key);
 

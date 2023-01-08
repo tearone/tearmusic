@@ -2,13 +2,14 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:provider/provider.dart';
+import 'package:sheet/route.dart';
 import 'package:tearmusic/models/music/lyrics.dart';
 import 'package:tearmusic/models/music/track.dart';
 import 'package:tearmusic/providers/current_music_provider.dart';
 import 'package:tearmusic/providers/music_info_provider.dart';
 import 'package:tearmusic/providers/theme_provider.dart';
+import 'package:tearmusic/ui/mobile/common/bottom_sheet.dart';
 import 'package:tearmusic/ui/mobile/common/knob.dart';
 import 'package:tearmusic/ui/mobile/common/player/lyrics_view/unavailable.dart';
 import 'package:tearmusic/ui/mobile/common/player/lyrics_view/full_text.dart';
@@ -23,12 +24,10 @@ class LyricsView extends StatefulWidget {
   final MusicTrack track;
 
   static Future<void> view(MusicTrack value, {required BuildContext context}) {
-    return showCupertinoModalBottomSheet(
-      context: context,
-      useRootNavigator: true,
+    return Navigator.of(context, rootNavigator: true).push(SheetRoute(
       barrierColor: Colors.black.withOpacity(.3),
-      builder: (context) => LyricsView(value),
-    );
+      builder: (context) => BottomSheetContainer(child: LyricsView(value)),
+    ));
   }
 
   @override
@@ -121,7 +120,7 @@ class _LyricsViewState extends State<LyricsView> with SingleTickerProviderStateM
   @override
   Widget build(BuildContext context) {
     if (_controller == null) {
-      _controller = ModalScrollController.of(context) ?? ScrollController();
+      _controller = ScrollController();
       _controller!.addListener(scrollListener);
     }
 
@@ -163,7 +162,6 @@ class _LyricsViewState extends State<LyricsView> with SingleTickerProviderStateM
               children: [
                 if (snapshot.data!.lyricsType != LyricsType.unavailable) const Wallpaper(particleOpacity: .07),
                 CustomScrollView(
-                  controller: ModalScrollController.of(context),
                   slivers: [
                     SliverToBoxAdapter(
                       child: SizedBox(height: verticalPadding + MediaQuery.of(context).padding.top),

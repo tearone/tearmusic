@@ -14,7 +14,8 @@ class Audio {
 enum AudioLoadingState { ready, loading, error }
 
 class CurrentMusicProvider extends ChangeNotifier {
-  get playing => null;
+  MusicTrack? _playing;
+  MusicTrack? get playing => _playing;
   double get progress => 0.0;
   Duration get position => Duration.zero;
   Stream<Duration> get positionStream => Stream.value(position);
@@ -29,6 +30,7 @@ class CurrentMusicProvider extends ChangeNotifier {
   void play() {}
 
   Future<void> playTrack(MusicTrack track) async {
+    _playing = track;
     final stream = AudioStreamProvider();
     await stream.startServer();
     await Future.delayed(const Duration(seconds: 3));

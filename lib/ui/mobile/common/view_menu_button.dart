@@ -2,7 +2,6 @@ import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 class ViewMenuButton extends StatelessWidget {
   const ViewMenuButton({Key? key}) : super(key: key);
@@ -21,7 +20,7 @@ class ViewMenuButton extends StatelessWidget {
           child: IconButton(
             padding: EdgeInsets.zero,
             onPressed: () {
-              showMaterialModalBottomSheet(
+              showModalBottomSheet(
                 context: context,
                 useRootNavigator: true,
                 builder: (context) => Container(height: 300),

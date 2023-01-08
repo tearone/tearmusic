@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:like_button/like_button.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:provider/provider.dart';
 import 'package:tearmusic/models/library.dart';
 import 'package:tearmusic/models/music/playlist.dart';
@@ -69,15 +68,9 @@ class _PlaylistViewState extends State<PlaylistView> {
   }
 
   @override
-  void dispose() {
-    _scrollController?.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     if (_scrollController == null) {
-      _scrollController = ModalScrollController.of(context) ?? ScrollController();
+      _scrollController = PrimaryScrollController.of(context);
       _scrollController!.addListener(() {
         if ((_scrollController?.offset ?? 0) > 250.0) {
           if (!showTitle) setState(() => showTitle = true);

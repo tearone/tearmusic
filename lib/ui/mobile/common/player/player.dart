@@ -9,7 +9,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:provider/provider.dart';
 import 'package:tearmusic/providers/current_music_provider.dart';
 import 'package:tearmusic/providers/theme_provider.dart';
@@ -207,8 +206,6 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final currentMusic = context.watch<CurrentMusicProvider>();
-
-    print("[d] reinicialize cached image");
 
     final cachedImage = CachedImage(
       currentMusic.playing?.album?.images,
@@ -479,7 +476,7 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                                   ),
                                   IconButton(
                                     onPressed: () {
-                                      showMaterialModalBottomSheet(
+                                      showModalBottomSheet(
                                         context: context,
                                         useRootNavigator: true,
                                         builder: (context) => Container(height: 300),
@@ -630,8 +627,7 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                                       playbackIndicator = MultiProvider(
                                         key: const Key("ready"),
                                         providers: [
-                                          StreamProvider(
-                                              create: (_) => currentMusic.positionStream, initialData: currentMusic.position),
+                                          StreamProvider(create: (_) => currentMusic.positionStream, initialData: currentMusic.position),
                                           StreamProvider(create: (_) => currentMusic.isPlayingStream, initialData: currentMusic.isPlaying),
                                         ],
                                         builder: (context, snapshot) => Consumer2<bool, Duration>(
@@ -651,7 +647,7 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                                                 child: FloatingActionButton(
                                                   heroTag: currentMusic.playing,
                                                   onPressed: () {
-                                                    if (currentMusic.playing) {
+                                                    if (currentMusic.isPlaying) {
                                                       currentMusic.pause();
                                                       playPauseAnim.reverse();
                                                     } else {
@@ -932,7 +928,7 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                               SizedBox(
                                 height: 65.0,
                                 child: Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 24.0),
+                                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
                                   child: waveFormSliderWidget,
                                 ),
                               ),

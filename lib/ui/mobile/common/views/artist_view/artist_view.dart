@@ -5,7 +5,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:provider/provider.dart';
 import 'package:tearmusic/models/music/album.dart';
 import 'package:tearmusic/models/music/artist.dart';
@@ -114,9 +113,7 @@ class _ArtistViewState extends State<ArtistView> {
             children: [
               Scaffold(
                 body: CupertinoScrollbar(
-                  controller: ModalScrollController.of(context),
                   child: CustomScrollView(
-                    controller: ModalScrollController.of(context),
                     slivers: [
                       SliverAppBar(
                         pinned: true,

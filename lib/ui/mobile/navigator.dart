@@ -151,64 +151,46 @@ class _NavigationScreenState extends State<NavigationScreen> with SingleTickerPr
             height: double.infinity,
             child: Stack(
               children: [
-                AnimatedBuilder(
-                  animation: animation,
-                  builder: (context, child) {
-                    return SizedBox(
-                      height: MediaQuery.of(context).size.height - (1 - (animation.value).clamp(0.0, 1.0)) * (80.0 + (bottom ?? 0)),
-                      child: Container(
-                        color: Colors.black.withOpacity((animation.value * 4.0).clamp(0.0, 1.0)),
-                        child: Transform.scale(
-                          scale: (1 - animation.value.clamp(0.0, 1.0)) / 10 + 0.9,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular((animation.value * 150.0).clamp(0.0, 42.0)),
-                            child: child,
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                  child: IndexedStack(
-                    index: _selected.index,
-                    children: [
-                      Navigator(
-                        key: _homeNavigatorState,
-                        onGenerateRoute: (_) {
-                          return PageRouteBuilder(
-                            pageBuilder: (context, animation, secondaryAnimation) {
-                              context.read<NavigatorProvider>().setState(MobileRoute.home, Navigator.of(context));
-                              context.read<ThemeProvider>().setState(MobileRoute.home);
-                              return homePage;
-                            },
-                          );
-                        },
-                      ),
-                      Navigator(
-                        key: _searchNavigatorState,
-                        onGenerateRoute: (_) {
-                          return PageRouteBuilder(
-                            pageBuilder: (context, animation, secondaryAnimation) {
-                              context.read<NavigatorProvider>().setState(MobileRoute.search, Navigator.of(context));
-                              context.read<ThemeProvider>().setState(MobileRoute.search);
-                              return searchPage;
-                            },
-                          );
-                        },
-                      ),
-                      Navigator(
-                        key: _libraryNavigatorState,
-                        onGenerateRoute: (_) {
-                          return PageRouteBuilder(
-                            pageBuilder: (context, animation, secondaryAnimation) {
-                              context.read<NavigatorProvider>().setState(MobileRoute.library, Navigator.of(context));
-                              context.read<ThemeProvider>().setState(MobileRoute.library);
-                              return libraryPage;
-                            },
-                          );
-                        },
-                      ),
-                    ],
-                  ),
+                IndexedStack(
+                  index: _selected.index,
+                  children: [
+                    Navigator(
+                      key: _homeNavigatorState,
+                      onGenerateRoute: (_) {
+                        return PageRouteBuilder(
+                          pageBuilder: (context, animation, secondaryAnimation) {
+                            context.read<NavigatorProvider>().setState(MobileRoute.home, Navigator.of(context));
+                            context.read<ThemeProvider>().setState(MobileRoute.home);
+                            return homePage;
+                          },
+                        );
+                      },
+                    ),
+                    Navigator(
+                      key: _searchNavigatorState,
+                      onGenerateRoute: (_) {
+                        return PageRouteBuilder(
+                          pageBuilder: (context, animation, secondaryAnimation) {
+                            context.read<NavigatorProvider>().setState(MobileRoute.search, Navigator.of(context));
+                            context.read<ThemeProvider>().setState(MobileRoute.search);
+                            return searchPage;
+                          },
+                        );
+                      },
+                    ),
+                    Navigator(
+                      key: _libraryNavigatorState,
+                      onGenerateRoute: (_) {
+                        return PageRouteBuilder(
+                          pageBuilder: (context, animation, secondaryAnimation) {
+                            context.read<NavigatorProvider>().setState(MobileRoute.library, Navigator.of(context));
+                            context.read<ThemeProvider>().setState(MobileRoute.library);
+                            return libraryPage;
+                          },
+                        );
+                      },
+                    ),
+                  ],
                 ),
 
                 Align(

@@ -10,11 +10,27 @@ class ProxyRequestHandler {
   // Active audio streams
   // Ideally, there should be only one per track
   final Map<String, AudioSource> _streams = {};
+  final List<String> _lastStream = [];
 
   Future<void> addStream(String streamId, String streamUrl) async {
+    // Don't add stream if already exists
+    if (_streams.keys.contains(streamId)) return;
+
+    // Purge unused streams
+    while (_lastStream.length > 5) {
+      final purge = _lastStream.removeAt(0);
+      _streams.remove(purge);
+    }
+
+    // Create new stream
     final source = AudioSource.fromUri(Uri.parse(streamUrl));
+
+    // Add stream
     _streams[streamId] = source;
+    _lastStream.add(streamId);
     log("[HANDLER] Added stream $streamId");
+
+    // Initialize stream
     await source.init();
   }
 

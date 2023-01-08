@@ -42,8 +42,10 @@ class CurrentMusicProvider extends ChangeNotifier {
 
   Future<void> playTrack(MusicTrack track) async {
     _currentTrack = track;
+    notifyListeners();
     log("[CURRENTMUSIC] Playing ${track.name}");
     await _player.playTrack(track);
+    if (_currentTrack != track) return;
     _player.play();
   }
 

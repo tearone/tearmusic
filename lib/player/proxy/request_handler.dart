@@ -20,6 +20,7 @@ class ProxyRequestHandler {
     while (_lastStream.length > 5) {
       final purge = _lastStream.removeAt(0);
       _streams.remove(purge);
+      log("[HANDLER] Discarded stream $purge");
     }
 
     // Create new stream

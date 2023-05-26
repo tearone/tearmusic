@@ -29,7 +29,7 @@ class MenuButton extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.only(left: 24.0),
                   child: DefaultTextStyle(
-                    style: Theme.of(context).textTheme.bodyText2!.copyWith(
+                    style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                           fontWeight: FontWeight.w500,
                           fontSize: 16.0,
                         ),

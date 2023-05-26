@@ -397,7 +397,7 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                                                         overflow: TextOverflow.ellipsis,
                                                         style: TextStyle(
                                                           fontSize: 16.0,
-                                                          fontFamily: Theme.of(context).textTheme.bodyText2!.fontFamily,
+                                                          fontFamily: Theme.of(context).textTheme.bodyMedium!.fontFamily,
                                                         ),
                                                       ),
                                                     ),

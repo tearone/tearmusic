@@ -68,7 +68,7 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    final media = MediaQueryData.fromWindow(window);
+    final media = MediaQueryData.fromView(View.of(context));
     topInset = media.padding.top;
     bottomInset = media.padding.bottom;
     screenSize = media.size;
@@ -932,7 +932,7 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
                               SizedBox(
                                 height: 65.0,
                                 child: Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 24.0),
+                                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
                                   child: waveFormSliderWidget,
                                 ),
                               ),

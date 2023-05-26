@@ -80,10 +80,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   ],
                                 ),
                               ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 2.0),
+                              const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 6.0, horizontal: 2.0),
                                 child: Row(
-                                  children: const [
+                                  children: [
                                     SettingsStatsItem(name: "Minute spent", value: "214"),
                                     SettingsStatsItem(name: "Likes received", value: "16"),
                                     SettingsStatsItem(name: "Followers", value: "7"),

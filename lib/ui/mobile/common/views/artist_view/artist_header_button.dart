@@ -32,7 +32,7 @@ class ArtistHeaderButton extends StatelessWidget {
                   ),
                 ),
               DefaultTextStyle(
-                style: Theme.of(context).textTheme.bodyText2!.copyWith(
+                style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                       fontWeight: FontWeight.w700,
                       color: Theme.of(context).colorScheme.onPrimary,
                     ),

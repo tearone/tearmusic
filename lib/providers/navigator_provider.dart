@@ -85,7 +85,7 @@ class NavigatorProvider extends ChangeNotifier {
     final theme = _theme.appTheme;
     _messenger.showSnackBar(SnackBar(
       content: DefaultTextStyle(
-        style: theme.textTheme.bodyText2!,
+        style: theme.textTheme.bodyMedium!,
         child: snackBar.content,
       ),
       backgroundColor: theme.colorScheme.background,

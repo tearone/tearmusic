@@ -1,8 +1,6 @@
 import 'dart:async';
-import 'dart:developer' as dev;
 import 'dart:math';
 import 'dart:typed_data';
-import 'dart:ui';
 
 import 'package:animations/animations.dart';
 import 'package:flutter/cupertino.dart';
@@ -10,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:tearmusic/models/music/images.dart';
 import 'package:http/http.dart' as http;
-import 'package:tearmusic/ui/mobile/common/player/waveform_slider.dart';
 
 class CachedImage extends StatefulWidget {
   const CachedImage(this.images, {Key? key, this.borderRadius = 4.0, this.setTheme = false, this.size, this.cacheHighest = false}) : super(key: key);

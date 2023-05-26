@@ -405,11 +405,11 @@ class _ArtistViewState extends State<ArtistView> {
                 ),
               ),
               const Knob(),
-              Padding(
-                padding: const EdgeInsets.only(top: 12.0, right: 8.0),
+              const Padding(
+                padding: EdgeInsets.only(top: 12.0, right: 8.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
-                  children: const [
+                  children: [
                     ViewMenuButton(),
                   ],
                 ),

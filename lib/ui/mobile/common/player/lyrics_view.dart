@@ -61,7 +61,7 @@ class _LyricsViewState extends State<LyricsView> with SingleTickerProviderStateM
         final span = TextSpan(
           text: line.segments.map((e) => e.text).join(),
           style: TextStyle(
-            fontFamily: ThemeProvider.defaultTheme.textTheme.bodyText2!.fontFamily,
+            fontFamily: ThemeProvider.defaultTheme.textTheme.bodyMedium!.fontFamily,
             fontWeight: FontWeight.bold,
             fontSize: 22.0,
           ),
@@ -76,7 +76,7 @@ class _LyricsViewState extends State<LyricsView> with SingleTickerProviderStateM
         final span = TextSpan(
           text: line.text,
           style: TextStyle(
-            fontFamily: ThemeProvider.defaultTheme.textTheme.bodyText2!.fontFamily,
+            fontFamily: ThemeProvider.defaultTheme.textTheme.bodyMedium!.fontFamily,
             fontWeight: FontWeight.bold,
             fontSize: 22.0,
           ),

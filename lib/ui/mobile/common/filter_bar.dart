@@ -38,10 +38,14 @@ class _FilterBarState extends State<FilterBar> {
       isScrollable: widget.scrollable,
       physics: const BouncingScrollPhysics(),
       // Label
-      labelStyle: Theme.of(context).textTheme.subtitle2!.copyWith(
+      labelStyle: Theme.of(context).textTheme.labelMedium!.copyWith(
             fontWeight: FontWeight.w600,
             fontSize: 15.0,
           ),
+      indicatorColor: Colors.transparent,
+      dividerColor: Colors.transparent,
+      indicatorWeight: 0,
+      indicatorSize: TabBarIndicatorSize.tab,
       labelPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
       labelColor: Theme.of(context).colorScheme.secondary,
       unselectedLabelColor: Colors.white.withOpacity(0.65),

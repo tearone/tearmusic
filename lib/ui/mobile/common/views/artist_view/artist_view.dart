@@ -7,7 +7,6 @@ import 'package:intl/intl.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:provider/provider.dart';
-import 'package:tearmusic/models/music/album.dart';
 import 'package:tearmusic/models/music/artist.dart';
 import 'package:tearmusic/models/music/track.dart';
 import 'package:tearmusic/providers/music_info_provider.dart';
@@ -81,8 +80,8 @@ class _ArtistViewState extends State<ArtistView> {
       getTheme(image!).then((value) {
         if (value != null) {
           if (mounted) context.read<ThemeProvider>().tempNavTheme(value);
+          theme.complete(value);
         }
-        theme.complete(value);
       });
     }
   }
@@ -281,7 +280,7 @@ class _ArtistViewState extends State<ArtistView> {
                             ),
                           ),
                         ),
-                      if (snapshot.hasData && details.albums.any((e) => e.albumType != AlbumType.single))
+                      if (snapshot.hasData && details.albums.any((e) => e.trackCount > 1))
                         SliverToBoxAdapter(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -299,7 +298,7 @@ class _ArtistViewState extends State<ArtistView> {
                                   scrollDirection: Axis.horizontal,
                                   children: [
                                     const SizedBox(width: 16.0),
-                                    ...details.albums.where((e) => e.albumType != AlbumType.single).map((e) => Padding(
+                                    ...details.albums.where((e) => e.trackCount > 1).map((e) => Padding(
                                           padding: const EdgeInsets.only(right: 12.0),
                                           child: ArtistAlbumTile(e, then: () => context.read<ThemeProvider>().tempNavTheme(theme)),
                                         )),
@@ -310,7 +309,7 @@ class _ArtistViewState extends State<ArtistView> {
                             ],
                           ),
                         ),
-                      if (snapshot.hasData && details.albums.any((e) => e.albumType == AlbumType.single))
+                      if (snapshot.hasData && details.albums.any((e) => e.trackCount == 1))
                         SliverToBoxAdapter(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -328,7 +327,7 @@ class _ArtistViewState extends State<ArtistView> {
                                   scrollDirection: Axis.horizontal,
                                   children: [
                                     const SizedBox(width: 16.0),
-                                    ...details.albums.where((e) => e.albumType == AlbumType.single).map((e) => Padding(
+                                    ...details.albums.where((e) => e.trackCount == 1).map((e) => Padding(
                                           padding: const EdgeInsets.only(right: 12.0),
                                           child: ArtistAlbumTile.small(e, then: () => context.read<ThemeProvider>().tempNavTheme(theme)),
                                         )),
@@ -405,11 +404,11 @@ class _ArtistViewState extends State<ArtistView> {
                 ),
               ),
               const Knob(),
-              Padding(
-                padding: const EdgeInsets.only(top: 12.0, right: 8.0),
+              const Padding(
+                padding: EdgeInsets.only(top: 12.0, right: 8.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
-                  children: const [
+                  children: [
                     ViewMenuButton(),
                   ],
                 ),

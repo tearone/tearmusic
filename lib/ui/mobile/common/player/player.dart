@@ -67,12 +67,7 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    final media = MediaQueryData.fromWindow(window);
-    topInset = media.padding.top;
-    bottomInset = media.padding.bottom;
-    screenSize = media.size;
-    maxOffset = screenSize.height;
-    sMaxOffset = screenSize.width;
+
     sAnim = AnimationController(
       vsync: this,
       lowerBound: -1,
@@ -204,6 +199,13 @@ class _PlayerState extends State<Player> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final currentMusic = context.watch<CurrentMusicProvider>();
+
+    final media = MediaQueryData.fromView(View.of(context));
+    topInset = media.padding.top;
+    bottomInset = media.padding.bottom;
+    screenSize = media.size;
+    maxOffset = screenSize.height;
+    sMaxOffset = screenSize.width;
 
     return Consumer<WillPopProvider>(
       builder: (context, willPop, child) {

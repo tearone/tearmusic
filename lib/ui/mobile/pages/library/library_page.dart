@@ -476,10 +476,10 @@ class _LibraryPageState extends State<LibraryPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.only(top: 12.0, bottom: 12.0, left: 28.0, right: 8.0),
+                    const Padding(
+                      padding: EdgeInsets.only(top: 12.0, bottom: 12.0, left: 28.0, right: 8.0),
                       child: Row(
-                        children: const [
+                        children: [
                           Padding(
                             padding: EdgeInsets.only(right: 8.0),
                             child: Icon(CupertinoIcons.person, size: 20.0),
@@ -571,10 +571,10 @@ class _LibraryPageState extends State<LibraryPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.only(top: 6.0, bottom: 16.0, left: 28.0, right: 8.0),
+                    const Padding(
+                      padding: EdgeInsets.only(top: 6.0, bottom: 16.0, left: 28.0, right: 8.0),
                       child: Row(
-                        children: const [
+                        children: [
                           Padding(
                             padding: EdgeInsets.only(right: 8.0),
                             child: Icon(CupertinoIcons.music_albums, size: 20.0),

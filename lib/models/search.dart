@@ -22,10 +22,10 @@ class SearchResults {
   }
 
   factory SearchResults.decodeFilter(Map json, {required String filter}) {
-    final tracks = MusicTrack.decodeList((json["tracks"] as List).cast<Map>());
-    final playlists = MusicPlaylist.decodeList((json["playlists"] as List).cast<Map>());
-    final albums = MusicAlbum.decodeList((json["albums"] as List).cast<Map>());
-    final artists = MusicArtist.decodeList((json["artists"] as List).cast<Map>());
+    final tracks = MusicTrack.decodeList(((json["tracks"] ?? []) as List).cast<Map>());
+    final playlists = MusicPlaylist.decodeList(((json["playlists"] ?? []) as List).cast<Map>());
+    final albums = MusicAlbum.decodeList(((json["albums"] ?? []) as List).cast<Map>());
+    final artists = MusicArtist.decodeList(((json["artists"] ?? []) as List).cast<Map>());
 
     return SearchResults(
       tracks: tracks.where((e) => e.match(filter)).toList(),

@@ -43,7 +43,7 @@ class InternalImage extends Model {
   factory InternalImage.decode(Map json) {
     return InternalImage(
       json: json,
-      url: json["url"],
+      url: json["url"] ?? "",
       width: json["width"] ?? 0,
       height: json["height"] ?? 0,
     );

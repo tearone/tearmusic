@@ -1,6 +1,7 @@
 import 'dart:async';
 
-import 'package:synchronized/synchronized.dart';
+// ignore: depend_on_referenced_packages
+import 'package:synchronized/synchronized.dart' show Lock;
 
 const int kAudioChunkSize = 16 * 1024;
 

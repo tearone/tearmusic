@@ -28,7 +28,7 @@ class CachedImage extends StatelessWidget {
     final box = await Hive.openBox("cached_images");
     Uint8List? bytes = box.get(uri);
 
-    if (bytes == null) {
+    if (bytes == null && Uri.parse(uri).host.isNotEmpty) {
       final res = await http.get(Uri.parse(uri));
       bytes = res.bodyBytes;
       box.put(uri, bytes);

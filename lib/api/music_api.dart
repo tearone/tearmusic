@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 
-import 'package:cbor/simple.dart';
 import 'package:tearmusic/api/base_api.dart';
 import 'package:http/http.dart' as http;
 import 'package:tearmusic/exceptionts.dart';
@@ -22,7 +21,7 @@ class MusicApi {
 
   BaseApi base;
 
-  static const baseUrl = "https://music.tear.one/api";
+  static const baseUrl = "http://localhost:3000/api";
 
   void _reschk(http.Response res, String cause) {
     cause = "MusicApi.$cause";

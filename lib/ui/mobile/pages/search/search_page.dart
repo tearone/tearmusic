@@ -46,7 +46,7 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
     Tab(text: "Top"),
     Tab(text: "Songs"),
     Tab(text: "Albums"),
-    Tab(text: "Playlists"),
+    // Tab(text: "Playlists"),
     Tab(text: "Artists"),
   ];
   late List<String> listOrder;
@@ -397,7 +397,7 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                                                         overflow: TextOverflow.ellipsis,
                                                         style: TextStyle(
                                                           fontSize: 16.0,
-                                                          fontFamily: Theme.of(context).textTheme.bodyText2!.fontFamily,
+                                                          fontFamily: Theme.of(context).textTheme.bodyMedium!.fontFamily,
                                                         ),
                                                       ),
                                                     ),
@@ -533,20 +533,20 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                                               tabController: _tabController,
                                             );
 
-                                          case 2:
-                                            return TopResultContainer(
-                                              kind: "Playlists",
-                                              icon: CupertinoIcons.music_note_list,
-                                              results: results!.playlists
-                                                  .sublist(0, math.min(results!.playlists.length, topShowCount))
-                                                  .map((e) => SearchPlaylistTile(e))
-                                                  .toList(),
-                                              index: 3,
-                                              pageController: _pageController,
-                                              tabController: _tabController,
-                                            );
+                                          // case 2:
+                                          //   return TopResultContainer(
+                                          //     kind: "Playlists",
+                                          //     icon: CupertinoIcons.music_note_list,
+                                          //     results: results!.playlists
+                                          //         .sublist(0, math.min(results!.playlists.length, topShowCount))
+                                          //         .map((e) => SearchPlaylistTile(e))
+                                          //         .toList(),
+                                          //     index: 3,
+                                          //     pageController: _pageController,
+                                          //     tabController: _tabController,
+                                          //   );
 
-                                          case 3:
+                                          case 2:
                                             return TopResultContainer(
                                               kind: "Artists",
                                               icon: CupertinoIcons.person,
@@ -554,7 +554,7 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                                                   .sublist(0, math.min(results!.artists.length, topShowCount))
                                                   .map((e) => SearchArtistTile(e))
                                                   .toList(),
-                                              index: 4,
+                                              index: 3,
                                               pageController: _pageController,
                                               tabController: _tabController,
                                             );

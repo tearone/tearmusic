@@ -50,7 +50,7 @@ Widget Function(BuildContext, int) subtitleListBuilder(List<TimedSegment> subtit
                           ? Theme.of(context).colorScheme.primary
                           : Theme.of(context).colorScheme.secondary
                       : Theme.of(context).colorScheme.secondary.withOpacity(.3),
-                  fontFamily: Theme.of(context).textTheme.bodyText2!.fontFamily,
+                  fontFamily: Theme.of(context).textTheme.bodyMedium!.fontFamily,
                   fontWeight: FontWeight.bold,
                   fontSize: 22.0,
                   shadows: [

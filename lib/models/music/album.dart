@@ -24,7 +24,7 @@ class MusicAlbum extends Model {
     return MusicAlbum(
       json: json,
       id: json["id"],
-      name: json["name"],
+      name: json["name"] ?? "Album",
       trackCount: json["track_count"] ?? 0,
       releaseDate: DateTime.tryParse(json["release_date"] ?? "") ?? DateTime.fromMillisecondsSinceEpoch(0),
       artists: (json["artists"] as List).map((e) => MusicArtist.decode(e)).toList().cast<MusicArtist>(),

@@ -600,24 +600,24 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
                                           },
                                         ),
                                       );
+                                    // case 3:
+                                    //   return CupertinoScrollbar(
+                                    //     child: ListView.builder(
+                                    //       itemCount: (results?.playlists.length ?? 0).clamp(1, 50) + 1,
+                                    //       itemBuilder: (context, index) {
+                                    //         if (index == results!.playlists.length) {
+                                    //           return const SizedBox(height: 100);
+                                    //         }
+
+                                    //         if (results?.playlists.isEmpty ?? true) {
+                                    //           return noResultsWidget;
+                                    //         }
+
+                                    //         return SearchPlaylistTile(results!.playlists[index]);
+                                    //       },
+                                    //     ),
+                                    //   );
                                     case 3:
-                                      return CupertinoScrollbar(
-                                        child: ListView.builder(
-                                          itemCount: (results?.playlists.length ?? 0).clamp(1, 50) + 1,
-                                          itemBuilder: (context, index) {
-                                            if (index == results!.playlists.length) {
-                                              return const SizedBox(height: 100);
-                                            }
-
-                                            if (results?.playlists.isEmpty ?? true) {
-                                              return noResultsWidget;
-                                            }
-
-                                            return SearchPlaylistTile(results!.playlists[index]);
-                                          },
-                                        ),
-                                      );
-                                    case 4:
                                       return CupertinoScrollbar(
                                         child: ListView.builder(
                                           itemCount: (results?.artists.length ?? 0).clamp(1, 50) + 1,
